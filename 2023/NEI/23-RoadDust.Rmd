@@ -1,0 +1,315 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Dust: Paved and Unpaved Roads {#roaddust}
+
+## Sector Descriptions and Overview 
+
+The road dust sector reflects emissions of particulate matter from vehicles driving over paved and unpaved roads. The SCCs that belong in this sector are provided in Table \@ref(tab:road-dust-sccs). Fugitive dust emissions from paved and unpaved road traffic were estimated for PM10-PRI, PM10-FIL, PM25-PRI, and PM25-FIL. Since there are no PM-CON emissions for this category, PM10-PRI emissions are equal to PM10-FIL emissions and PM25-PRI emissions are equal to PM25-FIL emissions.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-23/road-dust-sccs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r road-dust-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Source Classification Codes used in the road dust sector.',
+  format.args = list(scientific = FALSE)
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+## EPA-developed estimates
+
+Uncontrolled paved and unpaved road emissions were calculated at the county level by roadway type. This was done by multiplying the county/roadway class road vehicle miles traveled (VMT) on paved or unpaved roads by the appropriate emission factor. Next, control factors were applied to the road dust emissions in PM10 nonattainment and maintenance area counties. Emissions by roadway class were then totaled to the county level and adjusted for meteorological conditions. The following provides further details on the determination of paved unpaved road VMT, emission factor development, and controls.
+
+### Activity Data
+
+Total VMT in each county is provided by Federal Highway Administration (FHWA) to EPA for use in EPA’s MOtor Vehicle Emission Simulator (MOVES) model to calculate emissions for the mobile sector. The road dust methodology uses these same county-level VMT. FHWA categorizes roads into 14 different types based on road function and access; these road types can be found in Table \@ref(tab:dust-road-types).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-23/dust-FHWA-road-types.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r dust-road-types, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'FHWA road types',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+The county-level VMT from FHWA includes total VMT, but it does not provide data on how much of that VMT is on paved or unpaved roads. To determine how much of the total VMT is on paved or unpaved roads, the total VMT in each county is multiplied by county-level ratios of VMT on paved or unpaved roads to total county-level VMT from a dataset generated for EPA from Streetlight, covering the period June 2022 – May 2023 [[ref 1](#road-dust-references)].
+
+\begin{equation} 
+  VMT_{FHWA,p/u,c} = VMT_{FHWA,t,c} \times \frac{VMT_{SL,p/u,c}}{VMT_{SL,t,c}}
+  (\#eq:paved-unpaved-VMT)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( VMT_{FHWA,p/u,c} \) = Paved or unpaved vehicle miles traveled in county *c*, calculated from FHWA VMT data <br> \newline
+  \( VMT_{FHWA,t,c} \) = Total vehicle miles traveled in county *c*, from FHWA <br> \newline
+  \( VMT_{SL,p/u,c} \) = Paved or unpaved vehicle miles traveled in county *c*, from Streetlight <br> \newline
+  \( VMT_{SL,t,c} \) = Total vehicle miles traveled in county *c*, from Streetlight <br> \newline
+</div>
+
+Note that the Streetlight data does not include Alaska or Hawaii. For these states, the paved/unpaved ratios from the 2020 NEI were used. In addition, it is assumed that there is no VMT on unpaved roads for urban road types or in counties with a population density greater than 3,000 people per square mile. For these cases, all VMT is assumed to be on paved roads.
+
+### Allocation Procedure
+
+The total VMT used to estimate emissions from road dust is available at the county level. The amount of paved and unpaved VMT in each county is estimated using county-level ratios. County level emissions were calculated by multiplying the county unpaved VMT (by road type) by the emission factors, discussed below.
+
+### Emission Factors
+
+*Unpaved Roads*
+
+Re-entrained road dust emissions for unpaved roads were estimated using unpaved road VMT and the emission factor equation from AP-42 [[ref 2](#road-dust-references)]:
+
+\begin{equation} 
+  EF_{u,p,c} = \frac{k_{p} \times \frac{SM_{s}}{12} \times \frac{SPD}{30^{0.5}}}{\frac{M_{c}}{0.5^{0.2}}} - C
+  (\#eq:unpaved-EF)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{u,c} \) = Unpaved road dust emission factor for county *c* <br> \newline
+  \( k_{p} \) = Particle size multiplier for pollutant *p* (PM25 or PM10) <br> \newline
+  \( SM_{s} \) = Surface material silt content for state *s*, % <br> \newline
+  \( SPD \) = Mean vehicle speed <br> \newline
+  \( M_{c} \) = Surface material moisture content for county *c*, % <br> \newline
+  \( C \) = Emission factor for 1980's vehicle fleet exhaust, brake wear, and tire wear, (lb./VMT) <br> \newline
+</div>
+
+Values for *k* and *C* are shown in Table \@ref(tab:unpaved-EF-constants).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-23/unpaved-EF-constants.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r unpaved-EF-constants, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Constants used in unpaved Road Dust emission factor calculations',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+Average state-level unpaved road silt content values, developed as part of the 1985 National Acid Precipitation Assessment Program (NAPAP) Inventory, were obtained from the Illinois State Water Survey [[ref 3](#road-dust-references)]. Silt contents of over 200 unpaved roads from over 30 States were obtained. Average silt contents of unpaved roads were calculated for each state that had three or more samples for that State. For States that did not have three or more samples, the average for all samples from all States was used as a default value. The silt content values are reported by State in Table \@ref(tab:unpaved-silt-content). 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-23/road-dust-silt-content.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r unpaved-silt-content, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Surface material silt content percent for unpaved roads by state',
+) %>%
+kable_styling(position = "center", latex_options = c("repeat_header"), font_size = 10) %>%
+  column_spec(1, width = "6cm") %>%
+  column_spec(2, width = "3cm")
+```
+
+Table \@ref(tab:unpaved-road-speeds) lists the speeds modeled on the unpaved roads by roadway class. These speeds were determined based on the average speeds modeled for onroad emission calculations and weighted to determine a single average speed for each of the roadway classes [[ref 4](#road-dust-references)]. The roadway class “Urban collector” with an average speed of 20 mph was split into two sub-categories, “Urban major collector” and “Urban minor collector”, to correspond to the roadway types found in the VMT data. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-23/unpaved-road-speeds.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r unpaved-road-speeds, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Speeds modeled by roadway type on unpaved roads',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position"))
+```
+
+A report by Cowherd et al. [[ref 5](#road-dust-references)] estimates a range of 0.3% to 1.1% for surface material moisture content (M) from different road samples across regions of the country. EPA used expert judgment to assign surface material moisture content values from this range to counties based on regional patterns of soil moisture and precipitation [[ref 5](#road-dust-references)].
+
+*Paved Roads*
+
+Re-entrained road dust emissions for paved roads were estimated using paved road VMT and the emission factor equation from AP-42 [[ref 2](#road-dust-references)]:
+
+\begin{equation} 
+  EF_{pav,p,c,r} =  k_{p} \times sL_{s,r}^{0.91} \times W_{c,r}^{1.02} 
+  (\#eq:paved-EF)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{pav,p,c,r} \) = Paved road dust emission factor for pollutant *p* in county *c* for road type *r*, g/VMT <br> \newline
+  \( k_{p} \) = Particle size multiplier for pollutant *p*, g/VMT <br> \newline
+  \( sL_{s,r} \) = Road surface silt loading in state *s* for road type *r* <br> \newline
+  \( W_{c,r} \) = Average weight (tons) of all vehicles traveling road type *r* in county *c* <br> \newline
+</div>
+
+The particle size multipliers for both PM10-PRI/-FIL and PM25-PRI/-FIL for paved roads came from AP-42. Paved road silt loadings were assigned to each of the fourteen functional roadway classes (seven urban and seven rural) based on the average annual daily traffic volume (ADTV) of each functional system by county. ADTV is calculated by dividing the county-level VMT by the paved road miles from a county-level dataset prepared for EPA from the company Streetlight, covering the period June 2022 – May 2023 [[ref 1](#road-dust-references)]. Alaska and Hawaii are not available in the Streetlight data, and therefore paved road miles were taken from the 2020 FHWA Highway Statistics, the most recent year available [[ref 6](#road-dust-references)]. The silt loading values per average daily traffic volume come from the ubiquitous baseline values from Section 13.2.1 of AP-42 and are provided in Table \@ref(tab:paved-silt-loading).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-23/paved-silt-loading.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r paved-silt-loading, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Assumed paved roads silt loading by road type based on ADTV range',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+Average daily traffic volume (ADTV) was calculated by dividing an estimate of VMT by functional road length and then by 365. State FHWA road length by functional road type data was broken down to the county level by multiplying by the ratio of county VMT to state VMT for each FHWA road type. 
+
+To better estimate paved road fugitive dust emissions, the average vehicle weight was estimated by road type for each county in the U.S. based on the VMT by vehicle type. The VMT for each vehicle type (per MOVES road type and county) was divided by the sum of the VMT of all vehicle types for the given road type in each county. This ratio was multiplied by the vehicle type mass (see Table \@ref(tab:paved-vehicle-mass)) and summed to road type for each county to calculate a VMT-weighted average vehicle weight for each county/road type combination in the database. The VMT-weighted average vehicle weight by MOVES vehicle type was converted to FWHA vehicle type using the crosswalk in Table \@ref(tab:paved-MOVES-FHWA-xwalk) to be used in the emission factor equation above.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-23/paved-vehicle-mass.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r paved-vehicle-mass, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Average vehicle weights by FHWA class',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-23/paved-MOVES-FHWA-xwalk.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r paved-MOVES-FHWA-xwalk, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'MOVES and FHWA vehicle type crosswalk',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+*Note: Other Freeways and Expressways were not included in the crosswalk, and so were assumed to be restricted access like Interstates.
+
+### Controls
+
+*Unpaved Roads*
+
+The controls assumed for unpaved roads varied by PM10 nonattainment area classification and by urban and rural areas. On urban unpaved roads in moderate PM10 nonattainment areas, paving of the unpaved road was assumed and a control efficiency of 96 percent and a rule penetration of 50 percent were applied. Controls were not applied to rural unpaved roads in moderate nonattainment areas. Chemical stabilization, with a control efficiency of 75 percent and a rule penetration of 50 percent, was assumed for rural areas in serious PM10 nonattainment areas. A combination of paving and chemical stabilization, with a control efficiency of 90 percent and a rule penetration of 75 percent, was assumed for urban unpaved roads in serious PM10 nonattainment areas. In counties currently at maintenance status, controls were assumed based on the severity (moderate or serious) of their prior nonattainment status. Some counties had multiple partial areas with differing levels of nonattainment. In these cases, controls were assumed to be applied based on the most serious level of nonattainment found within a given county.
+
+Note that the controls were applied at the county level, and the controls differ by urban vs. rural roadway class. In the final emissions table, the emissions for all roadway classes were summed to the county level. Therefore, the emissions at the county level can represent several different control effectiveness and rule penetration levels. However, the control efficiency and rule penetration values were reported in the Controlled Emissions worksheet at the county level for urban and rural roadways separately. 
+
+*Paved Roads*
+
+Paved road dust controls were applied by county to urban and rural roads in serious PM10 nonattainment areas and to urban roads in moderate PM10 nonattainment areas. The assumed control measure is vacuum sweeping of paved roads twice per month. A control efficiency of 79% was assumed for this control measure [[ref 7](#road-dust-references)]. The assumed rule penetration varies by roadway class and PM10 nonattainment area classification (serious or moderate). The rule penetration rates are shown in Table \@ref(tab:paved-control-penetration). Rule effectiveness was assumed to be 100% for all counties where this control was applied.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-23/paved-control-penetration.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r paved-control-penetration, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Penetration rate of Paved Road vacuum sweeping',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+Note that the controls were applied at the county/roadway class level, and the controls differ by roadway class. No controls were applied to interstate or principal arterial roadways because these road surfaces typically do not have vacuum sweeping. In the excel spreadsheet, the total emissions for all roadway classes were summed to the county level. Therefore, the emissions at the county level can represent several different control efficiency and rule penetration levels and may include both controlled and uncontrolled emissions in the composite value.
+
+### Meteorological Adjustment
+
+After controls were applied, emissions were summed to the county level and converted to tons prior to applying the meteorological adjustment. The meteorological adjustment accounts for the reduction on fugitive dust emissions via the impact of precipitation and other meteorological factors over each hour of the year and then averaged to an annual meteorological adjustment factor for each grid cell in each county, aggregated to a single county-level factor. For example, wet roads will result in significantly lower dust emissions. The county-level meteorological adjustment factors were developed by EPA based on the ratio of the unadjusted to meteorology-adjusted county-level emissions from the SMOKE Flat Files. The county-level meteorological adjustment is a scalar between 0 and 1 that is multiplied by the estimated emissions, where lower-values/greater-reductions are typically found in areas with more frequent precipitation.
+
+### Emissions
+
+The emissions from paved and unpaved road dust are calculated by multiplying the VMT for each road type in each county for paved or unpaved roads by the corresponding emission factor. Emissions are then summed across road types to determine the total PM10 or PM25 emissions from paved or unpaved roads in each county.
+
+\begin{equation} 
+  E_{p/u,c,PM10/PM25} =  \sum^{R}_{r=1} VMT_{p/u,c,r} \times EF_{p/u,c,r,PM10/PM25} \times (1- CE_{c}) \times Met_{c} \times \frac{1 ton}{2000 lbs}
+  (\#eq:road-dust-emissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p/u,c,PM10/PM25} \) = Annual emissions of PM10 or PM25 from paved or unpaved road dust in county *c*, in tons <br> \newline
+  \( VMT_{p/u,c,r} \) = Paved or unpaved vehicle miles traveled in county *c* on road type *r* <br> \newline
+  \( EF_{p/u,c,r,PM10/PM25} \) = Emission factor for either PM10 or PM25 for paved or unpaved roads on road type *r* in county *c*, (lb/VMT) <br> \newline
+  \( CE_{c} \) = Control efficiency for county *c* <br> \newline
+  \( Met_{c} \) = Meteorological adjustment for county *c* <br> \newline
+</div>
+
+
+### Sample Calculations
+
+Table \@ref(tab:road-dust-sample-calculations) provides sample calculations for PM25-PRI emissions from paved and unpaved road dust. The steps shown in the table below are repeated for all road types and summed to the county level to determine the total PM25 and PM10 emissions in each county from paved and unpaved roads. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1:4,4),
+  Equation = c("$VMT_{FHWA,p/u,c} = VMT_{FHWA,t,c} \\times \\frac{VMT_{SL,p/u,c}}{VMT_{SL,t,c}}$",
+               "$\\frac{k_{p} \\times \\frac{SM_{s}}{12} \\times \\frac{SPD}{30^{0.5}}}{\\frac{M_{c}}{0.5^{0.2}}} - C$",
+               "$EF_{pav,p,c,r} =  k_{p} \\times sL_{s,r}^{0.91} \\times W_{c,r}^{1.02}$",
+               "$\\sum^{R}_{r=1} VMT_{p/u,c,r} \\times EF_{p/u,c,r,PM25} \\times (1- CE_{c}) \\times Met_{c}$",
+               "$\\sum^{R}_{r=1} VMT_{p/u,c,r} \\times EF_{p/u,c,r,PM10} \\times (1- CE_{c}) \\times Met_{c}$"),
+  Values = c("$\\text{99.9 million VMT} \\times \\frac{99.9M paved VMT}{100M total VMT}$",
+             "$\\frac{0.18lb/VMT \\times 0.039/12 \\times (30mph/30)^{0.5}}{\\frac{0.011}{0.5^{0.2}}} - 0.00036lb/VMT$",
+             "$0.25g/VMT \\times (0.2g/m^{2})^{0.91} \\times 3.4tons^{1.02}$",
+             "0.1 million VMT on unpaved roads $\\times$  0.05 lbs/VMT $\\times$ (1-0) $\\times$ 0.67 met adjustment factor",
+             "99.9 million VMT on paved roads $\\times$ 0.2 g/VMT $\\times$ (1-0) $\\times$ 0.67 met adjustment factor"),  
+  Result = c("99.9 million VMT on paved roads; 0.1 million VMT on unpaved roads",
+             "0.05 lbs. PM25-PRI/VMT on unpaved rural local roads",
+             "0.2 g PM25/VMT on paved rural local roads",
+             "1.7 tons PM25 emissions from unpaved roads",
+             "14.8 tons PM10 emissions from paved roads")
+)
+```
+
+```{r road-dust-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+
+### Improvements/Changes in the 2023 NEI
+
+The 2023 NEI uses county-level ratios based on data from the company Streetlight to estimate the VMT on paved and unpaved roads in each county. This replaces the method used in the 2020 NEI (and previous years), which relied on a mix of FHWA data for certain road types and modeling conducted in 2008 using the National Mobile Inventory Model (NMIM) for other road types. 
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exists to calculate emissions for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: Broward (state-county FIPS=12011) for Puerto Rico and Monroe (state-county FIPS=12087) for the US Virgin Islands. The total emissions in tons for these two Florida counties are divided by their respective populations creating a tons per capita emission factor. For each Puerto Rico and US Virgin Island county, the tons per capita emission factor is multiplied by the county population (from the same year as the inventory’s activity data) which served as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”. 
+
+## References {#road-dust-references}
+
+1.	Streetlight. Dataset on County-level Road Length Vehicle Miles Traveled on Paved and Unpaved Roads, June 2022 – May 2023. Prepared for EPA, 2024. 
+2.	United States Environmental Protection Agency, Office of Air Quality Planning and Standards. [Compilation of Air Pollutant Emission Factors, AP-42, Fifth Edition, Volume I: Stationary Point and Area Sources, Section 13.2.2, Unpaved Roads.](https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-compilation-air-emissions-factors-stationary-sources#5thed) Research Triangle Park, NC. November 2006.
+3.	W. Barnard, G. Stensland, and D. Gatz, Illinois State Water Survey, “Evaluation of Potential Improvements in the Estimation of Unpaved Road Fugitive Emission Inventories,” paper 87-58.1, presented at the 80th Annual Meeting of the APCA. New York, New York. June 21-26, 1987 
+4.	United States Environmental Protection Agency, [2011 National Emissions Inventory, version 2 Technical Support Document.](https://www.epa.gov/sites/default/files/2015-10/documents/nei2011v2_tsd_14aug2015.pdf) Research Triangle Park, NC. August 2015. 
+5.	Cowherd, C., M.A. Grelinger, C. Kies, and T.G. Pace. 2002. Improved Activity Levels for National Emission Inventories of Fugitive Dust from Paved and Unpaved Roads. Presentation at 11th International Emission Inventory Conference. Atlanta, Georgia, April 15-18, 2002. 
+6.	U.S. Department of Transportation, Federal Highway Administration. [Highway Statistics, Table HM-51.](https://www.fhwa.dot.gov/policyinformation/statistics/2020/.) Office of Highway Policy Information. Washington, DC. September 2022.
+7.	E.H. Pechan & Associates, Inc. “Phase II Regional Particulate Strategies; Task 4: Particulate Control Technology Characterization,” draft report prepared for U.S. Environmental Protection Agency, Office of Policy, Planning and Evaluation. Washington, DC. June 1995. 

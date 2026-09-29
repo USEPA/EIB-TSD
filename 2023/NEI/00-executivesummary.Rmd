@@ -1,0 +1,416 @@
+```{r, include=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(janitor)
+library(patchwork)
+```
+
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+# Executive Summary {- #exec-summary}
+
+Air pollution – created by human activities such as vehicle use, industrial operations, and agriculture practices, or by natural events such as wildfires – can influence air quality and public health. Every three years,the U.S. Environmental Protection Agency (EPA), with the help of many organizations, including state, tribal, and local air pollution control agencies, industry, and researchers, compiles a comprehensive summary of air emissions data known as the National Emissions Inventory (NEI). The emissions in the 2023 NEI include the directly emitted criteria air pollutants and their precursors (CAPs), black and organic carbon (components of PM2.5), all 187 hazardous air pollutants (HAPs), and diesel PM. The CAP-related emissions are ammonia, carbon monoxide, lead, nitrogen oxides, particulate matter (PM10 and PM2.5), sulfur dioxides, and volatile organic compounds. 
+
+**<span style="font-size: 1.75em;">What is the NEI?</span>**
+
+The NEI is a national compilation of air emissions estimates. The Agency adds information from EPA emissions programs, such as the emission trading program, Toxics Release Inventory (TRI), and data collected during rule development or compliance testing. EPA uses the NEI to develop and review regulations, conduct air quality modeling, and conduct air quality assessments to understand how air pollution may affect the health in communities across the country. An example of EPA’s use of the NEI is that the data are used as one of the considerations in area designations for new or revised National Ambient Air Quality Standards (NAAQS). Other federal agencies, along with state, local, and tribal air agencies, and members of the public and international organizations also use the data the inventory provides. 
+
+**<span style="font-size: 1.75em;">Source Types and Sectors</span>**
+
+The NEI covers both natural and anthropogenic (human-caused) sources of emissions. The four major source types are:
+
+- Stationary (point and nonpoint) sources
+- Mobile sources
+- Fires
+- Biogenics (naturally occurring emissions from soils and vegetation sources).
+
+Within each of the source types, emissions are provided at more detailed levels, such as sectors and sources classification codes (SCC), to provide more specificity about the source of air emissions. There are 60 sectors in the NEI and thousands of active SCCs, where each sector includes a varying number of SCCs for similar processes. Each SCC has 4 levels which describe the process from a general to more specific activity with each successive level.  
+
+The NEI is also broken out into data categories, which relate to how the data are reported and stored in the ["Emissions Inventory System (EIS)"](https://www.epa.gov/air-emissions-inventories/emissions-inventory-system-eis-gateway). Point sources are generally large facilities such as power plants or chemical manufacturers. Nonpoint and most mobile sources are reported at the county level. Nonpoint sources include many dispersed sources such as oil and gas production, agricultural livestock waste, residential heating, fires, and solvents.
+
+**<span style="font-size: 1.75em;">Emissions Estimates</span>**
+
+Emissions data are derived in several different ways:
+
+- Continuous measurements
+- Estimates using infrequent source samples
+- Estimates based on average emission rate information
+
+Our understanding of air emissions from specific sources continues to expand and the 2023 NEI includes improved emissions estimation methods for all data categories. Nonpoint EPA tools used for estimating emissions include the Wagon Wheel Tool and Oil and Gas Production and Exploration Tool. Emissions estimates documentations for Fires, Commercial Marine Vehicles (CMV), Aircraft, and Locomotive/Railyards are available on the [2023 NEI Supporting Data](https://www.epa.gov/air-emissions-inventories/2023-national-emissions-inventory-nei-documentation) and Summaries  site, along with HAP augmentation and PM speciation information that are completed in EIS. 
+
+**<span style="font-size: 1.75em;">Sources of Data</span>**
+
+Data in the NEI come from a variety of sources. The emissions are predominantly from State/Local/Tribal (S/L/T) agencies for both CAP and HAP emissions. In addition, EPA quality assures and augments the data provided by states to assist with data completeness, particularly with the HAP emissions since S/L/T HAP reporting is voluntary. For example, appropriate speciation profiles of VOC emissions for a given source may be used to estimate the HAP emissions. 
+
+**<span style="font-size: 1.75em;">The 2023 NEI</span>**
+
+The ["2023 NEI"](https://www.epa.gov/air-emissions-inventories/2023-national-emissions-inventory-nei-documentation) is a nationwide compilation of air pollution emissions specific to the year 2023. Figure [1](#exec-fig1) illustrates the nationwide emissions estimates for the 8 Criteria Air Pollutants and their precursors, excluding biogenics and fires, by data category. Biogenic and fire emissions are excluded due to their anomalous contributions to select pollutants. For example, biogenic sources in 2023 were estimated to have emitted more than 32 million tons of VOC. Meanwhile, fires (wildfires, prescribed fires, and agricultural field burning) in 2023 were estimated to have emitted more than 15 million tons of CO and 2 million tons of primary PM2.5. As shown in Figure [1](#exec-fig1), the relative contributions of each pollutant by data category can vary considerably. For example, carbon monoxide and nitrogen oxides feature significant contributions from onroad sources, whereas emissions of ammonia, primary particulates, and volatile organic compounds are dominated by nonpoint sources. Finally, sulfur dioxide and lead are primarily emitted by point sources.
+
+```{r, include=FALSE}
+fig1_all <- readr::read_csv("figures/Section-0/fig1_pie_by_category.csv", show_col_types = FALSE)
+
+# Category display order
+cat_labels <- c("Point", "Nonpoint", "Onroad", "Nonroad")
+
+# Helper to build one pie from the saved data (by pollutant label)
+make_pie_by_cat <- function(base_label) {
+  df <- fig1_all |>
+    dplyr::filter(.data$pollutant == base_label) |>
+    dplyr::select(data_cat, total_ton)
+
+  # Ensure all categories are present and in order
+  df <- dplyr::left_join(
+    data.frame(data_cat = factor(cat_labels, levels = cat_labels)),
+    df,
+    by = "data_cat"
+  )
+  df$total_ton[is.na(df$total_ton)] <- 0
+  df$data_cat <- factor(df$data_cat, levels = cat_labels)
+
+  total_val <- sum(df$total_ton, na.rm = TRUE)
+  unit_lab  <- if (identical(base_label, "Lead")) "Pounds" else "Tons"
+  subtitle_lab <- paste0("(", scales::comma(round(total_val, 0)), " ", unit_lab, ")")
+
+  ggplot2::ggplot(df, ggplot2::aes(x = 1, y = total_ton, fill = data_cat)) +
+    ggplot2::geom_col(width = 2, color = "white") +
+    ggplot2::coord_polar(theta = "y") +
+    ggplot2::scale_x_continuous(limits = c(0, 2), breaks = NULL) +
+    ggplot2::scale_fill_brewer(palette = "Dark2", drop = FALSE) +
+    ggplot2::labs(title = base_label, subtitle = subtitle_lab, x = NULL, y = NULL, fill = NULL) +
+    ggplot2::theme_void(base_size = 12) +
+    ggplot2::theme(
+      aspect.ratio = 1,
+      plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 10, margin = ggplot2::margin(t = 2, b = 4))
+    )
+}
+
+# Build the eight panels (top row: CO, NOx, NH3, SO2; bottom row: PM2.5, PM10, VOC, Lead)
+p_CO    <- make_pie_by_cat("CO")
+p_NOx   <- make_pie_by_cat("NOx")
+p_NH3   <- make_pie_by_cat("NH3")
+p_SO2   <- make_pie_by_cat("SO2")
+p_PM25  <- make_pie_by_cat("PM2.5")
+p_PM10  <- make_pie_by_cat("PM10")
+p_VOC   <- make_pie_by_cat("VOC")
+p_Lead  <- make_pie_by_cat("Lead")
+```
+
+<a id="exec-fig1"></a>
+\hypertarget{exec-fig1}{}
+```{r pollutant-pie-chart, fig.alt="Relative contributions of Data Categories to each Criteria Air Pollutant or precursor.", echo=FALSE, fig.pos='H'}
+# Arrange explicitly in 2 rows x 4 columns and collect a single legend at the bottom
+p_combined <- patchwork::wrap_plots(
+  p_CO, p_NOx, p_NH3, p_SO2,
+  p_PM25, p_PM10, p_VOC, p_Lead,
+  ncol = 4, nrow = 2, byrow = TRUE
+) +
+  patchwork::plot_layout(guides = "collect") +
+  patchwork::plot_annotation(
+    caption = "No biogenics or fire emissions included in these plots.",
+    theme = theme(
+      plot.caption = element_text(face = "italic", hjust = 0.5, size = 12, margin = margin(t = 6))
+    )
+  ) &
+  theme(
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 12),
+    legend.justification = "center",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 12, margin = margin(b = 4))
+  ) &
+  guides(fill = guide_legend(ncol = 4, byrow = TRUE, title = NULL))
+
+# Print and save
+print(p_combined)
+dir.create("figures/Section-0", recursive = TRUE, showWarnings = FALSE)
+ggsave("figures/Section-0/NEI2023_Pie_Panels_8Pollutants_ByDataCategory.png",
+       plot = p_combined, width = 13, height = 9, dpi = 900, bg = "white")
+```
+
+**Figure 1: Relative contributions of Data Categories to each Criteria Air Pollutant or precursor.** <br> \newline
+<a href="figures/Section-0/NEI2023_Pie_Panels_8Pollutants_ByDataCategory.png" download="figures/Section-0/NEI2023_Pie_Panels_8Pollutants_ByDataCategory.png" class="btn btn-primary">Download Figure</a>
+
+Figure [2](#exec-fig2) summarizes national nonpoint sector contributions to VOC, NH3, PM2.5, and NOx after excluding biogenic and fire sources. VOC is led by industrial oil and gas production at about 2.93 million tons (39%), followed by solvent use in consumer and commercial applications at roughly 2.01 million tons (27%). Residential wood combustion adds 580,000 tons (8%), while “Other” nonpoint sectors contribute 1.71 million tons (23%). For NH3, agriculture overwhelmingly dominates, with livestock waste contributing about 2.74 million tons (68%) and fertilizer application adding an additional 1.11 million tons (27%), with all other nonpoint sectors collectively below 4%. Primary PM2.5 is shaped by a broad “Other” category (852,000 tons; 37%), which is predominantly from commercial cooking, construction dust, paved road dust, waste disposal, and industrial biomass fuel combustion sources. There are also substantial contributions from agricultural and livestock dust (674,000 tons; 30%), residential wood combustion (453,000 tons; 20%), and unpaved road dust (contributes another (263,000 tons; 12%). NOx exhibits a more diversified nonpoint mix with large contributions from industrial oil and gas production (744,000 tons; 23%), commercial marine vessels (702,000 tons; 22%), fertilizer application (589,000 tons; 18%), and locomotives (447,000 tons; 14%), with the remaining “Other” at 739,000 tons (23%).
+
+```{r, include=FALSE}
+fig5_all <- readr::read_csv("figures/Section-0/fig2_sum_by_pollutant_sector_selected.csv", show_col_types = FALSE)
+
+# Fixed sector order for legend consistency (nine kept sectors + Other)
+sector_levels <- c(
+  "Agriculture - Crops & Livestock Dust",
+  "Agriculture - Fertilizer Application",
+  "Agriculture - Livestock Waste",
+  "Dust - Unpaved Road Dust",
+  "Fuel Comb - Residential - Wood",
+  "Industrial Processes - Oil & Gas Production",
+  "Mobile - Commercial Marine Vessels",
+  "Mobile - Locomotives",
+  "Solvent - Consumer & Commercial Solvent Use",
+  "Other"
+)
+
+# Display labels for pollutants
+pollutant_labels <- c(
+  "VOC"      = "VOC",
+  "NH3"      = "NH3",
+  "PM25-PRI" = "PM2.5",
+  "NOX"      = "NOx"
+)
+
+# Helper to build one pie for a given pollutant code
+make_pie_by_sector <- function(poll_code) {
+  lab <- pollutant_labels[[poll_code]]
+  df <- fig5_all |>
+    dplyr::filter(.data$pollutant == poll_code) |>
+    dplyr::select(sector_group, total_ton)
+
+  # Ensure all sector groups are present and ordered; fill missing with zero
+  df <- dplyr::left_join(
+    data.frame(sector_group = factor(sector_levels, levels = sector_levels)),
+    df,
+    by = "sector_group"
+  )
+  df$total_ton[is.na(df$total_ton)] <- 0
+  df$sector_group <- factor(df$sector_group, levels = sector_levels)
+
+  total_val <- sum(df$total_ton, na.rm = TRUE)
+  subtitle_lab <- paste0("(", scales::comma(round(total_val, 0)), " Tons)")
+
+  ggplot2::ggplot(df, ggplot2::aes(x = 1, y = total_ton, fill = sector_group)) +
+    ggplot2::geom_col(width = 2, color = "white") +
+    ggplot2::coord_polar(theta = "y") +
+    ggplot2::scale_x_continuous(limits = c(0, 2), breaks = NULL) +
+    ggplot2::scale_fill_brewer(palette = "Paired", drop = FALSE, name = "Sector") +
+    ggplot2::labs(title = lab, subtitle = subtitle_lab, x = NULL, y = NULL, fill = NULL) +
+    ggplot2::theme_void(base_size = 12) +
+    ggplot2::theme(
+      aspect.ratio = 1,
+      plot.title = ggplot2::element_text(hjust = 0.5, face = "bold", size = 14, margin = ggplot2::margin(b = 2)),
+      plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 10, margin = ggplot2::margin(t = 1, b = 2))
+    )
+}
+
+# Build the four panels
+p_VOC   <- make_pie_by_sector("VOC")
+p_NH3   <- make_pie_by_sector("NH3")
+p_PM25  <- make_pie_by_sector("PM25-PRI")
+p_NOx   <- make_pie_by_sector("NOX")
+```
+
+<a id="exec-fig2"></a>
+\hypertarget{exec-fig2}{}
+```{r np-pollutant-pie-chart, fig.alt="Relative contributions of EIS Sectors to select Criteria Air Pollutant or precursor emissions from only nonpoint sources.", echo=FALSE, fig.pos='H'}
+p_combined <- patchwork::wrap_plots(
+  p_VOC, p_NH3, p_PM25, p_NOx,
+  ncol = 2, nrow = 2, byrow = TRUE
+) +
+  patchwork::plot_layout(guides = "collect") +
+  patchwork::plot_annotation(
+    caption = "No biogenics or fire emissions included in these plots.",
+    theme = ggplot2::theme(
+      plot.caption = ggplot2::element_text(face = "italic", hjust = 0.5, size = 12, margin = ggplot2::margin(t = 3))
+    )
+  ) &
+  ggplot2::theme(
+    legend.position = "right",
+    legend.title = ggplot2::element_blank(),
+    legend.text = ggplot2::element_text(size = 11),  # keep legend size the same
+    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold", size = 12, margin = ggplot2::margin(b = 4))
+  ) &
+  ggplot2::guides(fill = ggplot2::guide_legend(ncol = 1, byrow = FALSE, title = NULL))
+
+# Print and save (slightly wider to accommodate right-side legend)
+print(p_combined)
+dir.create("figures/Section-0", recursive = TRUE, showWarnings = FALSE)
+ggplot2::ggsave(
+  "figures/Section-0/NEI2023_Pie_Panels_SectorGroups_VOC_NH3_PM25_NOx.png",
+  plot = p_combined, width = 12, height = 9, dpi = 900, bg = "white"
+)
+```
+
+**Figure 2: Relative contributions of EIS Sectors to select Criteria Air Pollutant or precursor emissions from only nonpoint sources.** <br> \newline
+<a href="figures/Section-0/NEI2023_Pie_Panels_SectorGroups_VOC_NH3_PM25_NOx.png" download="figures/Section-0/NEI2023_Pie_Panels_SectorGroups_VOC_NH3_PM25_NOx.png" class="btn btn-primary">Download Figure</a>
+
+Compared to the 2020 NEI, wildfire activity in the continental United States was relatively low in 2023. To capture the spatial variability more broadly, Figure [3](#exec-fig2) shows total primary PM2.5 and VOC emissions from fires aggregated to EPA’s 10 regions. Region 10  exhibits the largest totals (about 597,000 tons PM2.5 and 1.77 million tons VOC), driven primarily by large wildfires in Alaska, with additional wildfire contributions from Oregon. Region 4 and Region 6 are also elevated (approximately 508,000 and 409,000 tons PM2.5; 723,000 and 697,000 tons VOC, respectively). In Region 4, emissions are dominated by prescribed burning across the Southeast, with Florida and Georgia as prominent contributors. In Region 6, emissions reflect a mix of wildfires and prescribed/agricultural burning across Texas and the broader south-central states. Region 9 shows moderate totals (about 177,000 tons PM2.5 and 376,000 tons VOC), largely associated with wildfires in California and the interior Southwest. Region 7 is similarly moderate (about 164,000 tons PM2.5 and 242,000 tons VOC), with contributions primarily from prescribed and agricultural burning in the Plains. Regions 8, 5, 3, and 2 have lower totals, reflecting smaller or more episodic fire activity across the Rockies, Upper Midwest, Mid-Atlantic, and Northeast/Caribbean. Region 1 has the smallest fire-related totals (about 1,900 tons PM2.5 and 3,100 tons VOC), consistent with limited wildfires and prescribed/forestry burns in the Northeast. Overall, these regional patterns underscore strong geographic and year-to-year variability, with wildfires dominating in 2023 in the West (especially Alaska) and prescribed burning more prominent in the Southeast.
+
+```{r, include=FALSE}
+make_fire_panel_from_csv_region <- function(csv_path, label) {
+  dat <- readr::read_csv(csv_path, show_col_types = FALSE)
+
+  plot_dat <- dat |>
+    dplyr::select(region, total_ton) |>
+    # Ensure all regions are present and in fixed order
+    tidyr::complete(region = paste0("R", 1:10), fill = list(total_ton = 0)) |>
+    dplyr::mutate(region = factor(region, levels = paste0("R", 10:1)))
+
+  ggplot2::ggplot(plot_dat, ggplot2::aes(x = region, y = total_ton)) +
+    ggplot2::geom_col(fill = "#1f78b4") +
+    ggplot2::coord_flip() +
+    ggplot2::scale_y_continuous(labels = scales::comma) +
+    ggplot2::labs(title = label, x = NULL, y = "Emissions (tons)") +
+    ggplot2::theme_bw(base_size = 10) +
+    ggplot2::theme(
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor   = ggplot2::element_blank()
+    )
+}
+
+p_pm25 <- make_fire_panel_from_csv_region("figures/Section-0/fig3_fires_eparegions_PM2.5.csv", "PM2.5")
+p_voc  <- make_fire_panel_from_csv_region("figures/Section-0/fig3_fires_eparegions_VOC.csv",   "VOC")
+```
+
+<a id="exec-fig3"></a>
+\hypertarget{exec-fig3}{}
+```{r fires-by-region, fig.alt="Bar charts showing 2023 fire-emission totals by EPA region: PM2.5 and VOC. Region 10 is highest (∼597k PM2.5; ∼1.77M VOC), Regions 4 and 6 are also elevated, Regions 9 and 7 are moderate, and Region 1 is lowest.", echo=FALSE, fig.pos='H'}
+p_combined <- p_pm25 + p_voc +
+  patchwork::plot_layout(guides = "collect") &
+  ggplot2::theme(
+    legend.position = "none",
+    plot.title = ggplot2::element_text(hjust = 0, face = "bold", size = 12, margin = ggplot2::margin(b = 4)),
+    text = ggplot2::element_text(size = 12)
+  )
+
+print(p_combined)
+
+dir.create("figures/Section-0", recursive = TRUE, showWarnings = FALSE)
+ggplot2::ggsave(
+  "figures/Section-0/NEI2023_Bar_FireSources_EPARegions_PM25_VOC.png",
+  plot = p_combined, width = 12, height = 6.5, dpi = 900, bg = "white")
+```
+
+**Figure 3: Total 2023 primary PM2.5 and VOC fire emissions by EPA region.** <br> \newline
+<a href="figures/Section-0/NEI2023_Bar_FireSources_EPARegions_PM25_VOC.png" download="figures/Section-0/NEI2023_Bar_FireSources_EPARegions_PM25_VOC.png" class="btn btn-primary">Download Figure</a>
+
+Figure [4](#exec-fig4) shows NOx and SO2 emissions by data category aggregated to EPA’s 10 regions, highlighting how sector mixes and key states shape each region’s profile. For NOx, totals are largest in Region 6 (1.73 million tons), followed by Regions 4 (1.33 million tons) and 5 (1.24 million tons), and smallest in Region 1 (180,000 tons). In Region 6, NOx is led by nonpoint sources (811,000 tons), largely reflecting oil and gas production (496,000 tons). Region 4 and 5’s NOx emissions are more balanced between onroad mobile (475,000 tons and 325,000 tons, respectively), point (408,000 tons and 340,000 tons, respectively), and nonpoint (315,000 tons and 427,000 tons, respectively) sources. For SO2, totals are highest in Region 6 (457,000 tons), followed by Regions 5 (261,000 tons) and 4 (203,000 tons), and lowest in Regions 10 (21,000 tons) and 1 (10,000 tons). For SO2, point-source totals are generally dominated by coal-fired electricity generating units (629,000 tons nationwide) and oil and gas production (197,000 tons nationwide). As an example, in Region 6, SO2 emissions from coal-fired electricity generating units in Texas (103,000 tons) and oil and gas production in Texas (52,000 tons) and New Mexico (104,000 tons) total 57 percent of all SO2 emissions in the Region.
+
+```{r, include=FALSE}
+make_panel_by_cat_from_csv_region <- function(csv_path, label) {
+  plot_dat <- readr::read_csv(csv_path, show_col_types = FALSE) |>
+    dplyr::mutate(
+      data_cat = factor(data_cat, levels = c("Point", "Nonpoint", "Onroad", "Nonroad")),
+      region = factor(region, levels = paste0("R", 10:1))
+    ) |>
+    dplyr::filter(!is.na(region), !is.na(data_cat))
+
+  ggplot2::ggplot(plot_dat, ggplot2::aes(x = region, y = total_ton, fill = data_cat)) +
+    ggplot2::geom_col() +
+    ggplot2::coord_flip() +
+    ggplot2::scale_y_continuous(labels = scales::comma) +
+    ggplot2::scale_fill_brewer(palette = "Dark2", drop = FALSE) +
+    ggplot2::labs(title = label, x = NULL, y = "Emissions (tons)", fill = NULL) +
+    ggplot2::theme_bw(base_size = 10) +
+    ggplot2::theme(
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor   = ggplot2::element_blank()
+    )
+}
+
+p_nox <- make_panel_by_cat_from_csv_region("figures/Section-0/fig4_eparegions_by_datacat_NOx.csv", "NOx")
+p_so2 <- make_panel_by_cat_from_csv_region("figures/Section-0/fig4_eparegions_by_datacat_SO2.csv", "SO2")
+```
+
+<a id="exec-fig4"></a>
+\hypertarget{exec-fig4}{}
+```{r NOX-SO2-by-state, fig.alt="Total NOx and SO2 fire emissions, excluding biogenics and fire sources, for each of the EPA Regions.", echo=FALSE, fig.pos='H'}
+p_combined <- (p_nox + p_so2) +
+  patchwork::plot_layout(guides = "collect") +
+  patchwork::plot_annotation(
+    caption = "No biogenics or fire emissions included in these plots.",
+    theme = ggplot2::theme(
+      plot.caption = ggplot2::element_text(
+        face = "italic", hjust = 0.5, size = 12, margin = ggplot2::margin(t = 6)
+      )
+    )
+  ) &
+  ggplot2::theme(
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    legend.title = ggplot2::element_blank(),
+    legend.justification = "center",
+    text = ggplot2::element_text(size = 12),
+    legend.text = ggplot2::element_text(size = 12),
+    plot.title = ggplot2::element_text(hjust = 0, face = "bold", size = 12, margin = ggplot2::margin(b = 4))
+  ) &
+  ggplot2::guides(fill = ggplot2::guide_legend(ncol = 4, byrow = TRUE, title = NULL))
+
+print(p_combined)
+dir.create("figures/Section-0", recursive = TRUE, showWarnings = FALSE)
+ggplot2::ggsave(
+  "figures/Section-0/NEI2023_Bar_EPARegions_NOx_SO2_ByDataCategory.png",
+  plot = p_combined, width = 12, height = 6.5, dpi = 900, bg = "white")
+```
+
+**Figure 4: Total NOx and SO2 emissions, excluding biogenics and fire sources, for each of the EPA Regions.** <br> \newline
+<a href="figures/Section-0/NEI2023_Bar_EPARegions_NOx_SO2_ByDataCategory.png" download="figures/Section-0/NEI2023_Bar_EPARegions_NOx_SO2_ByDataCategory.png" class="btn btn-primary">Download Figure</a>
+
+Figure [5](#exec-fig5) shows VOC and primary PM2.5 emissions by data category aggregated to EPA’s 10 regions. VOC totals are highest in Region 6 (3.08 million tons), followed by Regions 4 (1.69 million tons) and 5 (1.44 million tons), and smallest in Region 1 (270,000 tons). Across regions, VOC is dominated by the nonpoint data category, with the sectoral contributions featuring region-specific patterns: Region 6’s VOC is dominated by oil and gas production (1.4 million tons in Texas, 348,000 tons in New Mexico), with considerable contributions from solvents (384,000 tons in all of Region 6). Regions 4 and 5 show large nonpoint VOC emissions from solvents (1.16 million tons), gas stations (186,000 tons), other onroad and nonroad mobile sources (727,000 tons). Primary PM2.5 totals peak in Regions 5 (464,000 tons), 6 (452,000 tons), and 4 (451,000 tons), and are lowest in Regions 2 (94,000 tons) and 1 (100,000 tons). PM2.5 emissions are dominated by nonpoint sources in every region, largely reflecting emissions from construction, road, and agricultural dust and residential wood combustion, with smaller but often locally important contributions from cooking, industrial boilers, and other industrial processes. 
+
+```{r, include=FALSE}
+make_panel_by_cat_from_csv_region <- function(csv_path, label) {
+  plot_dat <- readr::read_csv(csv_path, show_col_types = FALSE) |>
+    dplyr::mutate(
+      # Consistent category order
+      data_cat = factor(data_cat, levels = c("Point", "Nonpoint", "Onroad", "Nonroad")),
+      # Fixed region order: R1 top → R10 bottom with coord_flip
+      region   = factor(region, levels = paste0("R", 10:1))
+    ) |>
+    dplyr::filter(!is.na(region), !is.na(data_cat))
+
+  ggplot2::ggplot(plot_dat, ggplot2::aes(x = region, y = total_ton, fill = data_cat)) +
+    ggplot2::geom_col() +
+    ggplot2::coord_flip() +
+    ggplot2::scale_y_continuous(labels = scales::comma) +
+    ggplot2::scale_fill_brewer(palette = "Dark2", drop = FALSE) +
+    ggplot2::labs(title = label, x = NULL, y = "Emissions (tons)", fill = NULL) +
+    ggplot2::theme_bw(base_size = 11) +
+    ggplot2::theme(
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor   = ggplot2::element_blank()
+    )
+}
+
+# Build the two panels strictly from saved CSVs (adjust y-breaks as you see fit)
+p_voc  <- make_panel_by_cat_from_csv_region("figures/Section-0/fig5_eparegions_by_datacat_VOC.csv",   "VOC")
+
+p_pm25 <- make_panel_by_cat_from_csv_region("figures/Section-0/fig5_eparegions_by_datacat_PM2.5.csv", "PM2.5")
+```
+
+<a id="exec-fig5"></a>
+\hypertarget{exec-fig5}{}
+```{r PM25-VOC-by-state, fig.alt="Total PM2.5 and VOC fire emissions, excluding biogenics and fire sources, for each of the EPA Regions.", echo=FALSE, fig.pos='H'}
+p_combined <- (p_voc + p_pm25) +
+  patchwork::plot_layout(guides = "collect") +
+  patchwork::plot_annotation(
+    caption = "No biogenics or fire emissions included in these plots.",
+    theme = ggplot2::theme(
+      plot.caption = ggplot2::element_text(face = "italic", hjust = 0.5, size = 12,
+                                           margin = ggplot2::margin(t = 6))
+    )
+  ) &
+  ggplot2::theme(
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    legend.title = ggplot2::element_blank(),
+    legend.justification = "center",
+    text = ggplot2::element_text(size = 12),
+    legend.text = ggplot2::element_text(size = 12),
+    plot.title = ggplot2::element_text(hjust = 0, face = "bold", size = 12, margin = ggplot2::margin(b = 4))
+  ) &
+  ggplot2::guides(fill = ggplot2::guide_legend(ncol = 4, byrow = TRUE, title = NULL))
+
+# Print inline and save to file
+print(p_combined)
+dir.create("figures/Section-0", recursive = TRUE, showWarnings = FALSE)
+ggplot2::ggsave(
+  "figures/Section-0/NEI2023_Bar_EPARegions_VOC_PM25_ByDataCategory.png",
+  plot = p_combined, width = 12, height = 6.5, dpi = 900, bg = "white")
+```
+
+**Figure 5: Total PM2.5 and VOC emissions, excluding biogenics and fire sources, for each of the EPA Regions.** <br> \newline
+<a href="figures/Section-0/NEI2023_Bar_EPARegions_VOC_PM25_ByDataCategory.png" download="figures/Section-0/NEI2023_Bar_EPARegions_VOC_PM25_ByDataCategory.png" class="btn btn-primary">Download Figure</a>

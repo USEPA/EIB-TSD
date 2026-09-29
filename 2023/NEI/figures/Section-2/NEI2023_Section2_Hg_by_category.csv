@@ -1,0 +1,25 @@
+Pollutant,Source,Value
+Point,S/L/T,14.98068632
+Nonpoint,S/L/T,0.206170797
+Onroad,S/L/T,0
+Nonroad,S/L/T,0
+Point,EPA Nonpoint,0
+Nonpoint,EPA Nonpoint,9.16544715
+Onroad,EPA Nonpoint,0
+Nonroad,EPA Nonpoint,0
+Point,EPA TRI,3.889751406
+Nonpoint,EPA TRI,0
+Onroad,EPA TRI,0
+Nonroad,EPA TRI,0
+Point,EPA HAP Augmentation,0.372571907
+Nonpoint,EPA HAP Augmentation,0.254950929
+Onroad,EPA HAP Augmentation,0
+Nonroad,EPA HAP Augmentation,0
+Point,EPA Other,0.015706393
+Nonpoint,EPA Other,0
+Onroad,EPA Other,0
+Nonroad,EPA Other,0
+Point,EPA Mobile,0
+Nonpoint,EPA Mobile,0
+Onroad,EPA Mobile,0.34995543
+Nonroad,EPA Mobile,0.041074788

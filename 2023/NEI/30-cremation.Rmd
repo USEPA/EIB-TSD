@@ -1,0 +1,431 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Human and Animal Cremation {#human-animal-cremation}
+
+## Sector Descriptions and Overview 
+
+The cremation of human remains results in emissions of particulate matter, SO2, NOx, VOC, CO, and HAPs. It is a significant source of mercury emissions, due to mercury in dental fillings, as well as mercury in blood and tissues.
+
+The cremation of animals also results in emissions of CAPs and HAPs, though it emits less mercury than human cremation.
+
+SCCs for human and animal cremation are provided in Table \@ref(tab:cremation-sccs).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-30/cremation-sccs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r cremation-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Source Classification Codes used in the cremation sector.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+## EPA-developed estimates
+
+The calculations for estimating emissions from human cremation involve estimating the number of deaths in each age group in each county, using data from the Centers for Disease Control and Prevention. The number of deaths is multiplied by the average weight by age group and the state-level cremation rate from the National Funeral Directors Association to estimate the total amount of cremations in each county in terms of mass. This number is multiplied by an emissions factor to estimate the emissions of CAPs and HAPs. Emissions of mercury include emissions from mercury in fillings in teeth and in blood and tissues. The emissions from mercury in fillings are estimated based on data on the number of filled teeth per person in each age group and assumptions about the proportion of fillings that contain mercury and the amount of mercury in each filling.
+
+The calculations for estimating emissions from animal cremation involve determining the number of cremated animals nationally and distributing this number to each county based on population. The number of cremated animals is multiplied by average weights for cats and dogs to determine the amount of cremations in each county in terms of mass. This number is multiplied by an emissions factor to estimate the emissions of CAPs and HAPS.
+
+### Activity Data
+
+#### Human Cremation
+
+The activity data for human cremation is based on the number of deaths in each county in 13 age groups, from the Centers for Disease Control and Prevention WONDER database [[ref 1](#cremation-references)]. Data for some counties are withheld in the WONDER database. These gaps are filled using the data on the total number of deaths by age group in each state (which includes the number of deaths that are withheld at the county level). First, the sum of the reported county-level number of deaths in each age group and state is subtracted from the reported state-level number of deaths in each age group to determine the total number of deaths withheld at the county level in each state and age group.
+
+\begin{equation} 
+  \text{Deaths Withheld}_{s,a} = \text{Deaths State}_{s,a} - \sum{}\text{Deaths County}_{s,a}
+  (\#eq:deaths-withheld)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Deaths Withheld}_{s,a} \) = Total number of withheld deaths in state *s* in age group *a* <br> \newline
+  \( \text{Deaths State}_{s,a} \) = Total number of deaths reported at the state level in state *s* in age group *a* <br> \newline
+  \( \text{Deaths County}_{s,a} \) = Total number of deaths reported at the county level in state *s* in age group *a* <br> \newline
+</div>
+
+The total number of withheld deaths are distributed to the counties based on the proportion of population in those counties to the total state population.
+
+\begin{equation} 
+  \text{Pop Ratio}_{c} = \frac{Pop_{c}}{Pop_{s}}
+  (\#eq:pop-ratio)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Pop Ratio}_{c} \) = The population ratio used to distribute withheld deaths in state *s* to county *c* <br> \newline
+  \( Pop_{c} \) = The total population of county *c* <br> \newline
+  \( Pop_{s} \) = The total population of state *s* <br> \newline
+</div>
+
+The number of withheld deaths in each state is multiplied by the county population ratio to distribute the withheld deaths to the counties. Note that this step is only performed for counties where county-level data on number of deaths is withheld; this step is not performed where county-level data on deaths is reported.
+
+\begin{equation} 
+  \text{Deaths}_{c,a} = \text{Deaths Withheld}_{s,a} \times  \text{Pop Ratio}_{c}
+  (\#eq:county-deaths)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Deaths}_{c,a} \) = The number of deaths in county *c* in age group *a* <br> \newline
+  \( \text{Deaths Withheld}_{s,a} \) = Total number of withheld deaths in state *s* in age group *a* <br> \newline
+  \( \text{Pop Ratio}_{c} \) = The population ratio used to distribute withheld deaths in state *s* to county *c* <br> \newline
+</div>
+
+The total number of deaths in each county (either reported directly in the CDC WONDER database or estimated using Eqn. \@ref(eq:county-deaths)) is multiplied by a state-level cremation rate, reported by the National Funeral Directors Association (NFDA) [[ref 2](#cremation-references)], shown in Table \@ref(tab:state-cremation-rate). It is assumed that the state-level cremation rate applies to all counties within the state.
+
+\begin{equation} 
+  \text{Cremations}_{c,a} = \text{Deaths}_{c,a} \times  \text{Cremation Rate}_{s}
+  (\#eq:county-cremations)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Cremations}_{c,a} \) = The number of human cremations in county *c* in age group *a* <br> \newline
+  \( \text{Deaths}_{c,a} \) = The number of deaths in county *c* in age group *a* <br> \newline
+  \( \text{Cremation Rate}_{s} \) = The rate of human cremations in state *s* <br> \newline
+</div>
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-30/state-cremation-rate.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r state-cremation-rate, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Human cremation rate by state.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position"))
+```
+
+The CDC provides estimates of the average weight of individuals in each age group [[ref 3](#cremation-references)]. This number is multiplied by the number of cremations in each county in each age group and then summed across all age groups to estimate the total amount of cremations in tons in each county.
+
+\begin{equation} 
+  \text{Cremation tons}_{c} = \sum_{a=1}^{A} Cremations_{c,a} \times W_{a} \times \frac{\text{1 ton}}{\text{2,000 lbs}}
+  (\#eq:cremation-tons)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Cremation tons}_{c} \) = The weight of humans cremated in county *c*, in tons <br> \newline
+  \( \text{Cremations}_{c,a} \) = The number of human cremations in county *c* <br> \newline
+  \( W_{a} \) = The average weight of individuals from age group *a* in lbs <br> \newline
+</div>
+
+#### Animal Cremation
+
+The Pet Loss Professionals Alliance (PLPA) conducted a survey that estimated that there were 1,840,965 pet cremations in 2012, and that 99 percent of deceased pets are cremated [[ref 4](#cremation-references)]. In addition, the Humane Society of the United States estimates that there are 2,700,000 adoptable dogs and cats euthanized in animal shelters each year [[ref 5](#cremation-references)]. It is assumed that all of these shelter animals are cremated. Therefore, there are a total of approximately 4,540,965 animal creations each year. Note that this estimate does not double count the number of animal cremations, because the PLPA study counts the number of cremations of pets (i.e., animals that are owned by people), whereas the Humane Society estimates are for animals in shelters that were not adopted. 
+
+The population of cats and dogs is approximately 52.5 percent cats and 48.5 percent dogs [[ref 5](#cremation-references)]. Using this percentage and the total number of pets and shelter animals cremated annually, a total number of cats and a total number of dogs cremated annually can be calculated as follows:
+
+\begin{equation} 
+  Cremations_{c/d,US} = Ratio_{c/d} \times \bigl(\text{Cremations pets}_{US} + \text{Cremations shelter}_{US}\bigr)
+  (\#eq:cremations-cd-us)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( Cremations_{c/d,US} \) = Total cats, *c*, or dogs, *d*, cremated annually in the United States <br> \newline
+  \( Ratio_{c/d} \) = Ratio of cats, *c*, or dogs, *d*, in the pet population <br> \newline
+  \( \text{Cremations pets}_{US} \) = Total number of pets cremated annually in the United States <br> \newline
+  \( \text{Cremations shelter}_{US} \) = Total number of shelter animals cremated annually in the United States <br> \newline
+</div>
+
+The average weight of a domestic cat is approximately 4.5 kg (9.9 pounds) [[ref 6](#cremation-references)]. The average weight of a dog is difficult to determine due to large differences in breeds, but an average across breeds is 48.5 pounds [[ref 7](#cremation-references)]. Note that this is a straight average of the average adult weight for male and female dogs across breeds. It is not a weighted average that takes into account the popularity of different breeds in the United States. To calculate the weight, in tons, of both cats and dogs cremated annually, the average weight values are multiplied by the total number of cats and total number of dogs cremated annually.
+
+\begin{equation} 
+  \text{Cremations tons}_{c/d} = Cremations_{c/d} \times Weight_{c/d} \times \frac{\text{1 ton}}{\text{2000 pounds}}
+  (\#eq:cremations-tons-cd)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Cremations tons}_{c/d} \) = Total weight, in tons, of cats, *c*, or dogs, *d*, cremated annually in the United States <br> \newline
+  \( Cremations_{c/d} \) = Total cats, *c*, or dogs, *d*, cremated annually in the United States <br> \newline
+  \( Weight_{c/d} \) = Average weight per animal, in pounds, of cats, *c*, or dogs, *d* <br> \newline
+</div>
+
+Once the weight of cats and weight of dogs cremated annually has been calculated, these values can be summed to derive a total weight of animals cremated annually.
+
+\begin{equation} 
+  \text{Cremations tons}_{animal} =  \text{Cremations tons}_{c} +  \text{Cremations tons}_{d}
+  (\#eq:cremations-tons-animal)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Cremations tons}_{animal} \) = Total weight of animals cremated annually in the United States, in tons <br> \newline
+  \( \text{Cremations tons}_{c} \) = Total weight of cats, *c*, cremated annually in the United States, in tons <br> \newline
+  \( \text{Cremations tons}_{d} \) = Total weight of dogs, *d*, cremated annually in the United States, in tons <br> \newline
+</div>
+
+### Allocation Procedure
+
+#### Human Cremation
+
+The number of deaths is reported by the CDC at the county level. Therefore, these data do not need to be allocated. For counties with withheld data on the number of deaths, the total number of withheld deaths is distributed to counties based on the proportion of population in those counties, as described in Eqn. \@ref(eq:deaths-withheld) - Eqn. \@ref(eq:county-deaths). 
+
+#### Animal Cremation
+
+The estimated national-level total weight of animals cremated are allocated to the county level based on the ratio of population in each county to the total national population.
+
+\begin{equation} 
+  \text{Cremations tons}_{animal,c} =  \text{Cremations tons}_{animal,US} +  \frac{Pop_{c}}{Pop_{US}}
+  (\#eq:cremations-tons-animal-county)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Cremations tons}_{animal,c} \) = Total weight of animals cremated in county *c*, in tons <br> \newline
+  \( \text{Cremations tons}_{animal,US} \) = Total weight of animals cremated annually in the United States, in tons <br> \newline
+  \( Pop_{c} \) = The total population of county *c* <br> \newline
+  \( Pop_{US} \) = The total population of the United States <br> \newline
+</div>
+
+### Emission Factors
+
+#### Human and Animal Cremation – Blood and Tissues
+
+The emissions factors for human and animal cremation for CAPs are from AP-42 [[ref 8](#cremation-references)], and a report by EPA on emissions tests of a crematory [[ref 9](#cremation-references)] and are in units of pounds of emissions per ton cremated. The emissions factors for most HAPs are from a report from the California Air Resources Board [[ref 10](#cremation-references)], as well as from the EPA emissions test of a crematory. The mercury emissions factor is from a review of multiple studies [[ref 11](#cremation-references)]. These emission factors do not include emissions from dental fillings. As shown in Table \@ref(tab:cremation-EFs), EPA uses the same emissions factors for emissions from cremation of blood and tissues for both humans and animals. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-30/cremation-EFs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r cremation-EFs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Emissions factors for the cremation of human and animal blood and tissues.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position"))
+```
+
+#### Human Cremation – Dental Mercury
+
+In addition to mercury emitted from the cremation of blood and tissues, mercury is also emitted due to the cremation of dental fillings. The Bay Area Air Quality Management District (BAAQMD) issued a report in 2012 estimating the average amount of mercury in teeth per person for ten age groups, based on data from CDC’s National Health and Nutrition Examination Survey [[ref 12](#cremation-references)]. Table \@ref(tab:restored-teeth) shows the estimated amount of material in restored teeth by age group from the BAAQMD study [[ref 12](#cremation-references)], which is matched to the age groups used by the CDC Wonder database, which is the source of data on deaths by age group.
+
+The BAAQMD memorandum is used to estimate that 31.6 percent of filled teeth in the 5-24 age groups contain amalgam. According to the American Dental Association (ADA 1998) more than 75 percent of restorations before the 1970s used dental amalgam, which declined to 50 percent by 1991. Using these numbers, it is assumed that 50 percent of the filled teeth for 25-44 age groups contain amalgam, 62.5 percent of filled teeth in the 45-64 age group, and 75 percent of filled teeth for people over 65. The Food and Drug Administration has discouraged the use of dental amalgam in children under 6 [[ref 13](#cremation-references)]. While EPA does not have data on the percent of fillings containing dental amalgam for the 1-4 age group, it is assumed that this age group has approximately half the dental amalgam of the other age groups under 20 years old. It is also assumed that children under the age of 1 have no dental mercury. The analysis also assumes that 45 percent of all amalgam-containing fillings are mercury, based on information from the Food and Drug Administration [[ref 13](#cremation-references)]. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-30/restored-teeth.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r restored-teeth, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Estimated amount of material in restored teeth.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+The emissions factor for mercury in teeth is calculated by multiplying the average amount of material in restored teeth per person by the percentage of fillings containing mercury in each age group and the proportion of mercury in dental amalgam (approximately 45 percent).
+
+\begin{equation} 
+  \text{EF teeth}_{Hg,a} =  Material_{a} \times containHg_{a} \times HgProportion \times 0.0022\frac{lb}{g}
+  (\#eq:ef-teeth)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{EF teeth}_{Hg,a} \) = Emission factor for mercury emissions from teeth due to cremation for age group *a*, in lbs. per cremation <br> \newline
+  \( Material_{a} \) = The average amount of material in restored teeth for age group *a*, in grams per creamation <br> \newline
+  \( containHg_{a} \) = The proportion of people in age group *a* with fillings that contain mercury <br> \newline
+  \( HgProportion \) = The proportion of dental amalgam that is mercury (approximately 45 percent) <br> \newline
+</div>
+
+### Controls
+
+There are no controls assumed for this source category.
+
+### Emissions
+
+#### Human Cremation
+
+To estimate the emissions of CAPs from human cremation, the total number of human cremations in each county, in tons, is multiplied by the emissions factor for each pollutant, from Table \@ref(tab:cremation-EFs).
+
+\begin{equation} 
+  Emissions_{p,c} =  \text{Cremation tons}_{c} \times EF_{p}
+  (\#eq:emissions-pc)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( Emissions_{p,c} \) = Emissions of pollutant *p* from human cremation in county *c*, in pounds <br> \newline
+  \( \text{Cremation tons}_{c} \) = The number of human cremations in county *c*, in tons <br> \newline
+  \( EF_{p} \) = Emissions factor for pollutant *p* from human cremation, in lbs. per ton <br> \newline
+</div>
+
+The emissions from mercury in teeth are estimated based on the number of cremations rather than the weight. To estimate the emissions of mercury from teeth during human cremation, the number of cremations in each age group is multiplied by the emissions factor for each age group and then summed across age groups.
+
+\begin{equation} 
+  \text{Emissions teeth}_{Hg,c} =  \sum_{a=1}^{A} Cremations_{c,a} \times \text{EF teeth}_{Hg,a}
+  (\#eq:emissions-teeth)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Emissions teeth}_{Hg,c} \) = Emissions of mercury in teeth from human cremation in county *c*, in pounds <br> \newline
+  \( Cremations_{c,a} \) = The number of human cremations in county *c* in age group *a* <br> \newline
+  \( \text{EF teeth}_{Hg,a} \) = Emissions factor for mercury emissions from teeth due to cremation for age group *a*, in lbs. per cremation <br> \newline
+</div>
+
+The emissions from mercury from blood and tissues are estimated by multiplying the total number of cremations in each county, in tons, by the emissions factor for mercury from blood and tissues.
+
+\begin{equation} 
+  \text{Emissions tissue}_{Hg,c} =  \text{Cremation tons}_{c} \times \text{EF tissue}_{Hg}
+  (\#eq:emissions-tissue)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Emissions tissue}_{Hg,c} \) = Emissions of mercury in tissues from human cremation in county *c*, in pounds <br> \newline
+  \( \text{Cremation tons}_{c} \) = The number of human cremations in county *c*, in tons <br> \newline
+  \( \text{EF tissue}_{Hg} \) = Emissions factor for mercury emissions from blood and tissues due to cremation for in lbs. per ton  <br> \newline
+</div>
+
+The total emissions of mercury from cremation in each county are calculated by adding the emissions of mercury from teeth and the emissions of mercury from tissues.
+
+\begin{equation} 
+  Emissions_{Hg,c} =  \text{Emissions teeth}_{Hg,c} + \text{Emissions tissue}_{Hg,c}
+  (\#eq:Hg-emissions-total)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( Emissions_{Hg,c} \) = Emissions of mercury from human cremation in county *c*, in pounds <br> \newline
+  \( \text{Emissions teeth}_{Hg,c} \) = Emissions of mercury in teeth from human cremation in county *c*, in pounds <br> \newline
+  \( \text{Emissions tissue}_{Hg,c} \) = Emissions of mercury in tissues from human cremation in county *c*, in pounds <br> \newline
+</div>
+
+#### Animal Cremation
+
+\begin{equation} 
+  Emissions_{p,c} =  \text{Cremation tons}_{c} + EF_{p}
+  (\#eq:emissions-animal-total)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( Emissions_{p,c} \) = Emissions of pollutant *p* from animal cremation in county *c*, in pounds <br> \newline
+  \( \text{Cremation tons}_{c} \) = The number of animal cremations in county *c*, in tons <br> \newline
+  \( EF_{p} \) = Emissions factor for pollutant *p* from animal cremation, in lbs. per ton <br> \newline
+</div>
+
+### Sample Calculations
+
+Table \@ref(tab:cremation-sample-calculations) lists the sample calculations for estimating mercury emissions from human cremation in the 85+ age group and animal cremation of cats. To estimate the total emissions in a county, these steps would be repeated to estimate emissions from all age groups and from cremation of dogs. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county. 
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1,2,3,4,5,10,11,12,13,14,6,7,8,9,15),
+  Equation = c(
+    "$\\text{Deaths Withheld}_{s,a} = \\text{Deaths State}_{s,a} - \\sum{}\\text{Deaths County}_{s,a}$",
+    "$\\text{Pop Ratio}_{c} = \\frac{Pop_c}{Pop_s}$",
+    "$Deaths_{c,a} = \\text{Deaths Withheld}_{s,a} \\times \\text{Pop Ratio}_{c}$",
+    "$Cremations_{c,a} = Deaths_{c,a} \\times \\text{Cremation Rate}_{s}$",
+    "$\\text{Cremations tons}_{c} = \\sum_{a=1}^{A} Cremations_{c,a} \\times W_a \\times \\frac{\\text{1 ton}}{\\text{2,000 lbs}}$",
+    "$\\text{EF teeth}_{Hg,a} = Material_{a} \\times ContainHg_{a} \\times \\text{Hg proportion} \\times 0.0022\\,\\text{lb/g}$",
+    "$Emissions_{p,c} = \\text{Cremations tons}_{c} \\times EF_p$",
+    "$\\text{Emissions teeth}_{Hg,c} = \\sum_{a=1}^{A} Cremations_{c,a} \\times EF_{\\text{teeth}_{Hg,a}}$",
+    "$\\text{Emissions tissue}_{Hg,c} = Cremations_{\\text{tons}_{c}} \\times EF_{\\text{tissue}_{Hg}}$",
+    "$Emissions_{Hg,c} = \\text{Emissions teeth}_{Hg,c} + \\text{Emissions tissue}_{Hg,c}$",
+    "$Cremations_{c/d,US} = Ratio_{c/d} \\times \\bigl(\\text{Cremations pets}_{US} + \\text{Cremations shelter}_{US} \\bigr)$",
+    "$\\text{Cremations tons}_{c/d} = Cremations_{c/d} \\times Weight_{c/d} \\times \\frac{\\text{1 ton}}{\\text{2000 pounds}}$",
+    "$\\text{Cremations tons}_{animal} = \\text{Cremations tons}_{c} + \\text{Cremations tons}_{d}$",
+    "$\\text{Cremations tons}_{animal,c} = \\text{Cremations tons}_{animal,US} \\times \\frac{Pop_c}{Pop_{US}}$",
+    "$Emissions_{p,c} = \\text{Cremations tons}_{c} \\times EF_{p}$"
+  ),
+  Values = c(
+    "4,013 state level deaths - 3,997 total county level deaths",
+    "(873 people in the county) / (1,975 total population of counties with withheld deaths)",
+    "16 withheld deaths × 0.442 population ratio",
+    "7 deaths × 56.8\\% cremation rate",
+    "4 cremations × 158.25 lbs per person in 85+ age group ÷ 2000 lbs per ton",
+    "2.96 g mercury × 75\\% with mercury × 45\\% of fillings are mercury × 0.0022",
+    "N/A",
+    "4 cremations × 0.0022 lbs per cremation",
+    "0.3165 tons cremations × 0.0015 lbs per ton",
+    "0.0088 lbs from teeth + 0,00047 lbs from tissues",
+    "52.5\\% of cats in pet population × (1,840,965 pet cremations + 2,700,000 shelter animal cremations)",
+    "2,384,006 cremated cats × 9.9 lbs per cat ÷ 2000 lbs per ton",
+    "N/A",
+    "11,800 cremated cats × (873 people in the county) / (329,164,967 people in US)",
+    "0.03 tons × 0.0015 lbs per ton"
+  ),
+  Result = c(
+    "16 withheld deaths in the state",
+    "0.442 population ratio",
+    "7 deaths in the county",
+    "4 cremations in the county",
+    "0.3165 tons cremations in the county",
+    "0.0022 lbs. mercury per cremation",
+    "Completed in equation H9 for mercury",
+    "0.0088 lbs. mercury from teeth in 85+ age group in the county",
+    "0.00047 lbs. mercury from tissues in 85+ age group in the county",
+    "0.0093 lbs. mercury from cremation of 85+ age group in the county",
+    "2,384,006 cremated cats in the U.S.",
+    "11,800 tons of cremated cats in the U.S.",
+    "Cremations of dogs are not estimated in this sample calculation",
+    "0.03 tons cats cremated in the county",
+    "0.000045 lbs. mercury emissions from cremation of cats in the county"
+  ),
+  stringsAsFactors = FALSE
+)
+```
+
+```{r cremation-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+### Improvements/Changes in the 2023 NEI
+
+There are no significant changes from the methodology used to calculate the previous NEI emissions.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exists to calculate emissions from human cremation for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the US Virgin Islands. The total emissions in tons for these two Florida counties are divided by their respective populations creating a tons per capita emissions factor. For each Puerto Rico and US Virgin Island county, the tons per capita emissions factor is multiplied by the county population (from the same year as the inventory’s activity data) which served as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”.
+
+Emissions from animal cremation are based on county population; therefore, the emissions from animal cremation in Puerto Rico and the Virgin Islands are calculated using the method described for the rest of the counties.
+
+## References {#cremation-references}
+
+1. CDC. [2020 WONDER Database](https://wonder.cdc.gov/ucd-icd10.html). Table 2, last accessed December 2021.
+2. National Funeral Directors Association (NFDA). 2020. [The NFDA Cremation and Burial Report: Research, Statistics and Projections](https://nfda.org/about-nfda/research-and-information), last accessed December 2021.
+3. CDC 2016. [Anthropometric Reference Data for Children and Adults: United States, 2011-2014](https://www.cdc.gov/nchs/data/series/sr_03/sr03_039.pdf). Vital Health Statistics, Series 3, Number 29, last accessed August 2018.
+4. Pet Loss Professionals Alliance (PLPA). 2013. [Pet Loss Professionals Alliance Releases Finding of Inaugural Professional Survey](https://connectingdirectors.com/40088-pet-loss-professionals-alliance-releases-findings-of-inaugural-professional-survey), last accessed August 2018.
+5. Humane Society of the United States. [2014. Pets by the Numbers](https://humanepro.org/page/pets-by-the-numbers), last accessed August 2018.
+6. Mattern, M.Y. and D.A. McLennan. 2000. Phylogeny and Speciation of Felids. Cladistics, 16: 232-253.
+7. Modern Puppies. [Breed Weight Chart](https://modernpuppies.myshopify.com/pages/breed-weight-chart), last accessed August 2018.
+8. U.S. Environmental Protection Agency. 1993. AP-42: Compilation of Air Emissions Factors, Fifth Edition, Volume I, Chapter 2.3 - [Medical Waste Incineration](https://www.epa.gov/sites/default/files/2020-10/documents/c02s03.pdf), Tables 2.3-2 and 2.3-15.
+9. U.S. Environmental Protection Agency. 1999. [Emission Test Evaluation of a Crematory at Woodlawn Cemetery in the Bronx, NY, Vol. I-III](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/EPA454R99049_Emission_Test_Evaluation_Crematory_Woodlawn_BronxNY_Vol_I-III.pdf), EPA-454/R-99-049.
+10. California Air Resources Board. 1999. [Development of Toxic Emissions Factors from Source Test Data Collected Under the Air Toxics Hot Spots Program, Part II, Volume I](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/CARB_1999_Deve_Toxic_EFs_SrcTestData_96-333_1_pt2.pdf). Prepared by GE Energy and Environmental Research Corporation.
+11. Reindl, J. 2012. [Summary of References on Mercury Emissions from Crematoria](https://ejnet.org/files/crematoria/reindl.pdf), last accessed August 2018.
+12. Lundquist, J.H. 2012. Mercury Emissions from the Cremation of Human Remains. Bay Area Air Quality Management District.
+13. Food and Drug Administration. 2017. [About Dental Amalgam Fillings](https://www.fda.gov/medical-devices/dental-devices/dental-amalgam-fillings), last accessed August 2018.

@@ -1,0 +1,392 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Point sources {#point}
+
+## Sector Desciption
+
+A description of sources in the point data category and the approach used to build the National Emissions Inventory (NEI) for all point sources are discussed in this section. Point sources are included in the inventory as individual facilities, usually at specific latitude/longitude coordinates, rather than as county or tribal aggregates. These facilities include large energy and industrial sites, such as electric generating utilities (EGUs), portland cement manufacturing plants, petroleum refineries, natural gas compressor stations, and facilities that manufacture pulp and paper, automobiles, machinery, chemicals, fertilizers, pharmaceuticals, glass, food products, and other products. Additionally, smaller points sources are included voluntarily by some state/local/tribal (S/L/T) agencies, and can include small facilities such as crematoria, dry cleaners, and gas stations. These smaller sources may appear as point sources in one state but not another due to the voluntary nature of providing smaller sources. There are also some portable sources in the point source data category, such as hot mix asphalt facilities, which relocate frequently as a road construction project progress. The point source data category also includes emissions from the landing and take-off portions of aircraft operations, the ground support equipment at airports, and locomotive emissions within railyards. Within a point source facility, emissions are estimated and reported for individual emission units and processes. Those emissions are associated with any number of stack and fugitive release points that each have parameters needed for atmospheric modeling exercises. 
+
+## Point source approach: 2023
+
+The general approach to building the NEI point source inventory is to use S/L/T-submitted emissions, locations, and release point parameters wherever possible. Missing emissions values are gap-filled with EPA data where available. Quality assurance reviews of the emission values, locations, and release point modeling parameters are done by the EPA on the most significant emission sources. 
+
+### QA review of S/L/T data 
+
+S/L/T agency submittals for the NEI point sources were accepted through January 15, 2025. Continued for the 2023 NEI reporting cycle, is the on-line outlier check in EIS. The on-line version is implemented by setting a minimum and maximum emissions threshold^[These thresholds are available on the [2023NEI Supplemental Data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/point/) as file “2023_point_defaultMax_poll_thresholds_qa_01May2026.csv”] value for most facilities. For QA of the 2023 NEI S/L/T data, workbooks were created using the on-line outlier check called the Data Completeness Report. Remaining outliers and missing facilities were flagged as “NEED REVIEW” and shared with S/L/T agencies for on May 15, 2025. 
+
+Following these completeness checks, EPA compared facility level pollutant sums appearing in the 2023 NEI S/L/T submitted values to the 2022 and 2020 NEIs. The comparison included all facilities and pollutants, including any missing from the 2023 submittals (i.e., present in 2022/2020 but not 2023) as well as any that were new in the 2023 submittals and all that were common to both years. The comparison table also showed the 2023 emission values from the 2023 Toxics Release Inventory (TRI). EPA followed up with S/L/T via email on any discoveries during this comparison. 
+
+S/L/T edits to address any emissions values were accepted in the Emissions Inventory System (EIS) until March  31, 2025. (Note that a preliminary draft NEI point selection was run on January 31, 2025 and updated on August 24, 2025, for purposes of beginning an identification and review of HAP emissions at facilities – see Section \@ref(point-slt-hap) below). The S/L/T agencies did not change most of the highlighted values. Where the comparisons were exceptionally suspect, the EPA contacted the agencies by phone or by email if no edits had been made to obtain confirmation of the reported values. For a small number of cases, neither confirmation nor edits were obtained, and the value was tagged to be excluded from selection for the NEI. In some but not all of these instances, a value from TRI or the CAMD data sets was available as a replacement. A NEI point selection was run April 15, 2026. This draft added aircraft and, rail yard estimates. Note that most of the EPA EGU estimates are not needed or used in the selections because the S/L/T datasets already contain emissions for those sources which are preferentially used over the EPA EGU estimates. For suspect data identified during QA of the selection, or reported to EPA after the final selection, tagging files were created to tag the erroneous data out of the dataset.Any remaining tagged data is included in the tagging file “tagged_SLTdata_2023NEI_19may2026.csv” posted on the [2023NEI ftp site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/point).   
+
+Similar to previous NEI years, we quality assured the latitude-longitude coordinates at the site level. A new EIS QA check had been implemented for the 2018 NEI point submittal cycle which eliminated the need for a separate post-submittal review of the release point coordinates. In previous NEI cycles, we had reviewed, verified, and locked (in EIS) site-level coordinates of the most significant emitting facilities. For the 2023 NEI coordinate review, we compared all other site coordinate pairs to the county boundaries for the FIPS county codes reported for those facilities. We then identified all facilities that met both of the following criteria: (1) more than 20 tons total criteria pollutant emissions or more than 10 pounds total hazardous air pollutants (HAPs) for 2023, and (2) the coordinates caused the location of the facility to be more than a half mile outside of its indicated county. For these facilities, we reviewed the location using Google Earth, edited the location as needed in EIS, and locked the location in EIS. 
+
+A new critical QA check was also implemented in EIS, beginning with the 2018 NEI point source submittals, that does not allow the reporting of facility and release point coordinates that differ by more than a facility-specific amount for either latitude or longitude. The tolerance amount was set at 0.003 for most facilities, but that tolerance was increased for facilities where the above review had confirmed that the individual release point coordinates were valid. Some smaller footprint facilities that had to be reviewed due to apparent violations also had the tolerance set lower as part of the above review. Any release points outside of their site-specific tolerance from their site coordinates were reviewed. The site coordinates were adjusted if needed and locked. Any out of tolerance release point coordinates were set to use the verified site coordinates until replaced by valid in-tolerance coordinates. All release points used for 2023 emissions are therefore within the facility-specific tolerance of their site coordinates.
+
+An additional thing to note is that the facility inventory is not a static dataset. While 2023 NEI was being finalized, 2024 and 2025 point submittals were being received. During this time, any changes made to a facility, such as process-level SCCs, facility names, will be reflected in the summary documents prepared for the NEI. The date of the final point selection was July 17, 2026.  
+
+#### S/L/T Review of draft Hazardous Air Pollutants Emissions{#point-slt-hap}
+
+In addition to QA procedures mentioned above, we prepared a review of point source Hazardous Air Pollutant (HAP) emissions. The primary goal of this review is to quality assure emissions and release point parameters of HAPS in the NEI.
+Emissions review was provided for S/L/T at two levels: facility-wide emissions totals; and facility-process emissions. Workbooks were provided to S/L/T agencies showing emissions in the August 24, 2025 draft 2023 NEI (EIS dataset 2023NEI_draftV2.0) and included facilities with:
+
+a.	Flagged emissions in the 2022 NEI HAP review that had at least a 10% change in the sum of HAPs from 2022hd to the 2023 selection and at least 50 lbs of emitted HAPs in 2023 or were closed in 2023.
+b.	New facilities in 2023 that had a NAICS of a facility flagged for 2022 at the facility level, had at least 50 lbs of emitted HAPs, did not have an Oil and Gas NACIS, airport source type, or rail yard facility source type. 
+
+Update templates were provided that included fields for revised emissions, revised release point locations, revised release point parameters, and fields for comments and rationale. We provided these files to S/L/T agencies and EPA Regional contacts on January 15, 2026, Changes/comments were due back by February 25, 2026. 
+
+We received 44 individual comments/changes for point sources. Many of these individual comments covered multiple point sources and change requests. We reviewed these comments and created a dataset for use in the 2023 NEI selection: 2023EPA_ATS_SLT (all other HAP emissions changes from the SLT review). Changes made during this review included both process level HAP emissions and release point coordinates and parameters. Additionally, we tagged out (removed) process-level S/L/T emissions records where emissions were submitted in error at facilities or processes that were shutdown, as well as at processes having zero mass that prevented TRI inventory air releases from gap-filling the NEI. Chromium specification profile assignments were updated for one facility.
+
+### Sources of EPA data and selection hierarchy 
+
+Table \@ref(tab:dataset-ranking) lists the datasets that we used to compile the 2023 NEI point inventory and the hierarchy used to choose which data value to use for the NEI when multiple data sets are available for the same emissions source. 
+
+The EPA developed all datasets other than those containing S/L/T agency data and the dataset containing emissions from offshore oil and gas platforms in federal waters in the Gulf of Mexico. The primary purpose of the EPA datasets is to add or “gap fill” pollutants or sources not provided by S/L/T agencies, to resolve inconsistencies in S/L/T agency-reported pollutant submissions for particulate matter (PM) (Section \@ref(point-pmaug)) and to speciate S/L/T agency reported total chromium into hexavalent and trivalent forms (Section \@ref(point-cr-speciation)). 
+
+The hierarchy or “order” provided in the tables below defines which data are to be used for situations where multiple datasets provide emissions for the same pollutant and emissions process. The dataset with the lowest order number on the list is preferentially used over other datasets. The table includes the rationale for why each dataset was assigned its position in the hierarchy. In addition to the order of the datasets, the selection also considers whether individual data values have been tagged. Any data that were tagged by the EPA in any of the datasets were not used. State/local/tribal agency data were tagged only if they were deemed to be likely outliers and were not addressed during the S/L/T agency data reviews, or if they were reported as zero emissions which would prevent the use of TRI-reported values. As in earlier NEI years, the 2023 point source selection also excludes dioxins, furans and radionuclides. The EPA has not evaluated the completeness or accuracy of the S/L/T agency dioxin and furan values nor radionuclides and does not have plans to supplement these reported emissions with other data sources to compile a complete and accurate estimate for these pollutants as part of the NEI. While the Greenhouse Gas Reporting Program data was used as an input in the 2023 NEI selection, we included selection overrides that remove all GHGs from the 2023 NEI selection (output). The 2023 NEI point source inventory does not include greenhouse gas emissions.
+
+Table: (\#tab:dataset-ranking) Data sets and selection hierarchy used for 2023 NEI
+
+| Dataset name | Description and Rationale for the Order of the Selected Datasets |Order |
+| :---     | :---     |:---     |
+| 2023EPA_GHG  | Facility-level emissions for four specific GHGs from the USEPA’s Greenhouse Gas Reporting Program  |1  |
+| 2023EPA_CS_EtO  | Facility-level emissions of ethylene oxide emissions at 100 commercial sterilizer facilities, post S/L/T Review of HAPs. See Section \@ref(point-slt-hap)  |2  |
+|2023EPA_ATS_SLT|Process-level emissions for facilities other than commercial sterilizers, amended via the S/L/T Review of HAPs.  See Section \@ref(point-slt-hap)|3|
+|Responsible Agency Data Set|S/L/T agency submitted data through January 2023. These data are selected ahead of lower hierarchy datasets except where individual values in the S/L/T agency emissions were suspected outliers that were not addressed during the draft review and therefore tagged by the EPA.|4|
+|2023EPA_CrAug|Hexavalent and trivalent chromium speciated from S/L/T agency reported chromium. The EIS augmentation function creates this dataset by applying multiplication factors largely by SCC but also by specific facility or process IDs to the S/L/T agency reported total chromium. See Section \@ref(point-cr-speciation). |5|
+|2023EPA_PMaug|PM components added to gap fill missing S/L/T agency data or make corrections where S/L/T agency have inconsistent emissions across PM components. Uses ratios of emission factors from the PM Augmentation Tool for covered source classification codes (SCCs). For SCCs without emission factors in the tool, checks/corrects discrepancies or missing PM species using basic relationships such as ensuring that primary PM is greater than or equal to filterable PM (see Section \@ref(point-pmaug)). |6|
+|2023EPA_EGU|CAP and HAP emission unit level emissions from either the annual sum of CAMD hourly CEM data for SO2 and NOx or from emission factors used in previous NEI year inventories from AP-42 and other sources multiplied by 2023 CAMD heat input data.|7|
+|2023EPA_TRI|TRI data for the year 2023 (see Section \@ref(point-tri)). These data are selected for a facility only when the S/L/T agency data do not include emissions for a given pollutant at any process for that facility.|8|
+|2023EPA_TRIcr|TRI data reported as total chromium for the year 2023 speciated into the chromium III and chromium VI valence amounts, usually by use of a NAICs-based speciation profile, but possibly by use of a facility-specific profile.|9|
+|2023EPA_LF|Landfill emissions developed by EPA using methane data from the EPA’s GHG reporting rule program. |10|
+|2023EPA_HAPAug|HAP data computed from S/L/T agency criteria pollutant data using HAP/CAP EF ratios based on the EPA Factor Information Retrieval System (WebFIRE) database as described in Section \@ref(point-hapaug). These data are selected below the TRI data because the TRI data are expected to be better. |11|
+|2023EPA_HAPAug-PMAug|This dataset was created in the same fashion as the 2023EPA_HAPAug dataset above and is a supplement to it. This dataset contains HAPs calculated by applying a ratio to PM10-FIL emissions, for those instances where the S/L/T dataset did not contain any PM10-FIL emissions, but the PM augmentation routine was able to calculate a PM10-FIL value from some PM species that was reported by the S/L/T.|12|
+|2023EPA_Airports|CAP and HAP emissions for aircraft operations including commercial, general aviation, air taxis and military aircraft, auxiliary power units and ground support equipment computed by the EPA for approximately 20,000 airports. Methods include the use of the Federal Aviation Administration’s (FAA’s) Aviation Environmental Design Tool (AEDT) (see Section \@ref(point-airport)).|13|
+|2023EPA_Rail|2023 estimates compiled by the EPA, with guidance from Eastern Regional Technical Advisory Committee (ERTAC), for most rail yards in the US. Yard emissions are associated with the operation of switcher engines at each yard (see Section \@ref(point-rail)).|14|
+|2023EPA_Rail_HAPAug|This dataset was created in the same fashion as the 2023EPA_HAPAug dataset above and is a supplement to it. This dataset contains HAPs calculated by applying a ratio to PM10-FIL emissions, for those instances where the 2023EPA_Rail dataset did not contain all expected HAP VOCs and HAP Metals.|15|
+|2017EPA_BOEM|2017 Gulfwide Emission Inventory CAP emissions from Offshore oil platforms located in Federal Waters in the Gulf of Mexico developed by the U.S. Department of the Interior, Bureau of Ocean and Energy Management (BOEM), Regulation, and Enforcement in the National Inventory Input Format and converted to the CERS format by the EPA. The state code for data from the data set is “DM” (Federal Waters).|16|
+
+### Particulate matter augmentation {#point-pmaug}
+
+Particulate matter emissions components^[We use the term “components” here rather than “species” to avoid confusion with the PM2.5 “species” that are used for air quality modeling (e.g., organic carbon, elemental carbon, sulfate, nitrate, and other PM).] in the NEI are primary PM10 (pollutant code PM10-PRI in the EIS and NEI) and primary PM2.5 (PM25-PRI), filterable PM10 (PM10-FIL) and filterable PM2.5 (PM25-FIL), and condensable PM (PM-CON). The NEI in its final form needs the full suite of all five of these components, but S/L/T agencies do not always report all five. EPA therefore augments the reported components to fill the missing components. In the simplest cases reported PM-CON can simply be added to reported PM10-FIL or reported PM25-FIL to determine PM10-PRI or PM25-PRI, or reported PM-CON can be subtracted from reported primary components to determine the corresponding filterable components. However, if PM-CON is not reported, or one of the size cuts is not reported, some assumptions must be made to estimate the missing components. 
+
+Beginning with the 1999 NEI EPA used the “PM Calculator” as described in an NEI conference paper [[ref 1](#point-references)]  to estimate these missing components. The PM Calculator relied on ratios of emission factors and size distribution charts from AP-42 for various SCCs and control devices to provide look-up tables of multipliers to apply to the reported PM components to estimate the unreported components. Additional information on the procedure is provided in the 2008 NEI PM augmentation documentation [[ref 2](#point-references)]. Starting with the 2020 NEI, EPA replaced the external PM Calculator tool with a PM Augmentation software module built into EIS. Several things had changed in the years since the PM Calculator had been developed which resulted in some changes to how the PM augmentation was done within EIS. A significant difference was that EIS had added QA checks which insured that the S/L/T reported PM components were consistent with each other. The external PM Calculator software was designed to include that check and could make overwrites to S/L/T-reported values where needed. The internal EIS augmentation starts with the premise that the S/L/T reported values do not have to be overwritten because they have already passed EIS QA checks for consistency. The internal EIS augmentation then uses simple additions or subtractions to fill in missing components wherever possible, which is a large portion of the augmentation need. Only for the cases where the combination of reported components does not allow for the simple unambiguous calculation of missing components are any assumed ratios used. 
+
+The ratios used in the PM calculator were based on SCCs and up to two control device codes. Both the SCC code table and the control device code tables were revised after the PM Calculator ratio tables were built, and EIS has no limit on the number of control devices that can be reported. For these reasons a new set of ratios between PM components were built for the EIS augmentation. These ratios are based only on SCCs, not at all on control device codes. They were developed by calculating the ratios of the national totals of the five PM components for each SCC as seen in the 2017 NEI, for both point and nonpoint SCCs. The 2017 NEI was complete for all five PM components for all processes and SCCs, reflecting both S/L/T reported mass and any PM Calculator generated fill-in mass. The calculated ratios therefore represent the weighted average of all mass in the 2017 NEI for each SCC. For each of the 32 different possible combinations of PM components that can be reported, the EIS augmentation has a defined sequence of order of which missing component to calculate, and how, including the use of the SCC-based ratios if needed.
+
+In the 2020 NEI drafts, we noted some negative values had been calculated for PM10-FIL and PM25-FIL. Most were slightly negative, but a few were more than a few tons of PM. The slightly negative values were likely because the EIS QA check on the consistency of the S/L/T reported components had a tolerance value included of 1 ton. The larger negative values (all PM25-FIL) were because missing PM-CON was being estimated by a ratio applied to reported PM10-PRI. Where the S/L/T reported PM25-PRI was smaller than the typical values used to derive the ratios, the estimated PM-CON was in some cases more than the reported PM25-PRI. For the 2020 Point data category, we set these negative values to 0. For the 2023 NEI we made changes to that calculation sequence and also tightened the tolerance amount used in the incoming QA check. No negative values were found in the draft or final 2023 NEI. All PM augmentation factors (point and nonpoint) used in the 2023 NEI are available in the file “PM_Augmentation_2023 NEI_17apr2026.zip” on the [2023 Supplemental data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/).
+
+### Chromium speciation {#point-cr-speciation}
+
+The EIS generates and stores an EPA dataset containing the resultant hexavalent and trivalent chromium species. The EPA then used this dataset in the NEI selection by adding it to the selection hierarchy shown in Table \@ref(tab:dataset-ranking), excluding the S/L/T agency total chromium from the selection through a pollutant exception to the hierarchy. This EIS feature does not speciate chromium from any of the EPA datasets because the EPA data contains only speciated chromium. 
+
+For the 2023 NEI, the EPA named this dataset “2023EPA_CrAug.” Most of the speciation factors used in the 2023 NEI are SCC-based and are the same as were used for the 2008, 2011, 2014, 2017, and 2020 NEIs. There are some facility-specific factors resulting from the SLT HAP review. Facility-specific factors were also provided for several facilities by the state of Indiana during the 2020 NEI review. The factors “Chromium_speciation_2023NEI_17apr2026.zip”, based on data that have long been used by the EPA for NATA, ATS and other HAP projects, are available on the [2023 Supplemental data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/).
+
+Table \@ref(tab:point-table3) details changes to chromium speciation in 2023NEI compared to the 2020NEI.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-3/Table_03_cr-changes.xlsx",
+  col_types = rep("text"))
+df[is.na(df)] <- ""
+
+# Convert the target column to numeric
+col_name <- "Chromium(VI) multiplication factor"
+df[[col_name]] <- readr::parse_number(df[[col_name]])
+
+# Create a display version (2 significant figures, blanks for NA)
+df_disp <- df %>%
+  mutate(`Chromium(VI) multiplication factor` = ifelse(
+    is.na(.data[[col_name]]), "",
+    formatC(signif(.data[[col_name]], 2), digits = 2, format = "g")
+  ))
+```
+
+```{r point-table3, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df_disp, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'Changes to Chromium Speciation in 2023NEI compared to 2020NEI.'
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("repeat_header", "hold_position", "scale_down"),
+  font_size = 10
+)%>%
+  column_spec(1, width = "2cm")%>%
+  column_spec(2, width = "5cm")%>%
+  column_spec(3, width = "2cm")%>%
+  column_spec(4, width = "5cm")
+```
+
+### Use of the 2023 Toxics Release Inventory {#point-tri}
+
+The EPA used 2023 air emissions data from the Toxics Release Inventory (TRI) Program to supplement point source HAP and ammonia emissions provided to the EPA by S/L/T agencies. The resulting augmentation dataset is labeled as “2023EPA_TRI” in the Table \@ref(tab:dataset-ranking) selection hierarchy shown above. For 2023, TRI emissions of HAPs were loaded into the EIS for facilities with assigned and protected TRI Facility IDs in EIS, for certain TRI Facilities that previously were not in the set of EIS Facilities. Per the selection hierarchy above, the emissions of a pollutant in the 2023EPA_TRI dataset were not selected in the 2023 NEI if that pollutant was reported by the S/L/T agency or in another dataset preceding the TRI dataset in the hierarchy. The [TRI “Basic Plus” data files](https://www.epa.gov/toxics-release-inventory-tri-program/tri-basic-plus-data-files-calendar-years-1987-present) were downloaded on May 7, 2025, and file 1A with a date of November 5, 2024 was used to create the 2023 TRI dataset in EIS. This dataset reflected updates submitted to the TRI program through October 24, 2024. 
+
+EPA’s TRI Program collects data on disposal or other releases (including air emissions) of chemicals from U.S. facilities that meet TRI reporting criteria. For reporting year 2023, TRI listed chemicals includes 721 non-PFAS chemicals and 189 PFAS chemicals. For reporting year 2023, approximately 21,700 facilities reported releases to the TRI. One of TRI’s primary purposes is to inform communities about toxic chemical releases to the environment. The approach used for the 2023 NEI was like that used for the 2020, 2017, and 2014 NEI. The TRI emissions were included in the EIS as facility-total stack and facility-total fugitive emissions processes, which matches the aggregation detail of the TRI database. The 2023 NEI retained the same procedures as had been introduced for the 2017 NEI in how we avoid double-counting of TRI and other data sources (primarily the S/L/T data). Rather than tagging each individual TRI facility-based value wherever the S/L/T had reported that pollutant at any process(es) within the same facility, we enhanced the EIS selection software to not use values from a “Facility” level dataset if a more preferred dataset (e.g., the S/L/T datasets) had the pollutant at any process within that facility. In addition to using this “facility-based rule” in the selection software, we also used the “pollutant family rule” implemented in the 2020 NEI into the selection software, which prevents pollutants defined as belonging to the same overlapping family of pollutants from being selected for use if a higher preference dataset has already provided a pollutant value for that family. This procedure had also been accomplished using tagging in previous NEI years. The following steps describe in more detail the development of the 2023EPA_TRI dataset.
+
+**1.	Update the TRI_ID to EIS_ID facility-level crosswalk**
+
+When creating a new year’s TRI dataset in EIS, the same crosswalk list of TRI Facility IDs that had been used for the previous year is the starting point. A limited review of new TRI Facilities having significant air emissions of HAPs is conducted and TRI Facilities not previously matched with EIS facility IDs are either matched with existing facilities in EIS or are assigned new EIS Facility IDs. in unusual cases when an existing facility in EIS is assigned a new EIS Facility ID, the TRI Facility IDs is transferred from the previous EIS Facility ID to the new one. Since the 2020 NEI, changes were made to the set facilities included in TRI dataset for 2021, 2022, and 2023. 
+
+There are 7,592 EIS Facility IDs with emissions in the 2023EPA_TRI dataset, 690 of which were not in the 2020EPA_TRI dataset. There are 8,419 EIS Facility IDs with emissions in the 2020EPA_TRI dataset, 1,518 of which do not have emissions in the 2023EPA_TRI dataset. 6,902 EIS Facility IDs are common to both the 2023 and 2020 EPA TRI datasets.  
+
+For 2023EPA_TRI dataset, the TRI Basis Plus files were used to match cases where there are more than one EIS facility ID that corresponds to a single TRI Facility ID. In previous NEIs, for such cases, either the emissions of the entire TRI Facility ID were assigned to one of the matching EIS facility IDs or the TRI Facility ID was not assigned to an EIS Facility ID. In the former case, there is a possibly of double counting emissions of a pollutant reported for the related EIS Facility that was not assigned the TRI Facility ID. In the latter case, emissions that were reported to TRI would not be included in the inventory if the S/L/T agency did not report emissions of a pollutant reported to the TRI Program or if no emissions of a TRI reported pollutant existed in another dataset. The TRI Basic Plus files have an advantage for these cases if the emissions for the TRI Facility ID are reported to EPA as a set of partial facility reports and information associated with the partial facility reports (e.g., NAICS) corresponds with each of the EIS Facility IDs that comprise the TRI Facility ID. We were able to assign partial facility TRI reports to multiple EIS Facility IDs for two TRI Facility IDs for the 2023EPA_TRI dataset.  
+
+**2.	Map TRI pollutant codes to valid EIS pollutant codes and sum where necessary**
+
+The file “[TRI_EIS_pollutantcrosswalk_2023NEI_21may2026.xlsx](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/)”, provides the pollutant mapping from TRI pollutants to EIS pollutants and is available on the 2023 Supplemental data FTP site. Many of the 910 TRI chemicals do not have any EIS Pollutant counterpart, and so they are not included in the crosswalk. In addition, several EIS pollutants may be reported to TRI as either of two TRI pollutants. For example, both Pb and Pb compounds may be reported to TRI, and similarly for several other metal and metal compound TRI pollutants. For such pairs of TRI pollutants both correspond to the same EIS pollutant. In such cases, we summed the two TRI pollutants together as part of the step of assigning the TRI emissions to valid EIS pollutant codes. 
+
+For 2023, as in the 2020 NEI, we mapped TRI Hydrogen Cyanide and TRI Cyanide Compounds to their two corresponding separate EIS pollutant codes (74908 and 57125, respectively) rather than mapping both TRI chemicals to EIS pollutant code 57125 as had been done in prior NEI years. For 2023 the EIS selection rule for related overlapping families of pollutants will prevent the selection of potentially overlapping mass from the TRI and a S/L/T dataset if the two datasets labeled cyanide  with different pollutant IDs. 
+
+Similar to the 2011 through 2020 NEIs, we did not use TRI emissions reported for TRI chemicals: N230 “Certain Glycol Ethers,” N150 “Dioxin and Dioxin-like Compounds, 0025321226 ”Dichlorobenzene (mixed isomers), ” and 0026471625 “Toluene di-isocyanate (mixed isomers),” because they do not represent the same scope as the EIS pollutants: 171 “Glycol ethers,” 628 “Dioxins/Furans as 2,3,7,8-TCDD TEQs,” “1,4-Dichlorobenzene,” and “2,4-Di-isocyanate,” respectively. We maintained TRI stack and fugitive emissions separately during the summation step and maintained that separation through the storage of the TRI emissions in the EIS.
+
+There are 177 EIS Pollutants (excluding PFAS) in the 2023EPA_TRI dataset, of which 14  were not present in the 2020 TRI dataset. There are 168 EIS Pollutants (excluding PFAS) in the 2020EPA_TRI dataset, of which 5  had no emissions in the 2023EPA_TRI dataset. There are 163 EIS Pollutants (excluding PFAS) common to both the 2020 and 2023 TRI datasets.
+
+There are 26 PFAS Pollutants in the 2023EPA_TRI dataset, 15  of which were not present in the 2020 TRI dataset. There are 15 PFAS Pollutants in the 2020EPA_TRI dataset, of which 4  had no emissions in the 2023EPA_TRI dataset. There are 11 PFAS Pollutants common to both the 2020 and 2023 TRI datasets.
+
+**3.	Split TRI total chromium emissions into hexavalent and trivalent emissions**
+
+The TRI allows facilities to report either “Chromium” or “Chromium compounds,” but not the hexavalent or trivalent chromium species that are needed for the NEI (see Section \@ref(point-cr-speciation)). Because the only characterization available for the TRI facilities or their emissions is the facilities’ NAICS codes, we created a NAICS-based set of fractions to split the TRI-reported total chromium emissions into the hexavalent and trivalent chromium species. For the 2023 NEI we used the same set of NAICS-based chromium split factors as was used for the 2017 and 2020 NEIs. 
+
+During the 2017 NEI, a table of Standard Industrial Classification (SIC)- based chromium split fractions that were available from earlier year NEI usage of TRI databases was revised to a NAICS-based set of chromium split fractions by re-assignments to closely matching NAICS description.
+
+Unfortunately, not all SIC-based fractions could be assigned this way, so we computed NAICS-based split fractions for any NAICS codes in the 2017 TRI data that did not already have an SIC-to-NAICS assigned split fraction. These factors were used for the remaining TRI-reported chromium. To calculate the NAICS based factors, we summed by NAICS the total amounts of chromium III and chromium VI for the entire U.S. in the 2017 draft NEI data. These 2017 NEI S/L/T emissions were either reported directly by the S/L/T agencies as chromium III and chromium VI, or they had been split from S/L/T agency-reported total chromium by the EPA using the procedures described in Section \@ref(point-cr-speciation). Those procedures largely rely on either SCC-based or Regulatory code-based split factors. The derived NAICS split factors, therefore, represent a weighted average of the SCC and Regulatory code-based split factors, weighted according to the mass of each chromium valence in the 2017 NEI for that NAICS. 
+
+For 2023NEI, the dataset 2023EPA_TRIcr was created by applying the NAICS-based split factors to the Chromium emissions (both stack and fugitive) in the 2023EPA_TRI dataset based on the NAICS Code stored in EIS for the facility. As in previous NEIs, the NAICS based chromium speciation profiles include some facility-specific values provided by S/L/T agencies during air toxics reviews The 2023 chromium speciation dataset “Chromium_speciation_2023NEI_17apr2026.zip” is available on the [2023 Supplemental data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/). For the NAICS based profiles, please see records labeled “Chromium - NAICS Based” under the Augmentation Type field.
+
+**4.	Write the 2023 TRI emissions to EIS Process IDs with stack and fugitive release points **
+
+The total facility stack and total facility fugitive emissions values from the above steps were written to a set of EIS process IDs created to reflect those facility total type emissions. In most cases, the EIS process IDs for a given facility already existed in EIS as a result of earlier NEI. For the 2020 NEI, the emission calculation method code for almost all TRI emissions was 2 “Engineering Judgement”. Another reason the 2023 TRI dataset was developed using the TRI Basis Plus files is because they contain the TRI program’s basis of estimation codes, which are translated into EIS emissions calculation method codes as shown in table \@ref(tab:point-table4) below. In cases where there are more than one TRI basis of estimation code for a facility’s stack or fugitive emissions (e.g., partial facility reports contain different codes), the code associated with the greatest emissions was selected for transplantation into an EIS emission calculation method code. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-3/Table_04_TRI-basis-of-estimate-code-mapping.xlsx",
+  col_types = rep("text"))
+df[is.na(df)] <- ""
+```
+
+```{r point-table4, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'TRI Basis of Estimate Codes mapped to EIS Emission Calculation Method Codes'
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("repeat_header", "hold_position", "scale_down")
+)%>%
+  column_spec(1, width = "2cm")%>%
+  column_spec(2, width = "6cm")%>%
+  column_spec(3, width = "2cm")%>%
+  column_spec(4, width = "5cm")
+```
+
+**5.	Revise SCCs on the EIS Processes used for the TRI emissions**
+
+The 2002 and 2005 NEIs had assigned all the TRI emissions to a default process code SCC of 39999999, which caused a large amount of HAP emissions to be summed to a misleading “miscellaneous” sector. The 2008 NEI approach reduced this problem somewhat because it apportioned all TRI emissions to the multiple processes and SCCs that were used by the S/L/T agencies to report their emissions, but this apportioning created other distortions. The 2011 NEI reverted to loading the TRI emissions as the single process stack and fugitive values as reported by facilities to the TRI, but we revised the SCCs on those single processes to something other than the default 39999999 wherever possible. The edited SCCs were determined from the largest emitting SCCs reported in the S/L/T data for each facility. The purpose of this was to allow the TRI emissions to map to something other than the “miscellaneous” sector. The procedure performed for the 2011 NEI of editing TRI processes has not been performed since, but in the 2023 NEI, we use the same TRI process IDs as earlier years. Therefore, any TRI processes that were edited during the 2011 cycle to have SCCs other than 39999999 still have those SCCs. Newer TRI processes that have been added since that time have the 39999999 SCC. On occasion, TRI SCCs are updated where the process is known based on the type of facility or SCCs from processes for which CAPs were reported. However, there has not been a systematic approach to fill in all SCCs and for large industrial facilities, it would not be possible due to the variety of different process operations that can occur at such facilities. Most industrial facilities report a number of pollutants to the TRI, and it would not be unusual for those pollutants to be produced from a variety of different SCC processes.
+
+### HAP augmentation based on emission factor ratios {#point-hapaug}
+
+The 2023EPA_HAP-augmentation dataset was used for gap filling missing HAPs in the S/L/T agency-reported data. We calculated HAP emissions by multiplying the appropriate surrogate CAP emissions (provided by S/L/T agencies) by an emissions ratio of HAP to CAP EFs. For point sources, these EF ratios were largely the same as were used in the 2008 NEI v3, though additional quality assurance resulted in some changes. The ratios were computed using the EFs from WebFIRE and are based solely on the SCC code. The computation of these point HAP to CAP ratios is described in detail in the [2008 NEI documentation](https://www.epa.gov/air-emissions-inventories/2008-nei-technical-support-document), Section \@ref(point-tri). 
+
+For pollutants other than Hg, we computed ratios for only the SCCs in WebFIRE that met specific criteria: 1) the CAP and HAP WebFIRE EFs were both based on uncontrolled emissions and, 2) the units of the EF had to be the same or be able to be converted to the same units. In addition, for Hg, we added ratios for point SCCs that were not in WebFIRE for both PM10-FIL (the CAP surrogate for Hg) and Hg by using Hg or PM10-FIL factors for similar SCCs and computing the resulting ratio. That process is described (and supporting data files provided) in the [2008 NEI documentation](https://www.epa.gov/air-emissions-inventories/2008-nei-technical-support-document) (Section 3.1.5.2), since these additional Hg augmentation factors were used in the 2008 NEI v3 as well.
+
+A HAP augmentation feature was built into the EIS for the 2011 cycle, and the HAP EF ratios are available to the EIS users through the reference data link “Augmentation Profile Information.”  
+
+Since the initial set of HAP augmentation factors, factors and/or SCC-assignments were added including facility-specific HAP augmentation factors resulting from AirToxScreen reviews. Facility-specific coke oven to SO2 ratios were added for the 2017 NEI and used to compute coke oven emissions for specific facilities with operating coke ovens that were missing coke oven emissions. 
+
+Although the HAP Augmentation emissions are computed and stored at the emission process level, the HAP Augmentation dataset for point sources is designated as a “facility-level” dataset. This means that as part of the selection processing, if the facility being evaluated has a higher preference dataset emissions value available for a pollutant at any process within the facility, none of the HAP Augmentation values are used for that pollutant for that facility. The assumption here is that if a S/L/T has reported a pollutant for a facility at any process(es), then they have reported and accounted for all significant amounts of that pollutant for that facility, and so no HAP Augmentation is needed at the process level, and to include those HAP Augmentation values in the selection would potentially be double-counting that pollutant’s mass. Note that HAP Augmentation values for a given pollutant are not selected if the 2023EPA_TRI dataset contains that same pollutant. This is a result of the data selection hierarchy shown in Table \@ref(tab:dataset-ranking). The TRI dataset is given a higher preference in the hierarchy, and both the TRI dataset and the HAP Augmentation dataset are designated as “facility-level” datasets. All HAP augmentation factors used in the Point data category of the 2023 NEI are available in the file “HAP_Augmentation_2023NEI_17apr2026.zip” on the [2023 Supplemental data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/).
+
+### Cross-dataset pollutant family rules for overlapping pollutants
+
+Several HAPs can be reported as either individual compounds or as a group of compounds which overlaps with those individual compounds, e.g., o-Xylene and Xylenes (mixed isomers). The 2023 NEI uses the same software process that was introduced for the 2017 NEI to prevent inclusion of both sets of overlapping pollutants from two separate datasets in the 2023 NEI selection. Starting with the 2017 inventory year we have allowed both the individual xylene isomers and Xylenes (mixed isomers) to be reported within the same dataset and used in 3-15 the selection if reported in the same dataset; but we do not include both if they are reported from different datasets.
+
+## Airports: aircraft-related emissions{#point-airport}
+
+The EPA estimated emissions related to aircraft activity for all known U.S. airports, including seaplane ports and heliports, in the 50 states, Puerto Rico, and U.S. Virgin Islands. Approximately 20,000 individual airports are geographically located by latitude/longitude and stored in the NEI as point sources. As part of the development process, S/L/T agencies had the opportunity to provide both activity data as well as emissions to the NEI. When activity data on landings and take-offs were provided by S/L/Ts, the EPA used that data to calculate the EPA’s emissions estimates.
+
+###	Sector Description
+
+The aircraft sector includes all aircraft types used for public, private, and military purposes. This includes four types of aircraft: (1) commercial, (2) air taxis (AT), (3) general aviation (GA), and (4) military. A critical detail about the aircraft is whether each aircraft is turbine- or piston-driven, which allows the emissions estimation model to assign the fuel used, jet fuel or aviation gas, respectively. The fraction of turbine- and piston-driven aircraft is either collected or assumed for all aircraft types.
+
+Commercial aircraft include those used for transporting passengers, freight, or both. Commercial aircraft tend to be larger aircraft powered with jet engines. Air taxis carry passengers, freight, or both, but usually are smaller aircraft and operate on a more limited basis than commercial aircraft. General aviation includes most other aircraft used for recreational flying and personal transportation. Finally, military aircraft are associated with military purposes, and they sometimes have activity at non-military airports.
+
+The national AT and GA fleets include both jet- and piston-powered aircraft. Most of the AT and GA fleets are made up of larger piston-powered aircraft, though smaller business jets can also be found in these categories. Military aircraft cover a wide range of aircraft types such as training aircraft, fighter jets, helicopters, and jet- and piston-powered planes of varying sizes.
+
+The NEI also includes emission estimates for aircraft auxiliary power units (APUs) and aircraft ground support equipment (GSE) typically found at airports, such as aircraft refueling vehicles, baggage handling vehicles and equipment, aircraft towing vehicles, and passenger buses. These APUs and GSE are located at the airport facilities as point sources along with the aircraft exhaust emissions. 
+
+The emissions associated with airport activities are attributed to the following sources with associated source classification codes (SCC):
+
+- Commercial aviation (SCC: 2275020000)
+- Air taxis 
+  - Piston driven (SCC: 2275060011)
+  - Turbine driven (SCC: 2275060012)
+- General aviation
+  - Piston driven (SCC: 2275050011)
+  - Turbine driven (SCC: 2275050012)
+- Military (SCC: 2275001000)
+- Auxiliary Power Units (SCC: 2275070000)
+- Ground Support Equipment 
+  - Diesel-fueled (SCC: 2270008005)
+  - Gasoline-fueled (SCC: 2265008005).
+
+###	Sources of aircraft emissions estimates
+
+Aircraft exhaust, GSE, and APU emissions estimates are associated with aircraft’s landing and takeoff (LTO) cycle. LTO data were available from both S/L/T agencies and FAA databases. For airports where the available LTO included detailed aircraft-specific make and model information (e.g., Boeing 747-200 series), we used the FAA’s Aviation Environmental Design Tool (AEDT) to estimate CAP and HAP emissions.  The EPA first used the AEDT model for the 2017 NEI. Previous NEIs, including 2008 and 2011, used the FAA’s previous model, Emissions and Dispersion Modeling System (EDMS). Therefore, comparisons of aircraft emissions output may be a function of model revisions, rather than an actual trend in emissions. If such detailed data were not available, generic emission factors were used in combination with estimates of activity by different aircraft types (i.e., air taxis, general aviation, and military aircraft) to calculate emissions. The emissions factors (EFs) used, as well as the complete methodology for estimating aircraft exhaust from LTOs is in the aircraft documentation available in the document “[2023NEI Aviation Documentation](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/point/Airports/)” on the [2023 Supporting data FTP site](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/). For 2023 NEI, only Texas and Georgia submitted aircraft emissions. Georgia submitted emissions for just the Hartsfield-Jackson Atlanta International Airport. Additionally, eight states (Connecticut, Delaware, Georgia, Maryland, Maine, North Carolina, Virginia, and Washington), the District of Columbia, and one local program (Maricopa County Air Quality Department) provided revised operations data through the state review process.
+
+In addition to airport facility point, the EPA also estimated in-flight lead (Pb - from aviation gas) emissions and allocated those emissions to counties in the nonpoint inventory. For lead only, the NEI currently accounts for lead emitted in-flight, at altitudes above the landing and takeoff cycle. This calculation is derived by calculating the total amount lead in the national estimate of leaded fuel used (aviation gas), and then subtracting the lead accounted for in the LTO cycle. The remainder is assumed to be the in-flight lead emissions (Table \@ref(tab:point-table5)). That value is distributed to states by the ratio of LTOs in the state from piston aircraft engine SCCs. They are stored in a single county estimate, with county code ending in **777 to indicate ‘multiple/portable’ location.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-3/Table_05_inflight-lead-emissions.xlsx",
+  col_types = rep("text"))
+df[is.na(df)] <- ""
+```
+
+```{r point-table5, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'U.S. Inflight Lead Emissions',
+  col.names = c("", "2011", "2014", "2017", "2020", "2023")
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("scale_down","repeat_header")#,
+  #font_size = 11
+  )%>%
+  column_spec(1, width = "5cm")
+```
+A. The value erroneously used for 2014 in-flight lead emissions: 228 tons.  The percent difference caused by the error: 4.20%.
+
+A summary of state-level in-flight lead estimates “2023-lead-calculations-by-state-final.xlsx” can be found on the [2023 Supporting data FTP site](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/).
+
+##	Rail yard-related emissions {#point-rail}
+
+The 2023 NEI includes estimates compiled by the EPA for most rail yards in the US. Yard emissions are associated with the operation of switcher engines at each yard. Switch yards are reported as point sources to SCC 28500201. Some states report switch yards to nonpoint (2285002010); however, EPA prefers that these emissions be reported as point sources and may be retiring the nonpoint SCC in the next NEI cycle. Details for rail yards are documented in a report, “[2023 National Emissions Inventory Locomotive Methodology](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/Rail/)”, on the [2023 Supporting data FTP site](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/). S/L/Ts submitted point rail yard emissions were compared to EPA-computed emissions to avoid double counting between the S/L/T and EPA emissions.
+
+## EGUs
+
+The EPA developed a single combined dataset of emission estimates for EGUs to be used to fill gaps for pollutants and emission units not reported by S/L/T agencies. For the 2023EPA_EGU dataset, the emissions were estimated at the unit level, because that is the level at which the CAMD heat input activity data and the CAMD CEM data are available. The 2023EPA_EGU dataset was developed from two separate sources. The two sources were the annual sums of SO2, NOx, and mercury emissions based on the hourly CEM emissions reported to the EPA’s CAMD database; and heat-input based EFs that were built from AP-42 EFs and fuel heat and sulfur contents as part of the 2008 NEI development effort. We used the 2023 annual throughputs in BTUs from the CAMD database with the EF set to derive annual emissions for 2023. 
+
+We assumed that all heat input came from the primary fuel, and the EFs used reflected only that primary fuel. This introduces a small amount of uncertainty as many EGU units use a small amount of alternative fuels. The resultant unit-level estimates had to be loaded into EIS at the process-level to meet the EIS requirement that emissions can only be associated with the most detailed level. To do this for the EGU sectors, we needed to bridge the unit level (i.e., the boiler or gas turbine unit as a whole) to the process level (i.e., the individual fuels burned within the units). So, the EPA emissions were assigned to a single process for the primary fuel that was used by the responsible S/L/T agency for reporting the largest portion of their emissions. Starting with the 2020 NEI and continuing with the 2023 NEI, the selection process now includes a “Unit-level Rule”, similar in operation to the “Facility-level Rule” used to prevent double-counting between the TRI or HAP Augmentation datasets and the S/L/T process-level datasets. 
+
+The matching of the 2023EPA_EGU dataset to the responsible agency facility, unit and process IDs was done largely by using the ORIS plant and CAMD boiler IDs as found in the CAMD heat input activity dataset and linking these to the same two IDs as had been stored in EIS. We also compared the facility names and counties for agreement between the S/L/T-reported values and those in CAMD, and we revised the matches wherever discrepancies were noted. As a final confirmation that the correct emissions unit and a reasonable process ID in EIS had been matched to the EPA data, the magnitudes of the SO2 and NOx emissions for all preliminary matches were compared between the S/L/T agency-reported datasets and the EPA dataset. We identified and resolved several discrepancies from this emissions comparison. 
+
+**Alternative facility and unit IDs needed for matching with other databases**
+
+The 2023 NEI data contains two sets of alternate unit identifiers related to the ORIS plant and CAMD boiler IDs (as found in the CAMD heat input activity dataset) for export to the Sparse Matrix Operator Kernel Emissions (SMOKE) modeling file. The first set is stored in EIS with a Program System Code (PSC) of “EPACAMD.” The alternate unit IDs are stored as a concatenation of the ORIS Plant ID and CAMD boiler ID with “CAMDUNIT” between the two IDs. These IDs are exported to the SMOKE file in the fields named ORIS_FACILITY_CODE and ORIS_BOILER_ID. These two fields are used by the SMOKE processing software to replace the annual NEI emissions values with the appropriate hourly CEM values at model run time. The second set of alternate unit IDs are stored in EIS with a PSC of “EPAIPM” and are exported to the SMOKE file as a field named “IPM_YN.” The SMOKE processing software uses this field to determine if the unit is one that will have future year projections provided by the integrated planning model (IPM). The storage format of these alternate EPAIPM unit IDs, in both EIS and in the exported SMOKE file, replicates the IDs as found in the National Electric Energy Data System (NEEDS) database used as input to the IPM model. The NEEDS IDs are a concatenation of the ORIS plant ID and the CAMD boiler ID, with either a “_B_” or a “_G_” between the two IDs, indicating “Boiler” or “Generator.” The ORIS Plant IDs and CAMD boiler IDs as stored in the CAMD Business System (CAMDBS) dataset and in the NEEDS database are almost always the same, but there are occasional differences for the same unit. The EPACAMD alternate unit IDs available in the 2023 NEI are believed to be a complete set of all those that can safely be used for the purpose of substituting hourly CEM values without double-counting during SMOKE processing. The EPAIPM alternate unit IDs in the 2023 NEI are not a complete listing of all the NEEDS/IPM units, although most of the larger emitters do have an EPAIPM alternate unit ID. The NEEDS database includes a much larger set of smaller, non-CEM units. 
+
+## Landfills
+
+The point source emissions in the EPA’s Landfill dataset includes CO and 28 HAPs, as shown in Table \@ref(tab:point-table6). This set of pollutants was included in the 1999 NEI, and we continue to use the same set of pollutants each year for a consistent time series. To estimate emissions, we used the 2023 methane emissions reported by landfill operators in compliance with Subpart HH of the Greenhouse Gas Reporting Program (GHGRP) as a “surrogate” activity indicator. We converted the methane as reported in Mg CO2 equivalent to Mg as actual methane emitted by dividing by 23 (the Global Warming Potential of methane believed to be used in the version of the 2023 GHGRP facility inventory) to get Mg methane emitted and then multiplied by 1.1023 to get tons methane emitted^[For more information on CO2 equivalent and global warming potential, please refer to EPA’s page “Understanding Global Warming Potentials”.].  We created emission factors for CO and the 28 HAPs on a per ton of methane emitted basis using the default concentrations (ppmv) in AP-42 Section 2.4 (final section dated Jan 1998), Table 2.4-1. The concentrations for toluene and benzene were taken from Table 2.4-2 of AP-42, for the case of "no or unknown" co-disposal history. Per Equation 4 of that AP-42 section, $\text{M}_{p} = \text{Q}_{p} \times \text{MW}_{p} \times constant(k)$ (at any given temperature). Writing this equation twice, for the mass of any pollutant “P” and for methane (CH~4~), and dividing Mp by M~CH4~ yields: 
+
+\begin{equation}
+\frac{\text{M}_{p}}{\text{M}_{\text{CH}_{4}}}
+= \frac{\big(\text{Q}_{p}
+\times \text{MW}_{p}
+\times \text{k}\big)}
+{\big(\text{Q}_{\text{CH}_{4}}
+\times \text{MW}_{\text{CH}_{4}}
+\times \text{k}\big)}
+= \frac{\text{Q}_{p}}
+{\text{Q}_{\text{CH}_{4}}}
+\times 
+\frac{\text{MW}_{p}}
+{\text{MW}_{\text{CH}_{4}}}
+(\#eq:point-equation)
+\end{equation}
+
+in units of pounds pollutant “P” per pound CH~4~. 
+
+A rearrangement of Equation 3 of that AP-42 section provides $\frac{\text{Q}_{p}}{\text{Q}_{CH4}} = 1.82 \times \frac{\text{C}_{p}}{1,000,000}$, where the 1.82 is based upon a default methane concentration of 55% (550,000 ppm). Plugging this expression for $\frac{\text{Q}_{p}}{\text{Q}_{CH4}}$  into the first expression yields:
+
+\begin{equation}
+\frac{\text{M}_{p}}{\text{M}_{\text{CH}_{4}}}
+= \big(1.82 \times \frac{\text{C}_{p}}{1,000,000}\big)
+\times 
+\frac{\text{MW}_{p}}
+{\text{MW}_{\text{CH}_{4}}}
+\times 2000
+(\#eq:point-equation2)
+\end{equation}
+
+in units of pounds pollutant “P” per ton CH~4~.
+
+\begin{equation}
+\frac{\text{M}_{p}}{\text{M}_{\text{CH}_{4}}}
+= \big(1.82 \times \frac{\text{C}_{p}}{1,000,000}\big)
+\times 
+\frac{\text{MW}_{p}}
+{16}
+\times 2000
+=\text{C}_{p}
+\times
+\frac{\text{MW}_{p}}
+{4395.6}
+(\#eq:point-equation3)
+\end{equation}
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-3/Table_06_landfill-gas-efs.xlsx",
+  col_types = rep("text"))
+df[is.na(df)] <- ""
+
+cols_sig <- c(
+  "ppmv",
+  "MW x ppmv",
+  "lbs/Ton CH4"
+)
+
+# In one pass: parse -> 2 sig figs -> character (blank if NA)
+df <- df %>%
+  mutate(across(all_of(cols_sig), ~ {
+    v <- parse_number(.x)
+    ifelse(is.na(v), "", formatC(signif(v, 2), digits = 2, format = "g"))
+  }))
+```
+
+```{r point-table6, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'Landfill gas emission factors for 29 EIS pollutants'
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("scale_down","repeat_header")#,
+  #font_size = 11
+  )
+```
+## BOEM
+
+The U.S. Department of the Interior, Bureau of Ocean and Energy Management (BOEM) estimates emissions of CAPs in the Gulf of America from offshore oil platforms in Federal waters, and these data have been previously incorporated into the NEI. More information on the 2021 Outer Continental Shelf (OCS) offshore data is available on the BOEMS [OCS Emissions Inventory – 2021](https://www.boem.gov/environment/environmental-studies/2021-ocs-emissions-inventory) site. Year 2023 data was not available for these sources.
+
+## PM Species
+
+For the 2023 NEI Point inventory, the five species (EC, OC, SO4, NO3, and PMFINE) of PM2.5-PRI and diesel PM (which are duplicated from the reported values of PM2.5-PRI for diesel mobile engines such as locomotives and diesel-fueled ground support equipment) are included. These species are generated by using the PM speciation ratios as found on the [Air Emissions Modeling website](https://www.epa.gov/air-emissions-modeling).   
+
+## Documented Known Issues at the time of release
+
+Following the final selection in EIS, the following QA issue was discovered:
+
+- It was discovered that for SCC 31000133 for Lea, NM, there were two different HAP augmentation profiles assigned in EIS. This resulted in duplicate rows for HAP augmented values at the facility. This did not result in duplicated emissions. One profile had emissions factors that equaled zero, so all resulting emissions from the augmentation for that profile were zero.
+
+## References {#point-references}
+
+1.	Strait et al. (2003). Strait, R.; MacKenzie, D.; and Huntley, R., 2003. [PM Augmentation Procedures for the 1999 Point and Area Source NEI](https://gaftp.epa.gov/air/nei/ei_conference/EI12/point/strait.pdf),12th International Emission Inventory Conference – “Emission Inventories – Applying New Technologies”, San Diego, April 29 – May 1, 2003.
+2.	Dorn, J, 2012. Memorandum: 2011 NEI Version 2 – PM Augmentation approach. Memorandum to Roy Huntley, US EPA. (PM augmt 2011 NEIv2 feb2012.pdf, accessible in the file “2008nei_reference.zip” on the [2008v3 NEI FTP site](https://gaftp.epa.gov/air/nei/2008/doc/2008v3_supportingdata/2008nei_references.zip).

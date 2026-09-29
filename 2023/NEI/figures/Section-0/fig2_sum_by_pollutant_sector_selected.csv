@@ -1,0 +1,33 @@
+pollutant,sector_group,total_ton,percent
+NH3,Agriculture - Livestock Waste,2744302.844,0.681071802
+NH3,Agriculture - Fertilizer Application,1107349.707,0.274818306
+NH3,Other,155582.8651,0.038612029
+NH3,Fuel Comb - Residential - Wood,21488.14055,0.005332854
+NH3,Mobile - Commercial Marine Vessels,305.4869339,7.58147E-05
+NH3,Mobile - Locomotives,298.3259002,7.40375E-05
+NH3,Industrial Processes - Oil & Gas Production,61.07076963,1.51563E-05
+NH3,Agriculture - Crops & Livestock Dust,0,0
+NOX,Industrial Processes - Oil & Gas Production,743756.1091,0.228142349
+NOX,Other,738839.8915,0.226634331
+NOX,Mobile - Commercial Marine Vessels,701997.2202,0.215333081
+NOX,Agriculture - Fertilizer Application,589233.9574,0.180743684
+NOX,Mobile - Locomotives,446988.2364,0.137110734
+NOX,Fuel Comb - Residential - Wood,39237.41322,0.012035821
+NOX,Agriculture - Crops & Livestock Dust,0,0
+NOX,Solvent - Consumer & Commercial Solvent Use,0,0
+PM25-PRI,Other,852268.1559,0.373360152
+PM25-PRI,Agriculture - Crops & Livestock Dust,674074.1857,0.295297247
+PM25-PRI,Fuel Comb - Residential - Wood,453368.8486,0.198611037
+PM25-PRI,Dust - Unpaved Road Dust,262813.6858,0.115132962
+PM25-PRI,Mobile - Commercial Marine Vessels,15872.1235,0.006953232
+PM25-PRI,Industrial Processes - Oil & Gas Production,13176.38609,0.005772288
+PM25-PRI,Mobile - Locomotives,11123.76853,0.004873081
+PM25-PRI,Solvent - Consumer & Commercial Solvent Use,0,0
+VOC,Industrial Processes - Oil & Gas Production,2764157.449,0.376556131
+VOC,Solvent - Consumer & Commercial Solvent Use,2005125.134,0.273154542
+VOC,Other,1705809.737,0.232379351
+VOC,Fuel Comb - Residential - Wood,581507.5831,0.079217718
+VOC,Agriculture - Livestock Waste,232284.5042,0.031643695
+VOC,Mobile - Commercial Marine Vessels,33211.3463,0.004524321
+VOC,Mobile - Locomotives,18529.51499,0.002524242
+VOC,Agriculture - Crops & Livestock Dust,0,0

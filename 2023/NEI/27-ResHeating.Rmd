@@ -1,0 +1,293 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Fuel Combustion – Residential Heating – Natural Gas, Oil, and Other {#residentialheating}
+
+Residential heating includes the combustion of fuel, including coal, distillate oil, kerosene, natural gas, and liquefied propane gas (LPG) to heat homes. Common uses of energy associated with this category include space heating, water heating, and cooking. This category does not include the combustion of wood from the residential sector.
+
+## Sector Descriptions and Overview 
+
+The EIS sectors documented in this section include these emissions from residential fuel combustion:
+
+-	Fuel Comb - Residential - Natural Gas. Includes fuel natural gas only. Residential natural gas combustion is natural gas that is burned to heat residential housing as well as in grills, hot water heaters, and dryers.
+-	Fuel Comb - Residential – Oil. Includes the fuels: distillate oil, kerosene, and residual oil. Residual oil is not an EPA-estimated category, and agencies have not submitted data for this in recent NEIs. Residential distillate oil combustion is oil that is burned in residential housing. Residential kerosene combustion is kerosene that is burned in residential housing. Common uses of energy associated with this sector include space heating, water heating, cooking, and running a wide variety of other equipment.
+-	Fuel Comb - Residential – Other: Includes the fuels: coal, liquid petroleum gas (LPG), and “biomass; all except wood”. Note that “biomass; all except wood” is not an EPA-estimated category and agencies have not submitted data for this in recent NEIs. Residential coal combustion is coal that is burned in residential housing. Residential LPG combustion is liquefied propane gas that is burned in residential housing. Common uses of energy associated with this sector include space heating, water heating, and cooking.
+
+Table \@ref(tab:resheatingSCCs) shows, for non-wood Residential heating, the nonpoint SCCs covered by the EPA estimates and by the State/Local and Tribal agencies that submitted data. The SCC level 3 and 4 SCC descriptions are also provided. The SCC level 1 and 2 descriptions is “Stationary Source Fuel Combustion; Residential” for all SCCs. According to the State Energy Data System (SEDS) Consumption tables published by the Energy Information Administration (EIA) [[ref 1](#resheating-references)], there has been no residential coal combustion in recent years; however, a couple of agencies continue to submit very small estimates. However, the old methodology is retained here and provided in an EPA workbook, and as seen in Table \@ref(tab:resheatingSCCs), with zero emissions, in case a state would like to use their own coal consumption data.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-27/resheating_sccs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r resheatingSCCs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Non-wood residential fuel combustion SCCs in the NEI',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+## EPA-Developed Estimates
+
+The general approach to calculating emissions for these SCCs is to take state-level fuel consumption from the EIA State Energy Data System (SEDS) [[ref 1](#resheating-references)] and allocate it to the county level based on data from the Census Bureau on the number of homes in each county that use each fuel type [[ref 2](#resheating-references)]. County-level fuel consumption is multiplied by emissions factors to calculate emissions.
+
+Note that SEDS no longer includes data on residential coal consumption, as it is assumed to be near zero, and therefore emissions will be nonexistent for residential coal consumption. However, the methodology for estimating emissions from coal has been retained if states have additional data on residential coal consumption that they would like to use. 
+
+The calculations for estimating emissions from residential heating involve distributing state-level energy consumption data from SEDS to each county based on the proportion of houses in that county that use each fuel type as a primary fuel source. Additional calculations are necessary to distribute coal consumption to anthracite or bituminous coal consumption and to distribute fuel oil consumption to distillate fuel oil and kerosene consumption. County-level consumption of each fuel is multiplied by an emissions factor to estimate emissions of criteria air pollutants (CAPs) and hazardous air pollutants (HAPs).
+
+### Activity Data
+
+The amount of fuel consumed by residential sector in the United States from SEDS [[ref 1](#resheating-references)] is used to estimate emissions for this source category. The relevant fuel codes from SEDS are shown in Table \@ref(tab:resheatingSEDs).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-27/resheating_seds_fuel_codes.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r resheatingSEDs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'EIA State Energy Data System Fuel Codes',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+The SEDS data do not distinguish between anthracite and bituminous/subbituminous coal consumption estimates. The EIA table “Domestic Distribution of U.S. Coal by Destination State, Consumer, Origin and Method of Transportation” [[ref 3](#resheating-references)] provides state-level residential coal distribution data for 2006 that is used to estimate the fraction of coal consumption that is anthracite and bituminous/subbituminous. The amount of anthracite distributed to each state and the total coal delivered to each state is used to estimate the proportion of anthracite and bituminous coal consumption. Table \@ref(tab:resheatingCOAL) presents the anthracite and bituminous coal ratios for each state.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-27/resheating_coal_distribution.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r resheatingCOAL, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = "Anthracite and Bituminous Coal Distribution for the Residential and Commercial Sectors",
+) %>%
+  kableExtra::kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"))
+```
+
+The SEDS data on residential coal consumption are split into consumption of anthracite and bituminous/subbituminous coal based on the ratios in Table \@ref(tab:resheatingCOAL).
+
+\begin{equation} 
+  FC_{ant/bit,s} = FC_{coal,s} \times R_{ant/bit}
+  (\#eq:resheatcoalfuelconsumption)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FC_{ant/bit,s} \) = anthracite or bituminous coal consumption in state *s*, in tons <br> \newline
+  \( FC_{coal,s} \) = total fuel consumption of coal in state *s* from SEDS, in tons <br> \newline
+  \( R_{ant/bit} \) = ratio of anthracite or bituminous coal to total coal, as found in Table \@ref(tab:resheatingCOAL) <br> \newline
+</div>
+
+### Allocation Procedure
+
+State-level fuel consumption is allocated to each county using the US Census Bureau’s 5-year estimate Census Detailed Housing Information [[ref 2](#resheating-references)], which includes the number of housing units using a specific type of fuel for their primary fuel source. State fuel consumption is allocated to each county using the ratio of the number of houses using each fuel in each county to the total number of houses using each fuel in the state.
+
+For most fuels, the fuel type in SEDS matches well to the fuel type used in the Census data. However, the Census data report only for total fuel oil, which does not distinguish between distillate fuel oil and kerosene. Therefore, the ratio of distillate fuel oil versus kerosene in the heating fuel oil mix, which is used to determine the fraction of homes in each county that use distillate and those that use kerosene, is calculated.
+
+\begin{equation} 
+  R_{dfo/ker,s} = \frac{FC_{dfo/ker,s}}{FC_{dfo,s} + FC_{ker,s}}
+  (\#eq:resheatdistallatefraction)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( R_{dfo/ker,s} \) = ratio of residential distillate fuel oil or kerosene to total distillate fuel oil and kerosene in state *s* <br> \newline
+  \( FC_{dfo/ker,s} \) = fuel consumption of distillate fuel oil or kerosene in state s from SEDS, in thousand barrels <br> \newline
+</div>
+
+Then, the ratio of distillate fuel oil or kerosene to total fuel oil is used to determine how many housing units in each county use distillate fuel oil or kerosene. 
+
+\begin{equation} 
+  HU_{dfo/ker,c} = {HU_{fo,c}} \times {R_{dfo/ker,s}}
+  (\#eq:resheathousingunitsdisfuel)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(  HU_{dfo/ker,c} \) = housing units in county *c* using distillate fuel oil or kerosene as the primary heating fuel <br> \newline
+  \( HU_{fo,c} \) = housing units in county *c* using any fuel oil as primary heating fuel <br> \newline
+</div>
+
+To distribute the state-level energy consumption data for all fuel types, the ratio of county-level housing units using each fuel type as primary heating fuel to state-level housing units using that fuel type is calculated. This ratio is used to distribute state-level fuel consumption to the county level. The county-level values for housing units using distillate oil and kerosene as primary fuel are calculated in equation \@ref(eq:resheatdistallatefraction) and equation \@ref(eq:resheathousingunitsdisfuel) above.
+
+\begin{equation}
+  R_{f,c} = \frac{HU_{f,c}}{HU_{f,s}} 
+  (\#eq:resheatcntystateratio)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(R_{f,c} \) = ratio of homes in county *c* to homes in state *s*  that use fuel *f* as primary heating fuel <br>\newline
+  \(HU_{f,c} \) = housing units in county *c* using fuel type *f* as primary heating fuel <br>\newline
+  \(HU_{f,s} \) = housing units in state *s* using fuel type *f* as primary heating fuel <br>\newline
+</div>
+
+The state-level fuel consumption of each fuel type from SEDS is multiplied by the county-level ratio of homes using each fuel type. State-level fuel consumption of anthracite and bituminous/subbituminous coal is calculated in equation \@ref(eq:resheatcoalfuelconsumption).
+
+\begin{equation}
+  FC_{f,c} = FC_{f,s} \times R_{f,c} 
+  (\#eq:resheatfuelconsumption)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(FC_{f,c} \) = fuel consumption of fuel type *f* in county *c*, in tons, thousand barrels, or thousand cubic feet  <br>\newline
+  \(FC_{f,s} \) = fuel consumption of fuel type *f* in state *s*, in tons, thousand barrels, or thousand cubic feet, from SEDS <br>\newline
+  \(R_{f,c} \) = ratio of homes in county *c* to homes in state *s*  that use fuel *f* as primary heating fuel <br>\newline
+</div>
+
+Fuel consumption of distillate fuel oil is converted from barrels to gallons using a conversion factor of 42 gallons per barrel.
+
+### Emission Factors
+
+All emissions factors for CAPs, except ammonia, are from AP-42 [[ref 4](#resheating-references)]. The ammonia emissions factor is from EPA’s Estimating Ammonia Emissions from Anthropogenic Sources, Draft Final Report [[ref 5](#resheating-references)]. In some cases, HAP emissions factors are from a memorandum to EPA called “Baseline Emission Inventory of HAP Emissions from MACT Sources – Interim Final Report” [[ref 6](#resheating-references)].
+
+For many residential heating fuels, the emissions factors for SO2 and PM species are adjusted using sulfur or ash content data for the fuel at the county level. Note that for coal emissions, this step need only be done if a state supplies data on residential coal consumption, because SEDS currently assumes zero residential coal consumption.
+
+\begin{equation}
+  EF_{f,s,p} = SAC_{f,s} \times EF_{unadj,f} 
+  (\#eq:resheatingEF)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(EF_{x,p} \) = emissions factor of pollutant *p* for fuel type *f*  in state *s* <br>\newline
+  \(SAC_{x} \) = sulfur or ash content for fuel type *f* in state *s* <br>\newline
+  \(EF_{unadj,f} \) = unadjusted emissions factor for fuel type *f*, from EPA AP-42 <br>\newline
+</div>  
+
+For coal combustion, the SO2 emission factors are based on the sulfur content of the coal burned, and some of the PM emission factors for anthracite coal require information on the ash content of the coal. State-specific coal sulfur contents for bituminous coal are obtained from the EIA’s Coal Data Browser and applied at the county level [[ref 7](#resheating-references)]. Bituminous sulfur content data can be found in the Coal Consumption and Quality Data Set, filtered to only account for commercial and institutional sources. For anthracite coal, an ash content value of 13.38% and a sulfur content of 0.89% are applied to all counties except those in New Mexico (ash content 16.61%, sulfur content 0.77%), Washington (ash content 12%, sulfur content 0.9%), and Virginia (ash content 13.38%, sulfur content 0.43%). Table \@ref(tab:resheatingEFs) shows the coal SO2 and PM emissions factors. Table \@ref(tab:resheatingSulfurContent) presents the bituminous coal sulfur content values used for each state. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-27/resheating_efs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r resheatingEFs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'SO2 and PM Emissions Factors for Residential Anthracite and Bituminous Coal Combustion',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-27/resheating_state_sulfur_content.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r resheatingSulfurContent, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'State-Specific Sulfur Content for Bituminous Coal (SCC 2104002000)',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 11)
+```
+
+Emission rates for these pollutants are dependent upon combustion efficiency, with the mass of emissions per unit of heat input generally increasing with decreasing unit size. No anthracite emission rates are provided for residential heaters for these pollutants. Therefore, it was determined that the AP-42 emission rates from bituminous coal that are derived for smaller hand-fed units, are more appropriate to use than applying anthracite emissions factors derived for much larger boilers. 
+
+Note that while AP-42 provides emissions factors for emissions of some metals from coal combustion, these factors are based on tests at controlled and/or pulverized coal boilers. These test conditions are not expected to be a good representation of emission rates for metals from residential heaters, so these pollutants are not included.
+
+For all counties in the United States, the distillate oil consumed by residential combustion is assumed to be No. 2 fuel oil with a heating value of 140,000 Btu per gallon. The SO2 emissions factor for distillate oil assumes a sulfur content of 500 parts per million (ppm) and is calculated at the county level [[ref 8](#resheating-references)].
+
+Emissions factors for kerosene are based on the emissions factors for distillate oil, which are multiplied by a factor of 135/140 to convert them for this use. This factor is based on the ratio of the heat content of kerosene (135,000 Btu/gallon) to the heat content of distillate oil (140,000 Btu/gallon) [[ref 4](#resheating-references)]. Criteria pollutant and HAP emissions factors are from the same sources discussed above for distillate fuel oil. The distillate sulfur content (500 ppm) is used for kerosene as well [[ref 8](#resheating-references)].
+
+Pollutant emissions factors for residential LPG are based on the residential natural gas emissions factors. The natural gas emissions factors [[ref 9](#resheating-references)] are converted to LPG emissions factors by multiplying by 96,750 Btu/gallon.
+
+### Controls
+
+There are no controls assumed for this category. 
+
+### Emissions
+
+The criteria pollutant and HAP emissions from residential heating are calculated by multiplying the distributed county-level residential fuel consumption by the corresponding emissions factor for each pollutant. Note that the conversion of emissions from pounds to tons is performed for CAPS; HAP emissions are left in pounds. The adjusted emissions factors for SO2 and PM for anthracite and bituminous/subbituminous coal are calculated above in equation \@ref(eq:resheatingEF). 
+
+\begin{equation} 
+  E_{f,c,p} =  FC_{f,c} \times EF_{f,p} \times \frac{1 ton}{2000 lb}
+  (\#eq:resheatEmissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{f,c,p} \) = annual emissions of pollutant *p* from combustion of fuel type *f* in county *c*, in tons <br> \newline
+  \( FC_{f,c} \) = fuel consumption of fuel type *f* in county *c*, in tons, thousand barrels, or thousand cubic feet, from equation \@ref(eq:resheatfuelconsumption)  <br> \newline
+  \( EF_{f,p} \) = emissions factor pollutant *p* and fuel type *f*, in pounds of emissions per unit (tons, thousand barrels, or thousand cubic feet) of fuel consumption, are available in the Wagon Wheel Emission Factor Compendium. <br> \newline
+</div>
+
+### Example Calculations
+
+Table \@ref(tab:resheating-sample-calculations) provides sample calculations for CO emissions from residential heating from distillate fuel oil. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1:7),
+  Equation = c("$FC_{anth/bit,s} = FC_{coal,s} \\times R_{anth/bit}$",
+               "$R_{dfo/ker,s} = \\frac{FC_{dfo/ker,s}}{FC_{dfo,s} + FC_{ker,s}}$",
+               "$HU_{dfo/ker,c} = {HU_{fo,c}} \\times {R_{dfo/ker,s}}$",
+               "$R_{f,c} = \\frac{HU_{f,c}}{HU_{f,s}}$",
+               "$FC_{f,c} = FC_{f,s} \\times R_{f,c} \\times 42\\text{ gal. per barrel}$",
+               "$EF_{f,s,p} = SAC_{f,s} \\times EF_{unadj,f}$",
+               "$E_{f,c,p} =  EC_{f,c} \\times EF_{f,p} \\times \\frac{1\\text{ ton}}{2000\\text{ lb}}$"),
+  Values = c("N/A",
+             "$\\frac{15,062\\text{ thousand barrels}}{(15,062\\text{ thousand barrels} + 238\\text{thousand barrels})}$",
+             "$8,081\\text{ houses} \\times 0.9844$",
+             "$\\frac{7,955.30\\text{ houses}}{916,301.2\\text{ houses}}$",
+             "$15,062\\text{ thous. barrels} \\times  0.0086 \\times 42\\text{ gal. per barrel}$",
+             "N/A",
+             "$5,492.25\\text{ thous. gal.} \\times 5\\text{ lbs. per thous. gal.} \\times \\frac{1\\text{ ton}}{2000\\text{ lb}}$"), 
+  Result = c("This example is for distallate. Equation 1 is for coal.",
+             "0.9844 ratio of DFO to total fuel oil",
+             "7,955.30 houses using DFO",
+             "0.0086 county housing allocation ratio",
+             "5,492.25 thousand gallons DFO consumed",
+             "This example is for distallate. Equation 6 is for coal.",
+             "13.7 tons CO from DFO"))
+```
+```{r resheating-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample calculations for CO emissions from residential heating from distillate fuel oil",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+
+### Improvements/Changes in the 2023 NEI
+
+There were no changes in methodology from the 2020 NEI. Activity data was updated to reflect the most recent, best available data at the time of the NEI.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exist to calculate emissions for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the US Virgin Islands. The total emissions in tons for these two Florida counties are divided by their respective populations creating a tons per capita emissions factor.  For each Puerto Rico and US Virgin Island county, the tons per capita emissions factor is multiplied by the county population (from the same year as the inventory’s activity data) which served as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”.
+
+## References {#resheating-references}
+
+1.	U.S. Department of Energy. Energy Information Administration (EIA). 2024. [State Energy Data System (SEDS): 1960-2024 Consumption](https://www.eia.gov/state/seds/seds-data-fuel.php?sid=US).
+2.	U.S. Census Bureau. 2022. American Community Survey. B25040 [House Heating Fuel](https://data.census.gov/table?q=B25040&g=010XX00US&y=2020), 2020 ACS 5-Year Estimates.
+3.	U.S. Department of Energy, Energy Information Administration. 2014. “[Domestic Distribution of U.S. Coal by Destination State, Consumer, Origin and Method of Transportation](https://www.eia.gov/coal/distribution/annual/)”. 
+4.	U.S. Environmental Protection Agency.  1996. [Compilation of Air Pollutant Emission Factors, 5th Edition, AP-42, Volume I:  Stationary Point and Area Sources](https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-compilation-air-emissions-factors#5thed). Research Triangle Park, North Carolina.
+5.	U.S. Environmental Protection Agency. 2004. Emission Inventory Improvement Program. [Estimating Ammonia Emissions from Anthropogenic Sources, Draft Final Report](https://www.epa.gov/sites/production/files/2015-08/documents/eiip_areasourcesnh3.pdf). Prepared by E.H. Pechan and Associates, Inc.  Research Triangle Park, NC. 
+6.	Porter, Fred, U.S. Environmental Protection Agency, Emission Standards Division. Note to Anne Pope, U.S. Environmental Protection Agency/Emissions Monitoring and Analysis Division. Comments on Industrial Boiler information in the “Baseline Emission Inventory of HAP Emissions from MACT Sources – Interim Final Report,” September 18, 1998. November 13, 1998. 
+7.	U.S. Department of Energy, Energy Information Administration. 2017. [Coal Data Browser](https://www.eia.gov/coal/data/browser/#/topic/26?agg=1,0&geo=vvvvvvvvvvvvo&sec=0g&linechart=COAL.SULFUR_CONTENT.US-8.A&columnchart=COAL.SULFUR_CONTENT.US-8.A&map=COAL.SULFUR_CONTENT.US-8.A&freq=A&start=2002&end=2017&ctype=map&ltype=pin&rtype=s&pin=&rse=0&maptype=0).
+8.	U.S. Environmental Protection Agency. 2016. [Technical Support Document (TSD) Preparation of Emissions Inventories for the Version 6.3, 2011 Emissions Modeling Platform](https://www.epa.gov/sites/production/files/2016-09/documents/2011v6_3_2017_emismod_tsd_aug2016_final.pdf). Prepared by U.S. Environmental Protection Agency Office of Air and Radiation Office of Air Quality Planning and Standards Air Quality Assessment Division.
+9.	Huntley, Roy. 2012. Spreadsheet: “[natgas_procgas_lpg_pm_efs_not_ap42_032012_revisions.xls](https://www.epa.gov/sites/default/files/2015-08/natgas_procgas_lpg_pm_efs_not_ap42_032012_revisions.xls)”

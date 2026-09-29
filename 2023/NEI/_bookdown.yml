@@ -1,0 +1,23 @@
+book_filename: "NEI-2023-TSD"
+output_dir: _book
+language:
+  ui:
+    chapter_name: "Section "
+delete_merged_file: true # Default behavior, deletes the merged file from base directory
+rmd_files:
+  html: ["index.Rmd", "00-acronyms.Rmd", "00-executivesummary.Rmd", "01-introduction.Rmd", "02-overview.Rmd", 
+  "03-point.Rmd", "04-nonroad.Rmd", "05-onroad.Rmd", "06-nonpoint.Rmd", "07-biogenics.Rmd", "08-stage.Rmd",
+  "09-CMV.Rmd", "10-locomotives.Rmd", "11-OandG.Rmd", "12-PFC.Rmd", "13-fires.Rmd", "14-MVSfires.Rmd", 
+  "15-npHg.Rmd", "16-gasdistro.Rmd", "17-aglivestockwaste.Rmd", "18-agsilage.Rmd", "19-AgDust.Rmd", 
+  "20-ResConDust.Rmd", "21-NonresConDust.Rmd", "22-RoadConDust.Rmd", "23-RoadDust.Rmd", "24-miningquarrying.Rmd", 
+  "25-cooking.Rmd", "26-ICI.Rmd", "27-ResHeating.Rmd", "28-RWC.Rmd", "29-campfires.Rmd", 
+  "30-cremation.Rmd", "31-asphalt.Rmd", "32-solvents.Rmd", "33-compost.Rmd", "34-landclearing.Rmd", 
+  "35-reswasteburn.Rmd", "36-yardwasteburn.Rmd", "37-potw.Rmd", "38-othNH3.Rmd"]
+  latex: ["00-acronyms.Rmd", "00-executivesummary.Rmd", "01-introduction.Rmd", "02-overview.Rmd",  
+  "03-point.Rmd", "04-nonroad.Rmd", "05-onroad.Rmd", "06-nonpoint.Rmd", "07-biogenics.Rmd", "08-stage.Rmd", 
+  "09-CMV.Rmd", "10-locomotives.Rmd", "11-OandG.Rmd", "12-PFC.Rmd", "13-fires.Rmd", "14-MVSfires.Rmd", 
+  "15-npHg.Rmd", "16-gasdistro.Rmd", "17-aglivestockwaste.Rmd", "18-agsilage.Rmd", "19-AgDust.Rmd", 
+  "20-ResConDust.Rmd", "21-NonresConDust.Rmd", "22-RoadConDust.Rmd", "23-RoadDust.Rmd", "24-miningquarrying.Rmd", 
+  "25-cooking.Rmd", "26-ICI.Rmd", "27-ResHeating.Rmd", "28-RWC.Rmd", "29-campfires.Rmd", 
+  "30-cremation.Rmd", "31-asphalt.Rmd", "32-solvents.Rmd", "33-compost.Rmd", "34-landclearing.Rmd", 
+  "35-reswasteburn.Rmd", "36-yardwasteburn.Rmd", "37-potw.Rmd", "38-othNH3.Rmd"]

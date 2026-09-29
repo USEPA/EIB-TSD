@@ -1,0 +1,161 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Campfires {#campfires}
+
+## Sector Descriptions and Overview 
+
+Burning wood in campfires is often an outdoor recreational activity enjoyed by many outdoor enthusiasts. This activity is usually limited to publicly or privately owned camp sites, which can sometimes be located in local/state/national parks. Campfires are a source of air pollution since burning wood emits multiple air pollutants, both gaseous and particulate pollutants including criteria air pollutants and precursors, hazardous air pollutants and greenhouse gases. Prior to the 2023 NEI, EPA did not estimate emissions from this category; however, EPA became aware of a database of campgrounds that enabled us to create county level estimates for this emissions source. While the emission impacts from campfires is expected to be minimal at the national and even State level, adding campfires as an EPA method serves to make the NEI more complete, one of the basic tenets we have with every NEI.
+
+For the 2023 NEI, we crafted a national set of county-level emission estimates for campfires based on the database of campgrounds which provides the number of campsites per campground (for most campgrounds) and the geographic information that enables the number of campsites to be mapped to counties. We use assumptions on the amount of firewood (cords) used per campfire at a campsite, and the number of campfires per campsite per year.  This allows us to estimate the cords of wood burned in campfires in each county. The cords of wood per county per year are then converted to tons of dry wood per county per year and multiplied by pollutant-specific emission factors to generate emissions per year per pollutant.  Given that the data on campsites is not maintained annually, this value will not change by inventory year unless another source of data for campsites is found.
+
+The SCC for campfires is “2810090001” and the full SCC description is “Miscellaneous Area Sources: Other Combustion; Open Fire; Campfires”. The EIS Sector is “Miscellaneous Non-Industrial NEC”.
+This document describes the methods used for calculating campfire emissions by describing the data and assumptions used to generate the activity data and providing the basis of the emission factors. Activity data is based in part on an open-source campground database which is used to compute county-level camp sites information. Pollutant emission factors are adopted from the fireplace SCC which already exists in the Wagon Wheel.
+
+## EPA-developed estimates
+
+### Activity Data
+
+The activity data for generating emissions for campfires is the amount of wood burned in campfires by county, and this is broken out into two parameters: 1) the number of campsites per county, and 2) the amount of wood burned in campfires per campsite. Here, a campsite is a part of the campground where people camp and build a campfire. One campground may have multiple campsites.
+
+### Campground database
+
+The raw data used for the number of campsites per county is a list of the U.S. Campgrounds [[ref 1](#campfires-references)] which provides only publicly owned campgrounds. The original data have campgrounds residing in both in US and Canada. For more detailed information and meta data, please refer to the website listed in [ref 1](#campfires-references).
+
+The excel workbook “US_campgrounds_f.xlsx” provided  on the [2023 NEI Supplemental nonpoint data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/), contains only US campgrounds (13,470 total in US). In the original dataset, 21 campgrounds have missing longitudes and latitudes. Therefore, in the spreadsheet “v1”, the column “filled_Google” indicates whether it was filled by Google search.
+
+The columns “state” and “fips” were assigned based on latitude and longitude of each campground by GIS. 
+
+The column “sites” indicates the number of campsites in a campground. In the original dataset, 5,056 campgrounds have missing information of “sites”. We used the 10th percentile (# sites per campground) to gap fill campgrounds that don’t have this information. Therefore, each campground without data on the # of sites per campground was assumed to have 7 sites. The column “sites_filled” indicates whether it was gap-filled. 
+
+The spreadsheet “county level counts” provides the number of campgrounds and number of sites by county based on the v1 data on county “fips”. 
+
+
+### Assumptions for calculating wood consumption
+
+To compute the wood consumption (e.g., number of cords of firewood) per site per year, several assumptions were made to estimate the volume of firewood per campsite event. 
+
+- It was assumed to be 2 to 5 bundles per campsite event or 2 to 5 bundles per day. [[ref 2](#campfires-references)]
+- It was indicated that a typical bundle contains 4 to 6 pieces of firewood with a total volume between 0.75 to 1 cubic foot of wood. [[ref 2](#campfires-references)]
+
+A cord of wood is 128 cubic feet; therefore, the cords of wood per campsite per day was calculated to be 0.012 to 0.039 (see Equation \@ref(eq:wood-consumption-low) and \@ref(eq:wood-consumption-high) below).
+
+\begin{equation} 
+\text{Lower bound:} \frac{0.75\,\mathrm{ft}^{3}\times 2}{128\,\mathrm{ft}^{3}} = 0.012 \frac{\text{cords}}{\text{day}} \text{per campsite}
+  (\#eq:wood-consumption-low)
+\end{equation} 
+
+\begin{equation} 
+\text{Upper bound:} \frac{1\,\mathrm{ft}^{3}\times 5}{128\,\mathrm{ft}^{3}} = 0.039 \frac{\text{cords}}{\text{day}} \text{per campsite}
+  (\#eq:wood-consumption-high)
+\end{equation} 
+
+- Assuming the number of burning days in a year at a campsite to be 50, it was calculated to be 0.6 to 1.95 cords per campsite per year. Taking the average, the wood consumption is assumed to be 1.3 cords per campsite per year. 
+
+The density (ton wood/cord wood) can use the Wagon Wheel table “Wood Density Factors”.
+
+The emission activity levels estimated by EPA were compared to a survey conducted by the state of Minnesota (shown in Table \@ref(tab:campfires-table1)). 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-29/Table_01_MNcampdata.xlsx",
+  col_types = rep("text"))
+df[is.na(df)] <- ""
+```
+
+```{r campfires-table1, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'Minnesota campground firewood burning data',
+  col.names = c("", "2020", "2017")
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("repeat_header", "hold_position", "scale_down")
+  )
+```
+*The data from the campground database used in EPA’s estimation method; MN did not have an estimate of the number of campsites
+
+While MN’s values for cords/campsite are higher than EPA’s, it should be noted that the number of campsites in MN may be greater than those in EPA’s database as EPA’s database only included the public campgrounds and also EPA defaulted campgrounds without data on the number of sites to 7. For MN, this defaulting was done for 135 of the 444 campgrounds in MN.
+
+### Emission factors
+
+Campfire emissions used the fireplace emission factors (SCC 2104008100). These fireplace emission factors are being used for RWC outdoor wood burning for which we assume campfires is most similar.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-29/Table_02_CampfireEFs.xlsx",
+  col_types = rep("text"))
+df[is.na(df)] <- ""
+```
+
+```{r campfires-table2, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'Campfire emission factors'
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("repeat_header", "hold_position", "scale_down")
+  )
+```
+
+### Controls
+
+There are no known controls for campfires.
+
+### Emissions
+
+Emissions are quantified using county-level estimates on the number of campsites per county, the estimated cordwood used per campsite, the density of cordwood and the emission factors above, assumed fuel loading per incident, and the emission factors provided above as follows:
+
+\begin{equation}
+\text{Emissions}_{p,c}
+= \text{Number of Campsites}_{c}
+\times \text{Cords per Campsite}_{c}
+\times \text{Density}_{c}
+\times \frac{\text{EF}_{p}}{2000}
+(\#eq:emissions-equation)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( \text{Emissions}_{p,c} \) = Estimated annual emissions for campfires for pollutant (p), county (c), in tons <br> \newline
+  \( \text{Number of Campsites}_{c} \) = Estimated number of campsites in county (c) <br> \newline
+  \( \text{Cords of Campsites}_{c} \) = Estimated number of cords used per campsite in county (c) for campfires for the year <br> \newline
+  \( \text{Density}_{c} \) = Density of wood in county (c) in tons per cord wood (dry) (c) <br> \newline
+  \( \text{EF}_{p} \) = Emissions factor for pollutant (p), in lbs/ton <br> \newline
+  \( \text{c} \) = County <br> \newline
+  \( \text{p} \) = Pollutant <br> \newline
+</div>
+
+State and Local data submitters have the option to provide more local information on the number of campsites in each county and cords per campsite per year.
+
+### Example calculations
+
+Example calculation for Autauga County (FIPS 01001) annual PM2.5 emissions:
+
+1.	7 campground sites in FIPS 01001.
+2.	Per the Wood Density Factors, the density is 1.3062 ton wood/cord.
+3.	The below calculation is for a yearly estimate (the 1.3 cord/site is cords per site per year)
+
+\begin{equation} 
+  1.3 \frac{\text{cords}}{\text{site}} \times 7 \text{sites} \times 1.3062 \frac{\text{ton wood}}{\text{cord}} \times 23.6 \frac{\text{lb PM2.5}}{\text{ton wood}}  = 280.52 \text{ lb PM2.5}
+  (\#eq:example-calculation)
+\end{equation} 
+
+## References {#campfires-references}
+
+1.	Thomas Hillegass, [http://uscampgrounds.info](https://uscampgrounds.info/)  (a word version of the contents of this site is provided on the [2023 NEI Supplemental nonpoint data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/))
+2.	How Much Firewood is in a Cord? And Other Important Firewood Questions, [https://lumberjax.com/how-much-firewood-is-in-a-cord/](https://lumberjax.com/how-much-firewood-is-in-a-cord/).

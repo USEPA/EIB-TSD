@@ -1,0 +1,262 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Dust: Non-Residential Construction {#NonresConDust}
+
+## Sector Descriptions and Overview 
+
+Construction dust refers to residential and non-residential construction activity, which are functions of acreage disturbed for construction. The SCC for non-residential construction dust is 2311020000.
+
+## EPA-developed estimates
+
+The calculations for estimating the emissions from non-residential construction involve first estimating the acres disturbed from non-residential construction in each county. The value of national-level non-residential construction spending is available from the U.S. Census Bureau and is converted to acreage disturbed using a conversion factor from a report by the Midwest Research Institute (MRI). The national-level acres disturbed are distributed to counties based on the proportion of non-residential construction employment in each county. Emissions factors for PM10 and PM25 are calculated based on precipitation-evaporation values and dry silt content in each county. The total amount of acres disturbed is multiplied by these emissions factors to estimate emissions of PM from non-residential construction.
+
+### Activity Data
+
+The activity data for this source category is the acreage disturbed from non-residential construction, which is estimated using data from the U.S. Census Bureau’s Annual Value of Construction Put in Place in the U.S [[ref 1](#nonres-references)]. and a conversion factor from MRI’s Estimating Particulate Matter Emissions from Construction Operations, Final Report [[ref 2](#nonres-references)]. The national-level non-residential construction spending data are allocated to the county-level based on the proportion of non-residential construction employees (NAICS 2362) in each county. Employment data are taken from the U.S. Census Bureau’s County Business Patterns (CBP), and gaps in employment data are filled using a process described in detail in the next section.
+
+\begin{equation} 
+  EmpFr_{c} = \frac{Emp_{c}}{Emp_{US}}
+  (\#eq:nonres-empfrac)
+\end{equation} 
+
+\begin{equation} 
+  CS_{c} = EmpFr_{c} \times CS_{US}
+  (\#eq:nonres-spending)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EmpFr_{c} \) = The fraction of non-residential construction employees in county *c* <br> \newline
+  \( Emp_{c} \) = The number of non-residential construction employees in county *c* <br> \newline
+  \( Emp_{US} \) = The number of non-residential construction employees in the US <br> \newline
+  \( CS_{c} \) = Non-residential construction spending in county *c*  <br> \newline
+  \( CS_{US} \) = Non-residential construction spending in the US  <br> \newline
+</div>
+
+Non-residential construction spending is converted to acres disturbed using a conversion factor from MRI’s report. For the average acres disturbed per million dollars of non-residential construction, MRI reported a conversion factor of 2 acres/1 million dollars (in 1992 constant dollars). The 1992 conversion factor is adjusted to 2023 using the Price Deflator (Fisher) Index of New Single‐Family Houses under Construction [[ref 3](#nonres-references)]. In 2023 the conversion factor was 0.61 acres per million dollars spent on non-residential construction activities.
+
+\begin{equation} 
+  Apd_{iy} = \frac{2 \text{acres}}{1 \text{million dollars}} \times \frac{PD_{1992}}{PD_{iy}}
+  (\#eq:nonres-acres-per-million)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( Apd_{iy} \) = Acres disturbed per million dollars in the inventory year <br> \newline
+  \( PD_{1992} \) = Price Deflator (Fisher) Index value in 1992 <br> \newline
+  \( PD_{iy} \) = Price Deflator (Fisher) Index value in the inventory year <br> \newline
+</div>
+
+County-level non-residential construction spending (from equation \@ref(eq:nonres-spending)) is then multiplied by this conversion factor to estimate county-level acreage disturbed from non-residential construction activities. 
+
+\begin{equation} 
+  A_{c} = CS_{c} \times Apd_{iy}
+  (\#eq:nonres-acres-disturbed)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( A_{c} \) = Acres disturbed from non-residential construction in county *c* <br> \newline
+  \( CS_{c} \) = Non-residential construction spending in county *c*  <br> \newline
+  \( Apd_{iy} \) = Acres disturbed per million dollars in the inventory year <br> \newline
+</div>
+
+
+### Allocation Procedure
+
+Employment data are obtained from the U.S. Census Bureau’s County Business Patterns (CBP) [[ref 4](#nonres-references)]. Due to concerns with releasing confidential business information, the CBP does not release exact numbers for a given NAICS code if the data can be traced to an individual business This is the case if a particular county has 2 or fewer establishments under a given North American Industrial Classification Standard (NAICS) code. In prior years, the County Business Patterns data reported the counties where data was withheld, along with dataset ranges for the withheld data (e.g., 20-99 employees). A gap-filling procedure was implemented using state-level data, which did not feature withheld data, to estimate employment counts in all counties.  
+
+Beginning in 2018, the Census Bureau stopped reporting dataset ranges for counties with withheld data. As such, the prior gap-filling methods required updating. For all post-2017 inventories, year-specific employment data from the County Business Patterns dataset is used to determine the total amount of withheld data in each state. The 2017 version of the County Business Patterns is then used to determine the counties for which withheld data exist and the data ranges for those counties, and it is to these counties that the difference between the state-level total employment and county-level total employment are allocated.  
+
+To gap-fill withheld state-level employment data:
+
+ 1.	The 2017 version of CBP is used to determine the states for which data is withheld and the employment size range in those states.  \
+ 2.	State-level data for states with known employment in the NAICS code are summed to the national level.  \
+ 3.	The total sum of state-level known employment from step b is subtracted from the national total reported employment for the NAICS code in the national-level CBP to determine the employment total for the withheld states.  \
+ 4.	Each of the withheld states is assigned the midpoint of the range code reported for that state. Table \@ref(tab:nonreswithheldranges) lists the range codes and midpoints.  \
+ 5.	The midpoints for the states with withheld data are summed to the national level.  \
+ 6.	An adjustment factor is created by dividing the number of withheld employees (calculated in step 3 of this section) by the sum of the midpoints (step 5).    \
+ 7.	For the states with withheld employment data, the midpoint of the range for that state (step 4) is multiplied by the adjustment factor (step 6) to calculate the adjusted state-level employment for the NAICS code.  \
+ 
+These same steps are then followed to fill in withheld data in the county-level business patterns.
+
+ 1.	The 2017 version of CBP is used to determine the counties for which data is withheld and the employment size range in those counties.  \
+ 2.	County-level data for counties with known employment are summed by state.  \
+ 3.	County-level known employment is subtracted from the state total reported in state-level CBP (or, if the state-level data are withheld, from the state total estimated using the procedure discussed above).  \
+ 4.	Each of the withheld counties is assigned the midpoint of the range code (Table \@ref(tab:nonreswithheldranges)).  \
+ 5.	The midpoints for the counties with withheld data are summed to the state level.  \
+ 6.	An adjustment factor is created by dividing the number of withheld employees (step 3) by the sum of the midpoints (step 3).  \
+ 7.	For counties with withheld employment data, the midpoints (step 4) are multiplied by the adjustment factor (step 6) to calculate the adjusted county-level employment.  \
+
+Note that step 6 adjusts all counties within each state with withheld employment data by the same state-based proportion. It is unlikely that actual employment corresponds exactly with this smoothed adjustment method, but this method is the best option given the availability of the data. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-21/Withheldranges.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r nonreswithheldranges, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Withheld data ranges and midpoints',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+An example of this gap-filling method is provided for NAICS 2362 in Table \@ref(tab:nonresNAICSexample). The values in the table and subsequent steps are for demonstration purposes and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-21/NonResNAICSexample.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r nonresNAICSexample, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Example County Business Patterns for NAICS 2362',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+1.	The total of employees not including withheld counties is 11,121.
+2.	The state-level CBP reports 13,952 employees for NAICS 2362. The difference is 2,831.
+3.	County 001 is given a midpoint of 10 (since range code A is 0-19) and County 011 is given a midpoint of 3,750.
+4.	State total for these all withheld counties is 3,850. 
+5.	2,831/3,850 = 0.74.
+6.	The adjusted employment for county 001 is 10 × 0.74 = 7.35. County 011 has an adjusted employment of 3,750 × 0.74 = 2,757.47.
+The county-level employment data are used to allocate the national-level non-residential construction spending data to the county-level (see equations \@ref(eq:nonres-empfrac) and \@ref(eq:nonres-spending)).
+
+
+### Emission Factors
+
+Due to regional variances in soil moisture and silt content, emissions factors for PM10 and PM25 are calculated for each county. The initial PM10 emissions factor from non-residential construction is 0.19 tons/acre-month [[ref 5](#nonres-references)]. The duration of construction activity for non-residential construction is assumed to be 11 months. 
+
+To account for the soil moisture level, the PM10 emissions are weighted using the 30-year average precipitation-evaporation (PE) values from Thornthwaite’s PE Index. Average precipitation evaporation values for each state are estimated based on PE values for specific climatic divisions within a state [[ref 5](#nonres-references)]. The average PE value for the test sites from which the PM10 emissions factor was developed is 24. Equation \@ref(eq:nonres-PM10-EF) adjusts the county-level emissions factor based on this PE value.
+
+To account for the silt content, the PM10 emissions are weighted using average silt content for each county.  EPA uses the National Cooperative Soil Survey Microsoft Access Soil Characterization Database to develop county-level, average silt content values for surface soil [[ref 6](#nonres-references)]. The U.S. Department of Agriculture and the National Cooperative Soil Survey define silt content of surface soil as the percentage of particles (mass basis) of diameter smaller than 50 micrometers (µm) found in the surface soil. Note that this definition is different than the U.S. Environmental Protection Agency’s definition that includes all particles (mass basis) of diameter smaller than 75 micrometers. This database contains the most commonly-requested data from the National Cooperative Soil Survey Laboratories including data from the Kellogg Soil Survey Laboratory and cooperating universities. The average silt content for the test sites from which the PM10 emissions factor was developed is 9 percent. Equation \@ref(eq:nonres-PM10-EF) adjusts the county-level emissions factor based on this silt content value.
+
+\begin{equation}
+  EF_{PM10,c} = ef_{PM10} \times \frac{24}{PE_{s}} \times \frac{s_{c}}{0.09}
+  (\#eq:nonres-PM10-EF)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(EF_{PM10,c} \) = PM10 emissions factor corrected for soil moisture and silt content in state *s* and county *c*, in tons/acre-month <br> \newline
+  \(ef_{PM10} \) = Initial PM10 emissions factor for non-residential construction, 0.19 tons/acre-month <br> \newline
+  \(PE \) = precipitation-evaporation value for state *s* <br> \newline
+  \(s \) = Percent dry silt content for county *c* <br> \newline
+</div>
+
+Once PM10 adjustments have been made, PM2.5 emissions are set to 10 percent of PM10.[[ref 7](#nonres-references)]
+
+\begin{equation}
+  EF_{PM25,c} = EF_{PM10,c} \times 0.1
+  (\#eq:nonres-PM25-EF)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(EF_{PM25,c} \) = PM2.5 emissions factor corrected for soil moisture and silt content in state *s* and county *c*, in tons/acre-month <br> \newline
+  \(EF_{PM10,c} \) = PM10 emissions factor corrected for soil moisture and silt content in state *s* and county *c*, in tons/acre-month <br> \newline
+</div>
+
+Primary PM emissions are equal to filterable emissions as there are no condensible emissions from dust from non-residential construction. The resulting emission factors therefore vary by county and the composite minimum, median, and maximum emission factors for these sources are provided in the “Wagon Wheel Emission Factor Compendium” on the [2023 Supplemental nonpoint data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/).
+
+### Controls
+
+There are no controls assumed for this category.
+
+### Emissions
+
+The total annual PM emissions from non-residential construction in each county are calculated by multiplying the acres disturbed by the emissions factors calculated in equations \@ref(eq:nonres-PM10-EF) and \@ref(eq:nonres-PM25-EF) and by the duration of construction activity.
+
+\begin{equation} 
+  E_{p,c} =  A_{c} \times EF_{p,c} \times M
+  (\#eq:nonres-emissions)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c} \) = Annual emissions of pollutant *p* in county *c*, in tons <br> \newline
+  \( A_{c} \) = Acres disturbed from non-residential construction in county *c* <br> \newline
+  \(EF_{p,c} \) = Emissions factor for pollutant *p* and county *c*, in tons/acre <br> \newline 
+  \(M \) = Duration of construction activity, assumed to be 11 months <br> \newline 
+</div>
+
+
+### Sample Calculations
+
+Table \@ref(tab:constr-nonres-sample-calculations) shows sample calculations for PM25-PRI emissions from non-residential construction. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county. 
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1:7),
+  Equation = c("$EmpFr_{c} = \\frac{Emp_{c}}{Emp_{US}}$",
+               "$CS_{c} = EmpFr_{c} \\times CS_{US}$",
+               "$Apd_{iy} = \\frac{2 \\text{ acres}}{1 \\text{ million}} \\times \\frac{PD_{1992}}{PD_{iy}}$",
+               "$A_{c} = CS_{c} \\times Apd_{iy}$",
+               "$EF_{PM10,c} = ef_{PM10} \\times \\frac{24}{PE_{s}} \\times \\frac{s_{c}}{0.09}$",
+               "$EF_{PM25,c} = EF_{PM10,c} \\times 0.1$",
+               "$E_{p,c} =  A_{c} \\times EF_{p,c} \\times M$"),
+  Values = c("$\\frac{120\\text{ nonres construction employees}}{582,574 \\text{ nonres construction employees}}$",
+             "$0.000206 \\times 374,666 \\text{ million dollars}$",
+             "$\\frac{2\\text{ acres disturbed}}{1\\text{ million}} \\times \\frac{57 \\text{ in 1992}}{113 \\text{ in inventory year}}$",
+             "$71.61\\text{ million dollars} \\times \\frac{1.009 \\text{ acres disturbed}}{\\text{million dollars}}$",
+             "$0.19\\text{ tons per acre-month} \\times \\frac{24}{103.6} \\times \\frac{0.2195}{0.09}$",
+             "$0.1 \\times 0.1073 \\frac{\\text{tons}}{\\text{acre-month}}$",
+             "$\\text{72.25 acres} \\times 0.0107 \\frac{\\text{tons}}{\\text{acre-month}} \\times 11 \\text{ months}$"),  
+  Result = c("0.000206 fraction of non-residential construction employees ",
+             "71.61 million dollars in non-residential construction spending",
+             "1.009 acres disturbed per million dollars spent on non-residential construction spending",
+             "72.25 acres disturbed from non-residential construction",
+             "0.1073 tons PM10 per acre-month of non-residential construction",
+             "0.0107 tons PM25 per acre month on non-residential construction",
+             "8.5 tons PM25 emissions from non-residential construction")
+)
+```
+
+```{r constr-nonres-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{5cm}")
+)
+```
+
+### Improvements/Changes in the 2023 NEI
+
+There have been no significant changes to this category.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exist to calculate emissions for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the US Virgin Islands. The total emissions in tons for these two Florida counties are divided by their respective populations creating a tons per capita emissions factor. For each Puerto Rico and US Virgin Island County, the tons per capita emissions factor is multiplied by the county population (from the same year as the inventory’s activity data) which served as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”. 
+
+## References {#nonres-references}
+
+1.	U.S. Census Bureau, 2023. [Value of Construction Put in Place.](https://www.census.gov/construction/c30/about_the_survey.html) 
+2.	Midwest Research Institute. 1999. [Estimating Particulate Matter Emissions from Construction Operations.](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=9100KK1W.TXT) Prepared for Emission Factor and Inventory Group, Office of Air Quality Planning and Standards US EPA.
+3.	U.S. Census Bureau. 2023. [Price Deflator (Fisher) Index of New Single‐Family Houses Under Construction.](https://www.census.gov/construction/nrs/pdf/price_uc.pdf)
+4.	U.S. Census Bureau, County Business Patterns. 2023. [CBP Tables.](https://www.census.gov/programs-surveys/cbp/data/tables.html)
+5.	Midwest Research Institute. 1996. Improvement of Specific Emission Factors (BACM Project No. 1). Prepared for South Coast Air Quality Management District. 
+6.	U.S. Department of Agriculture, National Cooperative Soil Survey, [NCSS Microsoft Access Soil Characterization Database.](https://ncsslabdatamart.sc.egov.usda.gov/)
+7.	Midwest Research Institute. 2006. [Background Document for Revisions to Find Fraction Ratios Used for AP-42 Fugitive Dust Emissions Factors](https://www.epa.gov/sites/default/files/2020-10/documents/background_document_for_revisions_to_fine_fraction_ratios_used_for_ap-42_fugitive_dust_emission.pdf). Prepared for Wester Governors ‘Association.
+ 

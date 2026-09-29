@@ -1,0 +1,276 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Compost {#compost}
+## Sector Descriptions and Overview 
+
+Greenwaste composting includes the diversion of yard waste, food waste, and other biogenic waste from landfills to composting facilities. Estimates of emissions of volatile organic compounds (VOC), ammonia (NH3), and three hazardous air pollutants (HAPs), acetaldehyde; methanol; and naphthalene, from greenwaste composting are based on the amount of food and yard waste composted. Composting of biogenic waste is currently not included in emissions estimates for this category as activity data on this waste type is not available.
+
+Note that this source category does not include the composting of biosolids from wastewater treatment plants or manure management facilities. There are separate SCCs for biosolids (2680001000) and for a mixture of greenwaste and biosolids (2680002000). EPA is not currently estimating emissions for these SCCs. If S/L/Ts report any emissions for the mixture SCC, emissions from the greenwaste portion of that mixture may be duplicative of some or all of the EPA emissions estimates described here. Note also that this source category estimates emissions from composting facilities but does not estimate emissions from backyard composting.
+
+Table \@ref(tab:compost-sccs) shows, for composting, the SCCs covered by the EPA estimates and by the State/Local and Tribal agencies that submitted data. The SCC level 3 and 4 SCC descriptions are also provided. The SCC level 1 and leading level 2 descriptions is “Waste Disposal, Treatment, and Recovery; Composting:” for all SCCs.
+
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-33/compost-sccs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r compost-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Source Classification Codes used in the compost sector.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+## EPA-developed estimates
+The calculations for estimating the emissions from greenwaste composting involve first estimating the amount of food and yard waste composted in each county. The amount of state-level food waste composted is available from the EPA report Food Waste Management in the United States, 2014 [[ref 1](#compost-references)]. The amount of state-level yard waste composted is estimated by calculating the per-capita amount of yard waste composted using national data from the EPA report Advancing Sustainable Materials Management: 2015 Fact Sheet [[ref 2](#compost-references)] and multiplying that by the state population. The state-level yard and food waste are summed together and distributed to the counties based on the proportion of employment at solid waste landfills. The total amount of greenwaste composted is multiplied by emissions factors for VOC and NH3 to estimate emissions of these pollutants from greenwaste composting.
+
+### Activity Data
+The activity data for this source category is the amount of food and yard waste composted, which is estimated using data from two EPA reports: the national-level amount of yard waste composted comes from Advancing Sustainable Materials Management: 2015 Fact Sheet and the state-level amount of food waste composted comes from Food Waste Management in the United States, 2014 [[ref 1, ref 2](#compost-references)]. Table \@ref(tab:compost-annual-waste) shows the total national-level amount of yard waste generated and recovered for composting. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-33/compost-annual-waste.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r compost-annual-waste, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Annual Waste (million tons) generated and recovered in the US.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+The values from Table \@ref(tab:compost-annual-waste) are used with the U.S. population in 2020 of 336 million people [[ref 3](#compost-references)] to determine per-capita values of food and yard waste recovered for composting. 
+
+\begin{equation} 
+  PC_{yard,US} = \frac{W_{yard,US}}{P_{US}}
+  (\#eq:compost-per-capita)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( PC_{yard,US} \) = Per-capita yard waste recovered for compositing in the US, in tons per person per year <br> \newline
+  \( W_{yard,US} \) = Total annual yard waste recovered in the US, in tons/year <br> \newline
+  \( P_{US} \) = US population  <br> \newline
+</div>
+
+This calculation results in per-capita values of approximately 0.066 tons per person per year of yard waste recovered for composting. Please note that EPA data on composting does not include backyard composting. 
+
+The per-capita yard waste values from Equation \@ref(eq:compost-per-capita) are multiplied by the population of each state to estimate the state-level amount of yard waste recovered for composting.
+
+\begin{equation}
+  W_{yard,s} = PC_{yard,US} \times P_{s}
+  (\#eq:compost-yard-waste)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(W_{yard,s} \) = Annual yard waste recovered for composting in state *s*, in tons <br>\newline
+  \(PC_{yard,US} \) = Per-capita yard waste recovered for compositing in the US, in tons per person per year <br>\newline
+  \(P_{s} \) = Population of state *s*, in metric tons <br>\newline
+</div>
+
+EPA reports the amount of food waste composted at the state level in the report Food Waste Management in the United States, 2015 [[Table 3 in ref 1](#compost-references)]. These values are shown in Table \@ref(tab:compost-food-waste). EPA collected these data from state environmental websites and contacts with state agencies. The data year for each state is listed and represents the latest data available. The data were not altered from the original reference for use in this methodology.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-33/compost-food-waste.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r compost-food-waste, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'State-level food waste composting (tons).',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+The state-level amount of total greenwaste composted is the sum of the state-level food and yard waste composted.
+
+\begin{equation}
+  W_{GW,s} = W_{yard,s} + W_{food,s}
+  (\#eq:compost-total-waste)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(W_{GW,s} \) = Annual total greenwaste recovered for composting in state *s*, in tons <br>\newline
+  \(W_{yard,s} \) = Annual yard waste recovered for composting in state *s*, in tons <br>\newline
+  \(W_{food,s} \) = Annual food waste recovered for composting in state *s*, in tons, from Table \@ref(tab:compost-food-waste) <br>\newline
+</div>
+
+
+### Allocation Procedure
+
+Comprehensive data on the county locations of composting facilities is not available. As a result, the analysis assumes that greenwaste composting facilities are co-located with solid waste landfills. 
+State-level food greenwaste composting activity (from Equation \@ref(eq:compost-total-waste)) is allocated to the county-level using employment at solid waste landfills (NAICS code 562212). Specifically, state-level estimates of greenwaste collected for composting are multiplied by the ratio of county- to state- level number of employees at landfills. 
+
+\begin{equation}
+  EmpFrac_{t,c} = \frac{Emp_{t,c}}{Emp_{t,s}}
+  (\#eq:compostempfrac)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(EmpFrac_{c} \) = The fraction of landfill employees in county *c* <br>\newline
+  \(Emp_{c} \) = The number of landfill employees in county *c* <br>\newline
+  \(Emp_{s} \) = The number of landfill employees in state *s* <br>\newline
+</div>  
+
+Employment data are from the U.S. Census Bureau’s County Business Patterns (CBP) [[ref 4](#compost-references)]. Due to concerns with releasing confidential business information, the CBP does not release exact numbers for a given NAICS code if the data can be traced to an individual business. Instead, a series of range codes is used. Many counties and some smaller states have only one solid waste landfill, leading to withheld data in the county and/or state business pattern data. To estimate employment in counties and states with withheld data, the following procedure is used for NAICS code 562212. 
+
+To gap-fill withheld state-level employment data:
+
+1.	State-level data for states with known employment in NAICS 562212 are summed to the national level.
+2.	The total sum of state-level known employment from step 1 of this section is subtracted from the national total reported employment for NAICS 562212 in the national-level CBP to determine the employment total for the withheld states.
+3.	Each of the withheld states is assigned the midpoint of the range code reported for that state. Table \@ref(tab:compostwithheldranges) lists the range codes and midpoints.
+4.	The midpoints for the states with withheld data are summed to the national level. 
+5.	An adjustment factor is created by dividing the number of withheld employees (calculated in step 2) by the sum of the midpoints (step 4).
+6.	For the states with withheld employment data, the midpoint of the range for that state (step 3) is multiplied by the adjustment factor (step 5) to calculate the adjusted state-level employment for landfills.
+These same steps are then followed to fill in withheld data in the county-level business patterns.
+7.	County-level data for counties with known employment are summed by state. 
+8.	County-level known employment is subtracted from the state total reported in state-level CBP (or, if the state-level data are withheld, from the state total estimated using the procedure discussed above).
+9.	Each of the withheld counties is assigned the midpoint of the range code (Table \@ref(tab:compostwithheldranges)).
+10.	The midpoints for the counties with withheld data are summed to the state level. 
+11.	An adjustment factor is created by dividing the number of withheld employees (step 8) by the sum of the midpoints (step 10).
+12.	For counties with withheld employment data, the midpoints (step 9) are multiplied by the adjustment factor (step 11) to calculate the adjusted county-level employment for landfills.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-33/Withheldranges.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r compostwithheldranges, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Withheld data ranges and midpoints',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+As an example, sample county CBP data for NAICS 562212 (Landfills) are provided in Table \@ref(tab:compostNAICSexample). The values in the table and subsequent steps are for demonstration purposes and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-33/compost-NAICS-example.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r compostNAICSexample, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Example County Business Patterns for NAICS 562212',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+1.	The total number of known county-level employees in Arizona is 336.
+2.	The state-level CBP reports 522 employees for NAICS 562212.  This means that there are 186 employees withheld at the county level.
+3.	The counties with withheld data are assigned midpoints according to the employment codes. For example, Apache County is given a midpoint of 60 employees (since employment code B is 20-99).
+4.	The sum of the midpoints for all withheld counties is 270 employees. 
+5.	The adjustment factor is 186/272 = 0.6889.
+6.	The adjusted employment for Apache County is 60 × 0.6889 = 41 employees. 
+Once county- and state-level employment have been estimated, the ratio of county to state employees (from Equation \@ref(eq:compostempfrac)) is multiplied by the state-level greenwaste recovered for composting (from Equation \@ref(eq:compost-total-waste)) to calculate the amount of waste composted in each county.
+
+\begin{equation}
+  W_{GW,c} = W_{GW,s} \times EmpFrac_{c}
+  (\#eq:compost-county-waste)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(W_{GW,c} \) = Annual total greenwaste composted in county *c*, in tons <br>\newline
+  \(W_{GW,s} \) = Annual total greenwaste composted in state *s*, in tons <br>\newline
+  \(EmpFrac_{c} \) = The fraction of landfill employees in county *c* <br>\newline
+</div>
+  
+
+### Emission Factors
+
+The emissions factors for composting for VOC and ammonia (NH3) are taken from the California Air Resources Board Emissions Inventory Methodology for Composting Facilities [[ref 5](#compost-references)] and are unaltered from the original reference. The emissions factors for the HAPs (acetaldehyde, methanol, and naphthalene) are taken from Kumar et al [[ref 6](#compost-references)]. 
+
+### Controls
+There are no controls assumed for this category. 
+
+### Emissions
+Emissions of VOC and NH3 from composting are calculated by multiplying the total county-level greenwaste composted by an emission factor. The emissions are multiplied by a conversion factor to convert from pounds to tons. 
+
+\begin{equation} 
+  E_{p,c} =  EF_{p} \times W_{GW,c} \times \frac{1 ton}{2000 lbs}
+  (\#eq:compost-emissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c} \) = Annual emissions of pollutant *p* in county *c*, in tons per year for VOC and NH3 and lbs. per year for HAPs <br> \newline
+  \( EF_{p} \) = Emissions factor for pollutant *p*, in lbs./ton of greenwaste composted <br> \newline
+  \( W_{GW,c} \) = Annual total greenwaste composted in county *c*, in tons <br> \newline
+  \( Unit conversion \) = The pound per ton conversion is only relevant for CAPs <br> \newline
+</div>
+
+
+### Sample Calculations
+Table \@ref(tab:compost-sample-calculations) provides a summary of these calculations of VOC emissions from composting. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1:6),
+  Equation = c("$PC_{yard,US} = \\frac{W_{yard,US}}{P_{US}}$",
+               "$W_{yard,s} = (PC_{yard, US} \\times P_{s}$",
+               "$W_{GW,s} = W_{yard,s} + W_{food,s}$",
+               "$EmpFrac_{c} =  \\frac{Emp_{c}}{Emp_{s}}$",
+               "$W_{GW,c} = W_{GW,s} \\times EmpFrac_{c}$",
+               "$E_{p,c} = EF_{p} \\times W_{GW,c}$"),
+  Values = c("$\\frac{\\text{21.08 million tons yard waste}}{\\text{329 million people}}$",
+             "$\\text{0.064 tons yard waste per person} \\times \\text{7,016,270 people in the state}$",
+             "$\\text{449,553 tons yard waste} + \\text{0 tons food waste}$",
+             "$\\frac{\\text{41 landfill employees in the county}}{\\text{522 landfill employees in the state}}$",
+             "$\\text{449,553 tons composted} \\times  0.079$",
+             "$\\text{35,515 tons greenwaste} \\times \\text{4.67 lbs. VOC per ton greenwaste} \\times 0.005 \\frac{ton}{lbs.}$"),  
+  Result = c("0.064 tons yard waste per person per year",
+             "449,553 tons yard waste composted in the state",
+             "449,553 tons greenwaste composted in the state",
+             "Landfill employee fraction of 0.079",
+             "35,515 tons greenwaste composted in the county",
+             "83 lbs. VOC emissions from composting")
+)
+```
+```{r compost-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+### Improvements/Changes in the 2023 NEI
+
+There have been no significant changes to this category since the 2020 NEI.
+
+### Puerto Rico and U.S. Virgin Islands
+Emissions from Puerto Rico are calculated using the same method described above. For the U.S. Virgin Islands, emissions are calculated using 2020 population data [[ref 7](#compost-references)], since 2023 Census Data does not exist for the U.S. Virgin Islands. 
+
+## References {#compost-references}
+
+1.	U.S. EPA. 2016. Food Waste Management in the United States, 2014. Office of Resource Conservation and Recovery. https://www.epa.gov/sites/default/files/2016-12/documents/food_waste_management_2014_12082016_508.pdf 
+2.	U.S. EPA. 2020. Advancing Sustainable Materials Management: 2018 Fact Sheet, Table1. Generation, Recovery, and Discards of Products in MSW, 2018. https://www.epa.gov/sites/default/files/2021-01/documents/2018_ff_fact_sheet_dec_2020_fnl_508.pdf 
+3.	U.S. Census Bureau. County Population Totals. https://www.census.gov/data/tables/time-series/demo/popest/2020s-counties-total.html 
+4.	U.S. Census Bureau. 2023 County Business Patterns. https://www.census.gov/programs-surveys/cbp.html 
+5.	California Air Resources Board. 2015. ARB Emissions Inventory Methodology for Composting Facilities. https://ww3.arb.ca.gov/ei/areasrc/composting_emissions_inventory_methodology_final_combined.pdf Table A-4. Emission factor data taken from Draft Staff Report on Proposed Amended Rule 1133.1 (chipping and grinding activities) and Proposed Rule 1133.3 (emissions reductions from greenwaste composting operations),Table III-3. https://www.aqmd.gov/docs/default-source/ceqa/documents/aqmd-projects/2011/final-environmental-assessment-for-proposed-amended-rule-1133-1-and-proposed-rule-1133-3.pdf 
+6.	Kumar, A., C.P. Alaimo, R. Horowitz, F.M. Mitloehner, M.J. Kleeman, and P.G. Green. 2011. Volatile organic compound emissions from green waste composting: Characterization and ozone formation. Atmospheric Environment, 45:1841-1848. https://doi.org/10.1016/j.atmosenv.2011.01.014 
+7.	U.S. Census Bureau. 2020. County Population Totals. https://www.census.gov/data/tables/time-series/demo/popest/2020s-counties-total.html  

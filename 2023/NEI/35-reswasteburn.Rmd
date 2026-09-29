@@ -1,0 +1,184 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Open Burning - Residential Household Waste {#openburningRHW}
+
+## Sector Descriptions and Overview 
+
+This source category covers intentional burning for waste disposal purposes of municipal solid waste. Open burning of residential household waste (RHW) is the purposeful burning of RHW in outdoor areas. Emission estimates for RHW burning are a function of the amount of waste burned per year. The only SCC associated with this sector is 2610003000 (Waste Disposal, Treatment, and Recovery; Open Burning; Residential; Household Waste).
+
+## EPA-developed estimates
+
+The calculations for estimating the emissions from the burning of residential household waste (RHW) involve first estimating the amount of combustible waste generated in each county. The amount of waste generated in the U.S. is available from the EPA report, Advancing Sustainable Materials Management [[ref 1](#RHW-references)]. The amount of county-level RHW burned is estimated by calculating the per-capita amount of RHW generated using the national data from EPA and multiplying that by the number of people likely to burn waste in each county. The number of people likely to burn waste is based on the rural population in each county from the census. To estimate emissions from RHW burning, pollutant emissions factors are multiplied by the amount of combustible waste burned. Emissions factors for PM, VOC, and HAPs are from the literature, whereas emissions factors for CO, NOX, and SO2 are adjusted based on the ratio of total waste to combustible waste.
+
+### Activity Data
+
+The activity data for this source category is the amount of RHW burned in each county, which is estimated using data the EPA report Advancing Sustainable Materials Management [[ref 1](#RHW-references)]. The report presents the total mass of waste generated from the residential and commercial sectors in the United States by type of waste.
+
+Per-capita values of RHW subject to burning were developed based on EPA’s total amount of waste generated in 2018, the latest data available. According to the 2010 version of the same EPA report, residential waste generation accounts for 55-65% of the total waste from the residential and commercial sectors [[ref 2](#RHW-references)]; for the per-capita calculation, the median value of 60% of total waste generated is assumed. This number is multiplied by the sums of the total and combustible waste, respectively. Each number is then divided by the U.S. population in 2023 [[ref 3](#RHW-references)] to determine separate per-capita values for total and combustible waste. Note that yard waste is not included in either per-capita value as emissions from the burning of yard waste are calculated in separate SCCs.
+
+\begin{equation} 
+  PC_{cwaste} = \frac{W-C \times 0.60}{P_{US}}
+  (\#eq:RHW-per-capita-comb)
+\end{equation} 
+
+\begin{equation}   
+  PC_{twaste} = \frac{W-T \times 0.60}{P_{US}}
+  (\#eq:RHW-per-capita-tot)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( PC_{cwaste,US} \) = Per-capita yard waste amount of combustible waste in the US, in tons per person per year <br> \newline
+  \( PC_{twaste,US} \) = Per-capita yard waste amount of total waste in the US, in tons per person per year <br> \newline
+  \( W-C \) = Annual weight of combustible waste, minus yard waste, in million tons <br> \newline
+  \( W-T \) = Annual weight of all waste, minus yard waste, in million tons <br> \newline
+  \( P_{US} \) = US population  <br> \newline
+</div>
+
+The per-capita value of combustible household waste is estimated to be 0.344 tons generated per person, and the per-capita value of total waste is 0.407 tons generated per person. 
+
+As open burning of RHW is generally not practiced in urban areas, only the rural population in each county is assumed to practice open burning. The rural and urban populations are taken from U.S. Census data for each county [[ref 3](#RHW-references)]. It is assumed that 24% of the rural population burns RHW [[ref 4](#RWH-references)].
+
+\begin{equation}
+  PBurn_{c} = RPop_{c} \times 0.24
+  (\#eq:RHW-rural-frac)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(PBurn_{c} \) = Population likely to burn RHW in county *c* <br>\newline
+  \(RPop_{c} \) = Rural population in county *c* <br>\newline
+</div>
+
+The number of people likely to burn waste in each county (from Equation \@ref(eq:RHW-rural-frac)) is then used with the values of per-capita household waste subject to burning (from Equations \@ref(eq:RHW-per-capita-comb)-\@ref(eq:RHW-per-capita-tot)) to determine the amount of household RHW burned.
+
+\begin{equation}
+  CWst_{c} = PBurn{c} \times PC_{cwaste}
+  (\#eq:RHW-total-waste)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(CWst_{c} \) = Annual combustible RHW burned in county *c*, in tons <br>\newline
+  \(PBurn_{c} \) = Population likely to burn RHW in county *c* <br>\newline
+  \(PC_{cwaste} \) = Per-capita value of combustible waste in the U.S., in tons per person <br>\newline
+</div>
+
+### Allocation Procedure
+
+National values for the amount of waste generated are distributed to the counties based on rural population, as described in the previous section.
+
+### Emission Factors
+
+The emissions factors for PM, VOC, and HAPs were developed based on the amount of combustible waste burned. Emissions factors for CO, NOX, and SO2 were developed based on the amount of total waste burned; therefore, these factors need to be adjusted to be used with the values of combustible waste burned. This is accomplished by multiplying the emissions factors by a ratio of the total per-capita waste to combustible per-capita waste.
+
+\begin{equation} 
+  EF_{p,Com} =  EF_{p,T} \times \frac{PC_{twaste}}{PC_{cwaste}}
+  (\#eq:RHW-EF)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{p,Com} \) = Emission factor for pollutant *p* for combustible waste, in lbs. of pollution per ton of waste burned <br> \newline
+  \( EF_{p,T} \) = Emission factor for pollutant *p* for total waste, in lbs. of pollution per ton of waste burned <br> \newline
+  \( PC_{cwaste,US} \) = Per-capita yard waste amount of combustible waste in the US, in tons per person per year <br> \newline
+  \( PC_{twaste,US} \) = Per-capita yard waste amount of total waste in the US, in tons per person per year <br> \newline
+</div>
+
+### Controls
+Controls for residential household waste burning are generally in the form of a ban on open burning of waste in a given municipality or county. However, literature suggests that burn bans are not 100% effective. It is therefore assumed that approximately 25% of the residents that may burn trash in the yard would burn waste even if a ban is in place. For counties that have burn bans, the assumption is applied by multiplying 0.25 by the annual waste burned. Currently no counties are assumed to have burn bans in place.
+
+If county *c* has a burn ban, then:
+\begin{equation} 
+  CWst_{c} =  CWst_{c} \times 0.25
+  (\#eq:RHW-control)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( CWst_{c} \) = Annual combustible RHW burned in county *c*, in tons <br> \newline
+</div>
+
+### Emissions
+The annual amount of combustible RHW burned in each county is multiplied by the appropriate emissions factors:
+
+\begin{equation} 
+  E_{p,c} =  EF_{p,Com} \times CWst_{c}
+  (\#eq:RHW-emissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c} \) = Annual emissions of pollutant *p* in county *c* <br> \newline
+  \( EF_{p,Com} \) = Emissions factor for pollutant *p*, in lbs./ton of combustible waste burned <br> \newline
+  \( CWst_{c} \) = Annual combustible RHW burned in county *c*, in tons <br> \newline
+</div>
+
+### Sample Calculations
+Table \@ref(tab:RHW-sample-calculations) lists sample calculations to determine the CO and VOC emissions from open burning. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county. 
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1:7),
+  Equation = c("$PC_{cwaste} = \\frac{W-C \\times 0.60}{P_{US}}$",
+               "$PC_{twaste} = \\frac{W-T \\times 0.60}{P_{US}}$",
+               "$PBurn_{c} = RPop_{c} \\times 0.24$",
+               "$CWst_{c} = PBurn{c} \\times PC_{cwaste}$",
+               "$EF_{p,Com} =  EF_{p,T} \\times \\frac{PC_{twaste}}{PC_{cwaste}}$",
+               "$CWst_{c} =  CWst_{c} \\times 0.25$",
+               "$E_{p,c} =  EF_{p,Com} \\times CWst_{c}$"),
+  Values = c("$\\frac{\\text{188.22 million tons waste} \\times 0.60}{\\text{318.85 million people}}$",
+             "$\\frac{\\text{222.96 million tons waste} \\times 0.60}{\\text{318.85 million people}}$",
+             "$\\text{22,921 people} \\times 0.24$",
+             "$\\text{5,501 people} \\times \\text{0.035 tons combustible waste per person}$",
+             "$\\text{85 lbs. per ton} \\times \\frac{\\text{0.42 tons per person}}{\\text{0.354 tons per person}}$",
+             "$\\text{N/A}$",
+             "$\\text{1,947.4 tons} \\times \\text{100.8 lbs. CO per ton greenwaste} \\times 0.005 \\frac{ton}{lb}$"),  
+  Result = c("0.354 tons combustible waste per person per year",
+             "0.420 tons total waste per person per year",
+             "5,501 people likely to burn waste",
+             "1,947.4 tons of combustible waste burned",
+             "100.8 lbs. of CO per ton of combustible waste burned",
+             "County does not have a burn ban",
+             "98.14 tons CO emissions from burning of RHW")
+)
+```
+```{r RHW-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 12) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{5cm}")
+)
+```
+### Improvements/Changes in the 2023 NEI
+
+There have been no significant changes to this category.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Emissions from Puerto Rico are calculated using the same method described above. For the U.S. Virgin Islands, emissions are calculated using 2020 population data [[ref 7](#compost-references)], since 2023 Census Data does not exist for the U.S. Virgin Islands. 
+
+## References {#RHW-references}
+
+1.	U.S. EPA. 2020. Advancing Sustainable Materials Management: 2018 Fact Sheet, Table1. Generation, Recovery, and Discards of Products in MSW, 2018. https://www.epa.gov/sites/default/files/2021-01/documents/2018_ff_fact_sheet_dec_2020_fnl_508.pdf 
+2.	U.S. Environmental Protection Agency. 2011. Municipal Solid Waste Generation, Recycling, and Disposal in the United States: Facts and Figures for 2010—Fact Sheet, p. 4. https://archive.epa.gov/epawaste/nonhaz/municipal/web/pdf/msw_2010_factsheet.pdf 
+3.	U.S. Census Bureau. County Population Totals. https://www.census.gov/data/tables/time-series/demo/popest/2020s-counties-total.html 
+4.  Environment Canada. 2001. “[Household Garbage Disposal and Burning](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/Env%20Canada%20-%20Household%20garbage%20disposal%20and%20burning.pdf).” Prepared by Environics Research Group. 

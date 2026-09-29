@@ -1,0 +1,1377 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Nonpoint Gasoline Distribution {#gasdistro}
+
+## Sector Descriptions and Overview 
+
+This section includes discussion of all nonpoint sources in three EIS sectors: Bulk Gasoline Terminals, Gas Stations, and Industrial Processes – Storage and Transfer. Many of the sources reported to the point inventory as well; therefore, the EPA nonpoint survey is useful to avoid double-counting S/L/T-reported point emissions with EPA-estimated nonpoint emissions.
+
+This section is broken into two categories: those sources related to stage 1 gasoline distribution and those related to aviation gasoline.
+
+### Stage 1 gasoline distribution
+
+Stage 1 gasoline distribution is covered by the NEI in both the point and nonpoint data categories. In general terms, Stage 1 gasoline distribution is the emissions associated with gasoline handling excluding emissions from refueling activities. Stage I gasoline distribution includes the following gasoline emission points: 1) bulk terminals; 2) pipeline facilities; 3) bulk plants; 4) tank trucks; and 5) unloading at service stations. Emissions from Stage I gasoline distribution occur as gasoline vapors are released into the atmosphere. These Stage I processes are subject to EPA’s maximum available control technology (MACT) standards for gasoline distribution [[ref 1](#gasdistro-references)]. 
+
+Emissions from gasoline distribution at bulk terminals and bulk plants take place when gasoline is loaded into a storage tank or tank truck, from working losses (for fixed roof tanks), and from working losses and roof seals (for floating roof tanks). Working losses consist of both breathing and emptying losses. Breathing losses are the expulsion of vapor from a tank vapor space that has expanded or contracted because of daily changes in temperature and barometric pressure; these emissions occur in the absence of any liquid level change in the tank. Emptying losses occur when the air that is drawn into the tank during liquid removal saturates with hydrocarbon vapor and expands, thus exceeding the fixed capacity of the vapor space and overflowing through the pressure vacuum valve [[ref 2](#gasdistro-references)].
+
+Emissions from tank trucks in transit occur when gasoline vapor evaporates from (1) loaded tank trucks during transportation of gasoline from bulk terminals/plants to service stations, and (2) empty tank trucks returning from service stations to bulk terminals/plants [[ref 3](#gasdistro-references)].  Pipeline emissions result from the valves and pumps found at pipeline pumping stations and from the valves, pumps, and storage tanks at pipeline breakout stations. Stage I gasoline distribution emissions also occur when gasoline vapors are displaced from storage tanks during unloading of gasoline from tank trucks at service stations (Gasoline Service Station Unloading) and from gasoline vapors evaporating from service station storage tanks and from the lines going to the pumps (Underground Storage Tank Breathing and Emptying).
+
+Table \@ref(tab:stage1SCCs) shows all non-Aviation Gasoline SCCs in the nonpoint data category for EIS sectors Bulk Gasoline Terminals, Gas Stations, and Industrial Processes – Storage and Transfer. For Stage 1 Gasoline Distribution, the nonpoint SCCs covered by the EPA estimates are also noted. The SCC level 2, 3 and 4 SCC descriptions are also provided. The SCC level 1 description is “Storage and Transport” for all SCCs.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-16/Stage1SCCs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r stage1SCCs, tidy=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = FALSE, longtable = TRUE,
+  caption = "Nonpoint bulk gasoline terminals, gas stations, and storage and transfer SCCs in the NEI",
+) %>%
+  kableExtra::kable_styling(
+    full_width = FALSE, position = "center",
+    latex_options = c("hold_position", "repeat_header"),
+  ) %>%
+  kableExtra::column_spec(1, width = "2cm") %>%
+  kableExtra::column_spec(2, width = "6cm") %>%
+  kableExtra::column_spec(3, width = "4cm")
+```
+
+### Aviation gasoline distribution, stage 1 and 2
+
+Aviation gasoline (also called “AvGas”) is the only aviation fuel that contains lead as a knock-out component for small reciprocating, piston-engine crafts in civil aviation [[ref 4](#gasdistro-references)]. Commercial and military aviation rarely use this fuel.  AvGas is shipped to airports and is filled into bulk terminals, and then into tanker trucks. These processes fall under the definition of stage 1, displacement vapors during the transfer of gasoline from tank trucks to storage tanks, and vice versa. Stage 2 involves the transfer of fuel from the tanker trucks into general aviation aircraft.
+
+Table \@ref(tab:avgasSCCs) shows, for Aviation Gasoline, the nonpoint SCCs covered by the EPA estimates and by the S/L/T agencies that submitted data.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-16/AvgasSCCs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r avgasSCCs, tidy=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = FALSE, longtable = TRUE,
+  caption = "Nonpoint aviation gasoline distribution SCCs in the NEI",
+) %>%
+  kableExtra::kable_styling(
+    full_width = FALSE, position = "center",
+    latex_options = c("hold_position", "repeat_header"),
+  ) %>%
+  kableExtra::column_spec(1, width = "2cm") %>%
+  kableExtra::column_spec(2, width = "6cm") %>%
+  kableExtra::column_spec(3, width = "4cm")
+```
+
+## Sources of data
+
+Sources in the EIS sectors for Bulk Gasoline Terminals, Gas Stations, and Industrial Processes – Storage and Transfer do not focus solely on gasoline; however, for the purposes of developing the NEI, these SCCs are the only ones that EPA estimates in these sectors. EPA does not develop calculation tools that estimate emissions from transfer of naphtha, distillate oil, inorganic chemicals, kerosene, residual oil, or crude oil. Therefore, sector level emissions for these three EIS sectors will include sources not related to gasoline distribution, some from the point inventory. 
+
+## EPA-developed estimates
+
+**Bulk Terminals and Bulk Plants**
+
+The emissions for bulk terminals and bulk plants are aggregated to a single new SCC that includes both bulk terminals and bulk plants. This document describes the approach for calculating emissions separately for bulk terminals and bulk plants, which are then aggregated for the total emissions for the SCC. Point source subtraction  is done from the aggregated emissions.
+
+The calculations for estimating VOC emissions from bulk terminals involve allocating the VOC emissions calculated in support of the Gasoline Distribution NESHAP. National VOC emissions are allocated to states using data on refinery, bulk terminal, and natural gas plant stocks of motor gasoline in each state. State-level VOC emissions are then allocated to each county based on employment at petroleum bulk stations and terminals from the US Census County Business Patterns data for NAICS 42471 (Petroleum Bulk Stations and Terminals).
+
+The calculations for estimating VOC emissions from bulk plants involve first calculating bulk plant gasoline throughput in the US based on data from the U.S. Energy Information Administration (EIA). National bulk plant gasoline throughput is then allocated to each county based on the number of petroleum bulk stations from the US Census County Business Patterns data for NAICS 42471. The number of petroleum bulk plants by county is multiplied by the emissions factor for VOC to estimate VOC emissions from bulk plants.
+
+For both bulk terminal and bulk plants, county-level benzene speciation profiles are multiplied by VOC emissions to estimate benzene emissions. National average speciation profiles for all other HAPs are multiplied by VOC emissions to estimate HAP emissions from bulk terminals and bulk plants.  
+
+**Pipelines**
+
+The calculations for estimating VOC and HAP emissions from pipelines involve first multiplying the 1998 national VOC emissions developed in support of the Gasoline Distribution MACT standard by the currrent year to 1998 ratio of national volume of wholesale gasoline supplied. Emissions from HAPs are calculated by multiplying VOC emissions by a national average speciation profile. National VOC and HAP emissions are allocated to Petroleum Administration for Defense (PAD) District using data on the movement of finished motor gasoline in PAD District [[ref 21](#gasdistro-references)]. PAD District-level VOC and HAP emissions are then allocated to each county based on employment at petroleum bulk stations and terminals from the US Census County Business Patterns data for NAICS 42471 (Petroleum Bulk Stations and Terminals) [[ref 10](#gasdistro-references)].
+
+**Tank Trucks in Transit**
+
+The calculations for estimating VOC and HAP emissions from tank trucks in transit involve first calculating county-level total gasoline consumption by summing onroad gasoline consumption and nonroad gasoline consumption in each county. County-level gasoline consumption is multiplied by the emissions factor for VOC to estimate VOC emissions from tank trucks in transit. County-level benzene speciation profiles are multiplied by VOC emissions to estimate benzene emissions from tank trucks in transit. National average speciation profiles for all other HAPs are multiplied by VOC emissions to estimate HAP emissions from tank trucks in transit.
+
+**Underground Storage Tank (UST) Breathing and Storing**
+
+The calculations for estimating VOC and HAP emissions from UST breathing and storing involve first calculating county-level gasoline consumption by summing onroad gasoline consumption and nonroad gasoline consumption in each county. County-level gasoline consumption is multiplied by the emissions factor for VOC to estimate VOC emissions from UST breathing and storing. County-level benzene speciation profiles are multiplied by VOC emissions to estimate benzene emissions from UST breathing and storing. National average speciation profiles for all other HAPs are multiplied by VOC emissions to estimate HAP emissions from UST breathing and storing.
+
+**Gasoline Service Station Unloading**
+
+The calculations for estimating VOC and HAP emissions from gasoline service station unloading involve first calculating county-level total gasoline consumption by summing monthly onroad gasoline consumption and nonroad gasoline consumption in each county by fuel subtype. Monthly county-level gasoline consumption is then allocated to submerged, splash, and balanced filling technologies based on assumptions about the percentage of each filling technology used in each county. True vapor pressure is calculated for each county, month, and fuel subtype. Uncontrolled loading loss of liquid is calculated using true vapor pressure, temperature, molecular weight, and a saturation factor for the filling technology. Uncontrolled loading loss of liquid loaded is multiplied by monthly county-level gasoline consumption by fuel type to estimate VOC emissions from loading loss. Controlled VOC emissions are calculated by multiplying VOC emissions from loading loss by a control efficiency value. Controlled VOC emissions are subtracted from VOC emissions from loading loss to estimate monthly county-level VOC emissions by fuel subtype. Total county-level VOC emissions are calculated by summing monthly county-level VOC emissions by fuel subtype. County-level benzene speciation profiles are multiplied by VOC emissions to estimate benzene emissions from gasoline service station unloading. National average speciation profiles for all other HAPs are multiplied by VOC emissions to estimate HAP emissions from gasoline service station unloading.
+
+**Aviation Gasoline Stage 1**
+
+The calculations for estimating emissions from stage 1 aviation gasoline distribution involve first estimating the amount of aviation gasoline consumed in each county, based on state-level aviation gasoline consumption data from the Energy Information Administration (EIA) [[ref 7](#gasdistro-references)]. State-level aviation gasoline consumption is distributed to the counties based on the proportion of Landing-Take Offs (LTOs) [[ref 11](#gasdistro-references)]. The total amount of gasoline consumed is used to estimate non-fugitive and fugitive VOC emissions, as well as hazardous air pollutant (HAP) emissions.
+
+**Aviation Gasoline Stage 2**
+
+The calculations for estimating emissions from stage 2 aviation gasoline distribution involve first estimating the amount of aviation gasoline consumed in each county based on state-level aviation gasoline consumption data from the Energy Information Administration (EIA) [[ref 7](#gasdistro-references)]. State-level aviation gasoline consumption is distributed to the counties based on the proportion of Landing-Take Offs (LTOs) [[ref 11](#gasdistro-references)]. The total amount of gasoline consumed is used to estimate VOC and hazardous air pollutant (HAP) emissions.
+
+### Activity Data
+
+**Bulk Terminals and Bulk Plants**
+
+Emissions from bulk terminals are calculated by allocating the emissions estimates developed in support of the Gasoline NESHAPs [[ref 2](#gasdistro-references)].  Therefore, there is no activity data for this source category. 
+
+The activity data for estimating emissions from bulk plants are national volume of bulk plant gasoline throughput. The EIA’s Petroleum Navigator reports the volume of finished motor gasoline supplied in the U.S. [[ref 5](#gasdistro-references)]. The volume of finished motor gasoline is assumed to be the same as total gasoline consumption, and the volume of bulk plant gasoline throughput is assumed to be 9 percent of total gasoline consumption [[ref 6](#gasdistro-references)].
+ 
+\begin{equation} 
+  GT_{US,bp} = V_{US} \times 0.09
+  (\#eq:gasthroughput)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( GT_{US,bp} \) = Bulk plant gasoline throughput in the U.S., in thousand barrels <br> \newline
+  \( V_{US} \) = Volume of finished motor gasoline in the U.S., in thousand barrels <br> \newline
+</div>
+
+**Tank Trucks in Transit**
+
+The activity data for tank trucks in transit is county-level total gasoline consumption. State-level onroad motor gasoline consumption and nonroad gasoline consumption are estimated by splitting total motor gasoline consumption from EIA’s State Energy Data System (SEDS) [[ref 7](#gasdistro-references)] in to onroad and nonroad gasoline consumption using state-level MOVES data on onroad and nonroad CO$_2$ emissions [[ref 8](#gasdistro-references)]. State-level onroad motor gasoline consumption is then allocated to the county, month, and fuel subtype using a MOVES-derived ratio of county onroad CO$_2$ to state onroad CO$_2$. State-level nonroad motor gasoline consumption is allocated to the county, month, and fuel subtype using the MOVES-derived ratio of county nonroad CO$_2$ to state nonroad CO$_2$.  County-level onroad consumption and county-level nonroad consumption are estimated by summing county-level monthly consumption estimates.
+
+\begin{equation} 
+  GC_{OR,c} =  \sum{GC_{OR,m}}
+  (\#eq:onroadgas)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( GC_{OR,c} \) = Onroad gasoline consumption in county *c*, in gallons <br> \newline
+  \( GC_{OR,m} \) = Onroad gasoline consumption in county *c* for month *m,* in gallons <br> \newline
+</div>
+
+\begin{equation} 
+  GC_{NR,c} =  \sum{GC_{NR,m}}
+  (\#eq:nonroadgas)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( GC_{NR,c} \) = Nonroad gasoline consumption in county *c*, in gallons <br> \newline
+  \( GC_{NR,m} \) = Nonroad gasoline consumption in county *c* for month *m,* in gallons <br> \newline
+</div>
+
+County-level tank truck gasoline throughput is estimated by summing county-level onroad and nonroad estimates, and multiplying the sum by 1.09 to account for gasoline that is transported more than once in a given area (i.e., transported from bulk terminal to bulk plant and then from bulk plant to service station) [[ref 6](#gasdistro-references)].
+
+\begin{equation} 
+  GC_{c,t} = (GC_{OR,c} + GC_{NR,c}) \times 1.09 
+  (\#eq:totalgas)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( GC_{c,t} \) = Total gasoline consumption in county *c*, in gallons <br> \newline
+  \( GC_{OR,c} \) = Onroad gasoline consumption in county *c*, in gallons <br> \newline
+  \( GC_{NR,c} \) = Nonroad gasoline consumption in county *c*, in gallons <br> \newline
+</div>
+
+**Underground Storage Tank (UST) Breathing and Storage**
+
+The activity data for underground storage tank breathing and storing is county-level gasoline consumption, calculated as described above in the tank trucks in transit section.
+
+**Gasoline Service Station Unloading**
+
+The activity data for gasoline service station unloading is county-level total gasoline consumption for each month and fuel subtype. State-level onroad motor gasoline consumption and nonroad gasoline consumption are estimated by splitting total motor gasoline consumption from SEDS [[ref 7](#gasdistro-references)] into onroad and nonroad consumption using state-level MOVES data on onroad and nonroad CO$_2$ emissions [[ref 8](#gasdistro-references)]. State-level onroad motor gasoline consumption is then allocated to the county, month, and fuel subtype using a MOVES-derived ratio of county onroad CO$_2$ to state onroad CO$_2$. State-level nonroad motor gasoline consumption is allocated to the county, month, and fuel subtype using the MOVES-derived ratio of county nonroad CO$_2$ to state nonroad CO$_2$.  
+
+County-level gasoline consumption is estimated by summing onroad gasoline consumption and nonroad gasoline consumption and multiplying the sum by 1.09 to account for gasoline that is transported more than once in a given area (i.e., transported from bulk terminal to bulk plant and then from bulk plant to service station) [[ref 6](#gasdistro-references)]. 
+
+\begin{equation} 
+  GC_{c,t,m,f} = (GC_{c,OR,m,f} + GC_{c,NR,m,f}) \times 1.09
+  (\#eq:monthlygas)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( GC_{c,t,m,f} \) = Total gasoline consumption in county *c* for month *m* for fuel subtype *f*, in gallons <br> \newline
+  \( GC_{c,OR,m,f} \) = Onroad gasoline consumption in county *c* for month *m* for fuel subtype *f*, in gallons <br> \newline
+  \( GC_{c,NR,m,f} \) = Nonroad gasoline consumption in county *c* for month *m* for fuel subtype *f*, in gallons <br> \newline
+</div>
+
+The county-level gasoline consumption is allocated to submerged, splash, and balanced filling technologies. Percentages of each filling technology are derived from the EIIP study [[ref 3](#gasdistro-references)]. State, local, and tribal (SLT) agencies may submit input templates to update theses default assumptions about the percentage of delivered fuel by filling technology. 
+
+\begin{equation} 
+  GC_{c,ft,m,f} = GC_{c,m,f} \times Perc_{ft,c}  
+  (\#eq:gasbyfilltype)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( GC_{c,ft,m,f} \) = Total gasoline consumption in county *c* for filling technology *ft* for month *m* for fuel subtype *f*, in gallons <br> \newline
+  \( GC_{c,m,f} \) = Total gasoline consumption in county *c* for month *m* for fuel subtype *f*, in gallons <br> \newline
+  \( Perc_{ft,c} \) = Percentage of filling technology ft in county *c* <br> \newline
+</div>
+
+**Aviation Gasoline Stage 1 and 2**
+
+The activity data for this source category is the amount of aviation gasoline consumed, which is estimated using data from the EIA’s State Energy Data System (SEDS) [[ref 7](#gasdistro-references)]. The SEDS MSN Code AVTCP is used to identify the total consumption of aviation gasoline in units of thousand barrels. Data are then converted to units of gallons.
+
+\begin{equation} 
+  AG_{s} = AGB_{s} \times 42 \text{ gallons/barrel} 
+  (\#eq:stateavgas)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( AG_{s} \) = Annual consumption of AvGas for state *s*, in gallons <br> \newline
+  \( AGB_{s} \) = Annual consumption of AvGas for state *s*, in barrels <br> \newline
+</div>
+
+### Allocation Procedure
+
+**Bulk Terminals and Bulk Plants**
+
+Data from both bulk terminals and bulk plants are both distributed to the county level using County Business Patterns employment data for NAICS code 42471 (Petroleum Bulk Stations and Terminals) [[ref 10](#gasdistro-references)]. For bulk terminals, national-level emissions are distributed first to the states based on the fraction of refinery, bulk terminal, and natural gas plant stocks in each state [[ref 19](#gasdistro-references)]. The state-level emissions are distributed to the counties based on employment in NAICS 42471 [[ref 10](#gasdistro-references)]. 
+
+The national volume of bulk plant gasoline throughput is allocated to counties based on employment in NAICS 42471. (Petroleum Bulk Stations and Terminals) [[ref 10](#gasdistro-references)]. The employment at petroleum bulk stations and terminals is first summed to the national level.
+
+\begin{equation}
+  Emp_{US} = \sum{Emp_{c}}
+  (\#eq:USemp)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(Emp_{US} \) = Number of petroleum bulk stations and terminals employees in the U.S. <br>\newline
+  \(Emp_{c} \) = Number of petroleum bulk stations and terminals employees in county *c* <br>\newline
+</div>
+
+The fraction of petroleum bulk stations and terminals by county is calculated by dividing the total number of petroleum bulk stations and terminals in a given county by the total number of petroleum bulk stations and terminals in the U.S. 
+
+\begin{equation}
+  EmpFrac_{c} = \frac{Emp_{c}}{Emp_{US}}
+  (\#eq:empfrac)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(EmpFrac_{c} \) = Total fraction of petroleum bulk stations and terminals employees in county *c*  <br>\newline
+  \(Emp_{c} \) = Number of petroleum bulk stations and terminals employees in county *c* <br>\newline
+  \(Emp_{US} \) = Number of petroleum bulk stations and terminals employees in the U.S. <br>\newline
+</div>
+
+The county-level volume of bulk plant gasoline throughput is calculated by multiplying the fraction of petroleum bulk stations and terminals in each county by the national volume of bulk plant gasoline throughput.
+
+\begin{equation}
+  GT_{c,bp} = GT_{US,bp} \times EmpFrac_{c}
+  (\#eq:countygasthroughput)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(GT_{c,bp} \) = Bulk plant gasoline throughput in county *c*, in thousand barrels <br>\newline
+  \(GT_{US,bp} \) = Bulk plant gasoline throughput in the U.S., in thousand barrels, from equation \@ref(eq:gasthroughput) <br>\newline
+  \(EmpFrac_{c} \) = Total fraction of petroleum bulk stations and terminals employees in county *c* <br>\newline
+</div>
+
+Employment data are obtained from the U.S. Census Bureau’s County Business Patterns (CBP) [[ref 10](#gasdistro-references)]. Due to concerns with releasing confidential business information, the CBP does not release exact numbers for a given North American Industrial Classification Standard (NAICS) code if the data can be traced to an individual business. This is the case if a particular county has 2 or fewer establishments under a given NAICS code. In prior years, the CBP data reported the counties where data was withheld, along with dataset ranges for the withheld data (e.g., 20-99 employees). A gap-filling procedure was implemented using state-level data, which did not feature withheld data, to estimate employment counts in all counties.
+
+Beginning in 2018, the Census Bureau stopped reporting dataset ranges for counties with withheld data. As such, the prior gap-filling methods required updating. For all post-2017 inventories, year-specific employment data from the County Business Patterns dataset is used to determine the total amount of withheld data in each state. The 2017 version of the County Business Patterns is then used to determine the counties for which withheld data exist and the data ranges for those counties, and it is to these counties that the difference between the state-level total employment and county-level total employment are allocated. To estimate employment in counties and states with withheld data, the following procedure is used for NAICS code 42471. 
+
+To gap-fill withheld state-level employment data:<br>\newline
+a.	The 2017 version of CBP is used to determine the states for which data is withheld and the employment size range in those states.<br>\newline
+b.	State-level data for states with known employment in NAICS 42471 are summed to the national level.<br>\newline
+c.	The total sum of state-level known employment from step b is subtracted from the national total reported employment for NAICS 42471 in the national-level CBP to determine the employment total for the withheld states.<br>\newline
+d.	Each of the withheld states is assigned the midpoint of the range code reported for that state. Table \@ref(tab:gaswithheldranges) lists the range codes and midpoints.<br>\newline
+e.	The midpoints for the states with withheld data are summed to the national level. <br>\newline
+f.	An adjustment factor is created by dividing the number of withheld employees by the sum of the midpoints (step e).<br>\newline
+g.	For the states with withheld employment data, the midpoint of the range for that state (step d) is multiplied by the adjustment factor (step f) to calculate the adjusted state-level employment for petroleum bulk plants and terminals
+
+These same steps are then followed to fill in withheld data in the county-level business patterns.<br>\newline
+
+h.	The 2017 version of CBP is used to determine the counties for which data is withheld and the employment size range in those counties.<br>\newline
+i.	County-level data for counties with known employment are summed by state. <br>\newline
+j.	County-level known employment is subtracted from the state total reported in state-level CBP (or, if the state-level data are withheld, from the state total estimated using the procedure discussed above).<br>\newline
+k.	Each of the withheld counties is assigned the midpoint of the range code (Table \@ref(tab:gaswithheldranges)).<br>\newline
+l.	The midpoints for the counties with withheld data are summed to the state level. <br>\newline
+m.	An adjustment factor is created by dividing the number of withheld employees (step i) by the sum of the midpoints (step k).<br>\newline
+n.	For counties with withheld employment data, the midpoints (step j) are multiplied by the adjustment factor (step l) to calculate the adjusted county-level employment for petroleum bulk plants and terminals <br>\newline
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-16/Withheldranges.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r gaswithheldranges, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Ranges and midpoints for data withheld from state and county business patterns',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position"))
+```
+
+**Tank Trucks in Transit, Underground Storage Tank (UST) Breathing and Storing, and Gasoline Service Station Unloading**
+
+The activity data for these sources is available at the county-level; therefore, county allocation is not needed.
+
+**Aviation Gasoline Distribution Stage 1 and 2**
+
+State-level gasoline consumption (from equation \@ref(eq:stateavgas)) is allocated to the county-level using the ratio of county-to-state-level LTOs. State and county LTO data were compiled by the U.S. EPA’s Office of Air Quality, Planning and Standards (OAQPS) [[ref 11](#gasdistro-references)]. 
+
+\begin{equation}
+  RLTO_{c} = \frac{LTO_{c}}{LTO_{s}}
+  (\#eq:LTO)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(RLTO_{c} \) = The ratio of landing-take offs (LTOs) in county *c* <br>\newline
+  \(LTO_{c} \) = The number of LTOs in county *c* <br>\newline
+  \(LTO_{s} \) = The number of LTOs in state *s* <br>\newline
+</div>
+
+LTO data for turbine-powered airplanes were excluded because turbine-powered planes do not use aviation gasoline. Additionally, LTOs at airports that do not have aviation gasoline refueling, according to data from FAA Form 5010, were also excluded [[ref 12](#gasdistro-references)].
+
+The state-level gasoline consumption values from equation \@ref(eq:stateavgas) are multiplied by the proportion of LTOs in each county to estimate the county-level amount of aviation gasoline consumed. 
+
+\begin{equation}
+  AG_{c} = AG_{s} \times RLTO_{c}
+  (\#eq:countyavgas)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(AG_{c} \) = Annual consumption of AvGas in county *c*, in gallons <br>\newline
+  \(AG_{s} \) = Annual consumption of AvGas in state *s*, in gallons <br>\newline
+  \(RLTO_{c} \) = The ratio of landing-take offs (LTOs) in county *c* <br>\newline
+</div>
+
+### Emission Factors
+
+**Bulk Terminals and Bulk Plants**
+
+Emissions from bulk terminals are calculated by allocating emissions estimates developed in support of the Gasoline NESHAPs.[[ref 2](#gasdistro-references)] Therefore there are no activity-based emissions factors for bulk terminals.
+
+The VOC emissions factor for bulk plants is 8.62 pounds of VOC per 1,000 gallons of gasoline.[[ref 2](#gasdistro-references)]. HAP emissions are estimated using speciation profiles that are available on the [2023 NEI Supporting Data and Summaries site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/) by clicking on “HAP_Augmentation_2023NEI_17apr2026.zip” and selecting the HAP Augmentation Profile file for nonpoint. Speciation profiles for benzene emissions from bulk plants are based on county-specific refueling emissions data from MOVES [[ref 8](#gasdistro-references)]. 
+
+**Pipelines**
+
+Emissions from pipelines are calculated by growing the 1998 emissions estimates developed in support of the Gasoline MACT standard. Therefore, there are no activity-based emissions factors for pipelines. HAP emissions are estimated using speciation profiles available on the [2023 NEI Supporting Data and Summaries site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/) by clicking on “HAP_Augmentation_2023NEI_17apr2026.zip” and selecting the HAP Augmentation Profile file for nonpoint.
+
+**Tank Trucks in Transit**
+
+The VOC emission factor is the sum of the individual emission factors reported in the Gasoline Distribution EIIP guidance document for gasoline-filled trucks (traveling to service station/bulk plant for delivery) and vapor-filled trucks (traveling to bulk terminal/plant for reloading) [[ref 3](#gasdistro-references)]. 
+
+HAP emissions are calculated using speciation profiles available on the [2023 NEI Supporting Data and Summaries site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/) by clicking on “HAP_Augmentation_2023NEI_17apr2026.zip” and selecting the HAP Augmentation Profile file for nonpoint. Speciation profiles for benzene emissions from bulk plants are based on county-specific refueling emissions data from MOVES.
+
+**Underground Storage Tank (UST) Breathing and Storing**
+
+The VOC emissions factor for underground storage tank breathing and storing is 1 pound per 1,000 gallons. The VOC emissions factor for underground storage tank breathing and storing is recommended by the Gasoline Distribution EIIP guidance document [[ref 3](#gasdistro-references)]. 
+
+HAP emissions are calculated using speciation profiles available on the [2023 NEI Supporting Data and Summaries site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/) by clicking on “HAP_Augmentation_2023NEI_17apr2026.zip” and selecting the HAP Augmentation Profile file for nonpoint. Speciation profiles for benzene emissions from bulk plants are based on county-specific refueling emissions data from MOVES.
+
+**Gasoline Service Station Unloading**
+
+To calculate the VOC emissions factor for gasoline service station unloading, first calculate the true vapor pressure for each county and month using the following equation and data from MOVES [[ref 8](#gasdistro-references)]: Geographic specific information on the temperature of gasoline and the method of loading were obtained from a Stage I and II gasoline emission inventory study prepared for the EIIP. 
+
+The true vapor pressure is calculated using the following equation:
+
+\begin{equation*}
+P_{c,m,f} =
+\left[0.7553 - \frac{413}{T_{c.m} + 459.6}\right]S^{0.5}\,\log_{10}\!\left(\mathrm{RVP}_{c,m,f}\right)
+\;-\;
+\left[1.854 - \frac{1042}{T_{c.m} + 459.6}\right]S^{0.5}
+\end{equation*}
+
+\begin{equation}
+\;+\;
+\left[\frac{2416}{T_{c.m} + 459.6} - 2.013\right]\log_{10}\!\left(\mathrm{RVP}_{c,m,f}\right)
+\;-\;
+\frac{8742}{T_{c.m} + 459.6}
+\;+\; 15.64
+ (\#eq:truevaporpressure)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(P_{c,m,f} \) = Stock true vapor pressure for county *c* in month *m* for fuel subtype *f*, in pounds per square inch absolute <br>\newline
+  \(T_{c,m} \) = Stock temperature for county *c* in month *m*, in degrees Fahrenheit <br>\newline
+  \(RVP_{c,m,f} \) = Reid vapor pressure for county *c* in month *m* for fuel subtype *f*, in pounds per square inch  <br>\newline
+  \(S \) = Slope of the ASTM distillation curve at 10 percent evaporated, in degrees Fahrenheit per percent (assumed that S=3.0 for gasoline per Figure 7.1-14a of AP-42) [[ref 13](#gasdistro-references)] <br>\newline
+</div>
+
+The following equation is used to calculate the VOC emissions factor for gasoline service station unloading:
+
+\begin{equation}
+  L_{c,m,f} = 12.46 \times S_{ft} \times P_{c,m,f} \times M/T 
+  (\#eq:loadingloss)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(L_{c,m,f} \) = Uncontrolled loading loss of liquid loaded, in pounds per thousand gallons <br>\newline
+  \(S_{ft} \) = Saturation factor for filling technology *ft* <br>\newline
+  \(P_{c,m,f} \) = True vapor pressure of liquid loaded, in pounds per square inch absolute <br>\newline
+  \(M \) = Molecular weight of vapors, in pounds per mole <br>\newline
+  \(T \) = Temperature of liquid loaded (Rankine) [[ref 13](#gasdistro-references)] <br>\newline
+</div>
+
+Speciation profiles for benzene emissions from bulk plants are based on county-specific refueling emissions data from MOVES.
+
+**Aviation Gasoline Distribution Stage 1**
+
+The emissions factors for fugitive and non-fugitive VOC are taken from the TRC report Estimation of Alkylated Lead Emissions, Final Report [[ref 4](#gasdistro-references)]. The emissions factors for the HAPs are taken from multiple sources: the TRC report; the EPA report Locating and Estimating Air Emissions from Source of Ethylene Dichloride [[ref 14](#gasdistro-references)]; a memorandum to EPA/OAQPS [[ref 15](#gasdistro-references)], and a personal email between EPA/OAQPS employees [[ref 16](#gasdistro-references)]. HAP emission factors are available on the [2023 NEI Supporting Data and Summaries site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/) by clicking on “HAP_Augmentation_2023NEI_17apr2026.zip” and selecting the HAP Augmentation Profile file for nonpoint.
+
+**Aviation Gasoline Distribution Stage 2**
+
+The emissions factors for VOC are taken from the TRC report Estimation of Alkylated Lead Emissions, Final Report [[ref 4](#gasdistro-references)]. The emissions factors for the HAPs are taken from multiple sources: the TRC report; the EPA report Locating and Estimating Air Emissions from Source of Ethylene Dichloride [[ref 14](#gasdistro-references)]; a memorandum to EPA/OAQPS [[ref 15](#gasdistro-references)]; and a personal email between OAQPS employees [[ref 16](#gasdistro-references)]. HAP emission factors are available on the [2023 NEI Supporting Data and Summaries site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/) by clicking on “HAP_Augmentation_2023NEI_17apr2026.zip” and selecting the HAP Augmentation Profile file for nonpoint.
+
+### Controls
+
+There are county-level control efficiencies for service station unloading, including assumptions about the percentage of gasoline unloaded under different filling technologies: splash, submerged, or balanced. There are no controls assumed for all other sources.
+
+### Emissions
+
+**Bulk Terminals and Bulk Plants**
+
+Emissions of VOCs for bulk terminals are calculated by allocating national-level VOC emissions estimates developed in support of the Gasoline Distribution NESHAPs. National VOC bulk terminal emissions are allocated to states using the fraction of refinery, bulk terminal, and natural gas plant stocks of motor gasoline in each state [[ref 19](#gasdistro-references)]. 
+
+\begin{equation} 
+  GasFrac_{s} =  \frac{M_{s}}{M_{US}} 
+  (\#eq:motorgasfrac)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( GasFrac_{s} \) = Fraction of motor gasoline in state *s* <br> \newline
+  \( M_{s} \) = Amount of motor gasoline in state *s* <br> \newline
+  \( M_{US} \) = Amount of motor gasoline in the U.S. <br> \newline
+</div>
+
+The fraction of stocks of motor gasoline in each state is then used to distribute the VOC emissions and HAP emissions.
+
+\begin{equation} 
+  E_{VOC,bt,s} =  GasFrac_{s} \times EF_{VOC,US,bt} 
+  (\#eq:BTVOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,bt,s} \) = Annual VOC emissions in state *s* from bulk terminals, in tons <br> \newline
+  \( GasFrac_{s} \) = Fraction of motor gasoline in state *s* <br> \newline
+  \( EF_{VOC,US,bt} \) = Annual national-level VOC emissions from bulk terminals, in tons <br> \newline
+</div>
+
+State-level VOC emissions are allocated to counties using the fraction of petroleum bulk stations and terminals facilities employees in each county from the US Census County Business patterns data for NAICS code 42471 [[ref 10](#gasdistro-references)]. 
+
+\begin{equation} 
+  EmpFrac_{c} =  \frac{Emp_{c}}{Emp_{s}} 
+  (\#eq:bulkstationempfrac)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EmpFrac_{c} \) = Fraction of petroleum bulk stations and terminals facilities employees in county *c* <br> \newline
+  \( Emp_{c} \) = Number of petroleum bulk stations and terminals facilities employees in county *c* <br> \newline
+  \( Emp_{s} \) = Number of petroleum bulk stations and terminals facilities employees in state *s* <br> \newline
+</div>
+
+Due to concerns with releasing confidential business information, the CBP does not release exact numbers for a given NAICS code if the data can be traced to an individual business. Instead, a series of range codes is used. Many counties and some smaller states have only one petroleum bulk station and terminal facility, leading to withheld data in the county and/or state business pattern data. To estimate employment in counties and states with withheld data, the procedure discussed above is used for NAICS code 42471. 
+
+The fraction of petroleum bulk stations and terminals facilities employees in each county is then used to distribute the VOC emissions.
+
+\begin{equation} 
+  E_{VOC,bt,c} =  EmpFrac_{c} \times E_{VOC,bt,s} 
+  (\#eq:bulkterminalVOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,bt,c} \) = Annual VOC emissions from bulk terminals in county *c*, in tons <br> \newline
+  \( EmpFrac_{c} \) = Fraction of petroleum bulk stations and terminals facilities employees in county *c* <br> \newline
+  \( E_{VOC,bt,s} \) = Annual VOC emissions from bulk terminals in state *s*, in tons <br> \newline
+</div>
+
+For bulk plants, VOC emissions are estimated by multiplying the VOC emission factor by the county-level volume of bulk plant gasoline throughput. 
+
+\begin{equation} 
+  E_{VOC,c} =  EF_{VOC} / \text{1,000 gallons} \times GT_{c} \times \text{42 gallons per barrel} 
+  (\#eq:bulkplantVOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c} \) = Annual emissions of VOC from bulk plants in county *c*, in pounds <br> \newline
+  \( EF_{VOC} \) = Emissions factor for VOC from bulk plants, in pounds per 1,000 gallons <br> \newline
+  \( GT_{c} \) = Gasoline throughput for bulk plants in county *c,* in thousand barrels <br> \newline
+</div>
+
+Finally, the emissions from bulk terminals and bulk plants are added together.
+
+\begin{equation} 
+  E_{VOC,c,bpbt} =  E_{VOC,bp,c} + E_{VOC,bt,c} 
+  (\#eq:BTBPemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c,bpbt} \) = Annual emissions of VOC from bulk plants and bulk terminals in county *c*, in pounds <br> \newline
+  \( E_{VOC,bp,c} \) = Annual emissions of VOC from bulk plants in county *c*, in pounds <br> \newline
+  \( E_{VOC,bt,c} \) = Annual VOC emissions from bulk terminals in county *c*, in tons <br> \newline
+</div>
+
+Benzene emissions are estimated by multiplying VOC emissions by county-level speciation profiles from MOVES.
+
+\begin{equation} 
+  E_{BZ,c,bpbt} =  E_{VOC,c,bpbt} \times S_{BZ,c} 
+  (\#eq:bpbtbenzene)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{BZ,c,bpbt} \) = Annual emissions of benzene from bulk plants and bulk terminals in county *c*, in pounds <br> \newline
+  \( E_{VOC,c,bpbt} \) = Annual emissions of VOC from bulk plants and bulk terminals in county *c*, in pounds  <br> \newline
+  \( S_{BZ,c} \) = Speciation profile for benzene for bulk plants and bulk terminals in county *c*, as a fraction of VOC <br> \newline
+</div>
+
+All other HAPs emissions are estimated by multiplying VOC emissions by the national average speciation profiles displayed in Hester et al. [[ref 11](#gasdistro-references)] 
+
+\begin{equation} 
+  E_{p,c,bpbt} =  E_{VOC,c,bpbt} \times S_{p,c} 
+  (\#eq:bpbtHAP)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c,bpbt} \) = Annual emissions of pollutant *p* from bulk plants and bulk terminals in county *c*, in pounds <br> \newline
+  \( E_{VOC,c,bpbt} \) = Annual emissions of VOC from bulk plants and bulk terminals in county *c*, in pounds  <br> \newline
+  \( S_{p,c} \) = Speciation profile for pollutant *p* for bulk plants and bulk terminals in county *c*, as a fraction of VOC <br> \newline
+</div>
+
+**Pipelines**
+
+Emissions of VOCs for pipelines are calculated by multiplying 1998 national estimates developed in support of the Gasoline Distribution MACT standard by the current inventory year to 1998 ratio of the national volume of wholesale gasoline supplied [[ref 17](#gasdistro-references)], [[ref 18](#gasdistro-references)]. Emissions are converted to tons.
+
+\begin{equation} 
+  E_{VOC,US,pl} =  E_{MACT,US,pl} \times \frac{G_{y}}{G_{1998}} \times \text{1.1203 ton per Mg} 
+  (\#eq:USpipelineemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,US,pl} \) = Annual national-level emissions of VOC from pipelines, in tons <br> \newline
+  \( E_{MACT,US,pl} \) = 1998 national VOC emission estimates developed for Gasoline Distribution MACT standard from pipelines, in Mg <br> \newline
+  \( G_{y} \) = National volume of wholesale gasoline supplied in inventory year *y*, in thousand barrels per day <br> \newline
+  \( G_{1998} \) = National volume of wholesale gasoline supplied in 1998, in thousand barrels per day <br> \newline
+</div>
+
+National VOC and HAP emissions are allocated to PAD Districts using the fraction of the total amount of finished motor gasoline that originated in each PAD District. There are five PAD Districts across the United States.  PAD District 1 comprises seventeen states plus the District of Columbia along the Atlantic Coast; PAD District 2 comprises fifteen states in the Midwest; PAD District 3 comprises six states in South Central U.S.; PAD District 4 comprises five states in the Rocky Mountains; and PAD District 5 comprises seven states along the West Coast. These data are reported in Table 37 of Volume 1 of Petroleum Supply Annual [[ref 21](#gasdistro-references)]. States in each PAD District are shown in Table \@ref(tab:statesbyPADD).
+
+\begin{equation} 
+  PADDFrac_{PD} =  \frac{M_{PD}}{M{_US}} 
+  (\#eq:PADDfraction)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( PADDFrac_{PD} \) = Fraction of motor gasoline in PAD District *PD* <br> \newline
+  \( M_{PD} \) = Amount of finished motor gasoline in PAD District *PD*, in thousand barrels <br> \newline
+  \( M_{US} \) = Amount of finished motor gasoline in the U.S., in thousand barrels <br> \newline
+</div>
+
+\begin{equation} 
+  E_{VOC,PD,pl} =  PADDFrac_{PD} \times E_{VOC,US,pl} 
+  (\#eq:PADDpipelineemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,PD,pl} \) = Annual VOC emissions from pipelines in PAD District *PD*, in tons <br> \newline
+  \( PADDFrac_{PD} \) = Fraction of motor gasoline in PAD District *PD* <br> \newline
+  \( E_{VOC,US,pl} \) = Annual national-level VOC emissions of from pipelines, in ton <br> \newline
+</div>
+
+Pipeline emissions in each PAD District are allocated to counties based on County Business Patterns employment data. Because employment data for NAICS code 48691 (Pipeline Transportation of Refined Petroleum Products) are often withheld due to confidentiality reasons, the number of employees in NAICS code 42471 (Petroleum Bulk Stations and Terminals) are used for this allocation. To better account for the location of refined petroleum pipelines, however, no activity is allocated to States which had employees in this NAICS code but did not have employees in NAICS code 48691 (i.e., District of Columbia, Idaho, Maine, New Hampshire, Vermont, and West Virginia). To allocate pipeline emissions in each PAD District to counties, first the county level employment data for NAICS code 42471 is summed to the PAD District. 
+
+\begin{equation} 
+  Emp_{PD} =  \sum{Emp_{c}} 
+  (\#eq:PADDemp)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( Emp_{PD} \) = Number of petroleum bulk stations and terminals facilities employees in PAD District *PD* <br> \newline
+  \( Emp_{c} \) = Number of petroleum bulk stations and terminals facilities employees in county *c* <br> \newline
+</div>
+
+The fraction of petroleum bulk stations and terminals employees in each county is used to allocate the emissions from the PAD District to counties.
+
+\begin{equation} 
+  EmpFrac_{c} = \frac{Emp_{c}}{Emp_{PD}} 
+  (\#eq:pipelineempfrac)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EmpFrac_{c} \) = Fraction of petroleum bulk stations and terminals facilities employees in county *c* <br> \newline
+  \( Emp_{c} \) = Number of petroleum bulk stations and terminals facilities employees in county *c* <br> \newline
+  \( Emp_{PD} \) = Number of petroleum bulk stations and terminals facilities employees in PAD District *PD* <br> \newline
+</div>
+
+Due to concerns with releasing confidential business information, the CBP does not release exact numbers for a given NAICS code if the data can be traced to an individual business. Instead, a series of range codes is used. Many counties and some smaller states have only one petroleum bulk station and terminal facility, leading to withheld data in the county and/or state business pattern data. To estimate employment in counties and states with withheld data, the procedure discussed above is used for NAICS code 42471. 
+
+The fraction of petroleum bulk stations and terminals facilities employees in each county is then used to distribute the VOC emissions.
+
+\begin{equation} 
+  E_{VOC,c,pl} =  EmpFrac_{c} \times E_{VOC,PD,pl} 
+  (\#eq:pipelinecountyVOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c,pl} \) = Annual VOC emissions from pipelines in county *c*, in tons <br> \newline
+  \( EmpFrac_{c} \) = Fraction of petroleum bulk stations and terminals facilities employees in county *c* <br> \newline
+  \( E_{VOC,PD,pl} \) = Annual VOC emissions from pipelines in PAD District *PD*, in tons <br> \newline
+</div>
+
+Emissions of HAPs are calculated by multiplying emissions of VOCs by a national average speciation profile [[ref 13](#gasdistro-references)]. Total VOC emission estimates are used so emissions represent total emissions. 
+
+\begin{equation} 
+  E_{p,c,pl} =  E_{VOC,c,pl} \times S_{p} 
+  (\#eq:pipelinecountyHAPemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c,pl} \) = Annual emissions of pollutant p from pipelines in county *c*, in tons <br> \newline
+  \( E_{VOC,c,pl} \) = Annual VOC emissions from pipelines in county *c*, in tons <br> \newline
+  \( S_{p} \) = Speciation profile of pollutant *p*, as a fraction of VOC emissions <br> \newline
+</div>
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-16/StatesbyPADD.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r statesbyPADD, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'States by PAD District',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position"))
+```
+
+**Tank Trucks in Transit**
+
+VOC emissions from tank trucks in transit are calculated by multiplying county-level total gasoline consumption by the VOC emission factor for tank trucks in transit. 
+
+\begin{equation} 
+  E_{VOC,c,tt} =  EF_{VOC,tt} \times \frac{GC_{c,t}}{\text{1,000}} 
+  (\#eq:tanktruckVOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c,tt} \) = Annual emissions of VOC from tank trucks in transit in county *c*, in pounds <br> \newline
+  \( EF_{VOC,tt} \) = Emissions factor for VOC from tank trucks in transit, in pounds per 1,000 gallons <br> \newline
+  \( GC_{c,t} \) = Gasoline consumption for tank trucks in transit in county *c*, gallons <br> \newline
+</div>
+
+Benzene emissions are estimated by multiplying VOC emissions by county-level speciation profiles from MOVES. 
+
+\begin{equation} 
+  E_{BZ,c,tt} =  E_{VOC,c,tt} \times S_{BZ,c}
+  (\#eq:tanktruckbenzeneemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{BZ,c,tt} \) = Annual emissions of benzene from tank trucks in transit in county *c*, in pounds <br> \newline
+  \( E_{VOC,c,tt} \) = Annual emissions of VOC from tank trucks in transit in county *c*, in pounds <br> \newline
+  \( S_{BZ,c} \) = Speciation profile for benzene for tank trucks in transit in county *c*, as a fraction of VOC <br> \newline
+</div>
+
+All other HAPs emissions are estimated by multiplying VOC emissions by the national average speciation profiles. 
+
+\begin{equation} 
+  E_{p,c,tt} =  E_{VOC,c,tt} \times S_{p,c} 
+  (\#eq:tanktruckHAPemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c,tt} \) = Annual emissions of pollutant *p* from tank trucks in transit in county *c*, in pounds <br> \newline
+  \( E_{VOC,c,tt} \) = Annual emissions of VOC from tank trucks in transit in county *c*, in pounds  <br> \newline
+  \( S_{p,c} \) = Speciation profile for pollutant *p* for tank trucks in transit in county *c*, as a fraction of VOC <br> \newline
+</div>
+
+**Underground Storage Tank (UST) Breathing and Storing**
+
+VOC emissions from UST breathing and storing are calculated by multiplying county-level total gasoline consumption by the VOC emission factor for UST breathing and storing. 
+
+\begin{equation} 
+  E_{VOC,c,ust} =  EF_{VOC,ust} \times \frac{GC_{c,t}}{\text{1,000}} 
+  (\#eq:USTVOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c,ust} \) = Annual emissions of VOC from UST breathing and storing in county *c*, in pounds <br> \newline
+  \( EF_{VOC,ust} \) = Emissions factor for VOC from UST breathing and storing, in pounds per 1,000 gallons <br> \newline
+  \( GC_{c,t} \) = Gasoline consumption for UST breathing and storing in county *c*, gallons <br> \newline
+</div>
+
+Benzene emissions are estimated by multiplying VOC emissions by county-level speciation profiles from MOVES. 
+
+\begin{equation} 
+  E_{BZ,c,ust} =  E_{VOC,c,ust} \times S_{BZ,c}
+  (\#eq:USTbenzeneemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{BZ,c,tt} \) = Annual emissions of benzene from UST breathing and storing in county *c*, in pounds <br> \newline
+  \( E_{VOC,c,tt} \) = Annual emissions of VOC from UST breathing and storing in county *c*, in pounds <br> \newline
+  \( S_{BZ,c} \) = Speciation profile for benzene for UST breathing and storing in county *c*, as a fraction of VOC <br> \newline
+</div>
+
+All other HAPs emissions are estimated by multiplying VOC emissions by the national average speciation profiles. 
+
+\begin{equation} 
+  E_{p,c,ust} =  E_{VOC,c,ust} \times S_{p,c} 
+  (\#eq:USTHAPemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c,ust} \) = Annual emissions of pollutant *p* from UST breathing and storing in county *c*, in pounds <br> \newline
+  \( E_{VOC,c,ust} \) = Annual emissions of VOC from UST breathing and storing in county *c*, in pounds  <br> \newline
+  \( S_{p,c} \) = Speciation profile for pollutant *p* for UST breathing and storing in county *c*, as a fraction of VOC <br> \newline
+</div>
+
+**Gasoline Service Station Unloading**
+
+County-level uncontrolled loading loss of liquid loaded VOC emissions are calculated by multiplying the loading loss calculated in equation \@ref(eq:loadingloss) by the total gasoline consumption in each county for each filling technology.
+
+\begin{equation} 
+  E_{VOC,c,m,f,ft,ll} =  \frac{GC_{c,ft,m,f}}{\text{1,000}} \times L_{c,m,f}
+  (\#eq:uncontrolledunloadingemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c,m,f,ft,ll} \) = VOC emissions from loading loss in county *c* for month *m* for filling technology *ft* and fuel subtype *f*, in pounds <br> \newline
+  \( GC_{c,ft,m,f} \) = Total gasoline consumption in county *c* for month *m* for filling technology *ft* and fuel subtype *f*, in gallons <br> \newline
+  \( L_{c,m,f} \) = Uncontrolled loading loss of liquid loaded for county *c* for month *m* and fuel subtype *f*, in pounds per thousand gallons <br> \newline
+</div>
+
+County-level controlled VOC emissions are calculated by multiplying loading loss VOC emissions by a county-level control efficiency. Emissions are divided by 100 to convert the control efficiency from a percentage. 
+
+\begin{equation} 
+  E_{VOC,c,m,f,ft,ct} =  E_{VOC,c,m,f,ft,ll} \times CE_{c} as a percentage 
+  (\#eq:controlledunloadingemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c,m,f,ft,ct} \) = Controlled VOC emissions in county *c* for month *m* for filling technology *ft* and fuel subtype *f*, in pounds <br> \newline
+  \( E_{VOC,c,m,f,ft,ll} \) = VOC emissions from loading loss in county *c* for month *m* for filling technology *ft* and fuel subtype *f*, in pounds <br> \newline
+  \( CE_{c} \) = Control efficiency value for county *c*, as a percentage <br> \newline
+</div>
+
+County-level monthly VOC emissions by fuel subtype and filling technology are calculated by subtracting controlled VOC emissions from VOC emissions from loading loss.
+
+\begin{equation} 
+  E_{VOC,c,m,f,ft} =  E_{VOC,c,m,f,ft,ll} - E_{VOC,c,m,f,ft,ct}
+  (\#eq:monthlyVOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c,m,f,ft} \) = VOC emissions from gasoline service station unloading county *c* for month *m* for filling technology *ft* and fuel subtype *f*, in pounds <br> \newline
+  \( E_{VOC,c,m,f,ft,ll} \) = Controlled VOC emissions in county *c* for month *m* for filling technology *ft* and fuel subtype *f*, in pounds <br> \newline
+  \( E_{VOC,c,m,f,ft,ct} \) = VOC emissions from loading loss in county *c* month *m* for filling technology *ft* and fuel subtype *f*, in pounds <br> \newline
+</div>
+
+County-level total VOC emissions by filling technology are calculated by summing VOC emissions for each month and fuel subtype.
+
+\begin{equation} 
+  E_{VOC,c,ft} =  \sum {E_{VOC,c,m,f,ft}}
+  (\#eq:technologyVOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c,ft} \) = Annual VOC emissions from filling type *ft* for gasoline service station unloading for county *c*, in pounds <br> \newline
+  \( E_{VOC,c,m,f,ft} \) = VOC emissions from gasoline service station unloading county *c* for month *m* for filling technology *ft* and fuel subtype *f*, in pounds <br> \newline
+</div>
+
+Benzene emissions are estimated by multiplying VOC emissions by county-level speciation profiles from MOVES.
+
+\begin{equation} 
+  E_{BZ,c,ssu} =  E_{VOC,c,ssu} \times S_{BZ,c} 
+  (\#eq:unloadingbenzeneemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{BZ,c,ssu} \) = Annual emissions of benzene from gasoline service station unloading in county *c*, in pounds <br> \newline
+  \( E_{VOC,c,ssu} \) = Annual emissions of VOC from gasoline service station unloading in county *c*, in pounds  <br> \newline
+  \( S_{BZ,c} \) = Speciation profile for benzene for gasoline service station unloading in county *c*, as a fraction of VOC <br> \newline
+</div>
+
+All other HAPs emissions are estimated by multiplying VOC emissions by the national average speciation profiles. 
+
+\begin{equation} 
+  E_{p,c,ssu} =  E_{VOC,c,ssu} \times S_{p,c} 
+  (\#eq:unloadingHAPemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c,ssu} \) = Annual emissions of pollutant *p* from gasoline service station unloading in county *c*, in pounds <br> \newline
+  \( E_{VOC,c,ssu} \) = Annual emissions of VOC from gasoline service station unloading in county *c*, in pounds  <br> \newline
+  \( S_{p,c} \) = Speciation profile for pollutant *p* for gasoline service station unloading in county *c*, as a fraction of VOC <br> \newline
+</div>
+
+**Aviation Gasoline Distribution Stage 1**
+
+Emissions of non-fugitive VOC from multiple sources, including tank truck filling and storage tank breathing, are estimated by multiplying gasoline consumed by the emissions. For VOC, emissions are multiplied by a conversion factor to convert from tons to pounds. 
+
+\begin{equation} 
+  NFE_{r,c} =  AG_{c} \times EF_{VOC,r} / \text {2,000 lbs per ton}
+  (\#eq:nonfugitiveavgasemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( NFE_{r,c} \) = Annual non-fugitive VOC emissions for source *r* in county *c*, in tons <br> \newline
+  \( AG_{c} \) = Annual consumption of AvGas in county *c*, in gallons <br> \newline
+  \( EF_{VOC,r} \) = VOC emission factor for source *r*, units vary based on pollutant <br> \newline
+</div>
+
+Fugitive VOC emissions from valves and pumps are estimated by multiplying gasoline consumed by the emissions factor. Assumptions concerning bulk terminals used in these calculations can be found in Table \@ref(tab:avgasassumptions).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-16/Avgasassumptions.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r avgasassumptions, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Assumptions for Bulk Terminals Using Aviation Gasoline',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+\begin{equation} 
+  VFE_{c} =  BPE \times V \times EF_{VOC,r} \times D \times \frac{LTO_{c}}{LTO_{US}} / \text{2,000 lbs per ton}  
+  (\#eq:valveemissions)
+\end{equation}
+
+\begin{equation} 
+  PFE_{c} =  BPE \times P \times S \times EF_{VOC,r} \times D \times \frac{LTO_{c}}{LTO_{US}} / \text{2,000 lbs per ton} 
+  (\#eq:pumpemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( VFE_{c} \) = Annual fugitive VOC emissions from valves in county *c*, in tons <br> \newline
+  \( PFE_{c} \) = Annual fugitive VOC emissions from pumps in county *c*, in tons <br> \newline
+  \( BPE \) = Number of bulk plant equivalents in the U.S. <br> \newline
+  \( V \) = Number of valves per plant <br> \newline
+  \( P \) = Number of pumps per plant <br> \newline
+  \( S \) = Number of seals per plant <br> \newline
+  \( EF_{VOC,r} \) = VOC emission factor for source *r*, units vary based on pollutant <br> \newline
+  \( D \) = Number of days used per year <br> \newline
+  \( LTO_{c} \) = The number of landings and takeoffs in county *c* <br> \newline
+  \( LTO_{US} \) =  The number of landings and takeoffs in the US <br> \newline
+</div>
+
+Total Annual VOC emissions in each county are estimated by summing the fugitive emissions (from equations \@ref(eq:valveemissions) and \@ref(eq:pumpemissions)) and all sources of non-fugitive emissions (from equation \@ref(eq:nonfugitiveavgasemissions)).
+
+\begin{equation} 
+  E_{VOC,c} =  \sum_{r}{NFE_{r,c}+VFE_{c}+PFE_{c}} 
+  (\#eq:avstage1VOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c} \) = Annual VOC emissions in county *c*, in tons <br> \newline
+  \( NFE_{r,c} \) = Annual non-fugitive VOC emissions for source *r* in county *c*, in tons <br> \newline
+  \( VFE_{c} \) = Annual fugitive VOC emissions from valves in county *c*, in tons <br> \newline
+  \( PFE_{c} \) = Annual fugitive VOC emissions from pumps in county *c*, in tons <br> \newline
+</div>
+
+Emissions of all HAPs, except ethylene dichloride, are estimated by applying speciation factors to the annual VOC emissions. For HAPs, no conversion factor is needed, and the emissions are reported in tons.
+
+\begin{equation} 
+  E_{h,c} =  E_{VOC,c} \times SF_{h}  
+  (\#eq:avstage1hapemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{h,c} \) = Annual emissions of HAP *h* in county *c*, in tons <br> \newline
+  \( E_{VOC,c} \) = Annual VOC emissions in county *c*, in tons <br> \newline
+  \( SF_{h} \) = Emissions factor for pollutant *h*, in lbs. per million gallons <br> \newline
+</div>
+
+Ethylene dichloride emissions are calculated by multiplying the gasoline consumed in each county (from equation \@ref(eq:countyavgas)) by the emission factor. For ethylene dichloride, emissions are multiplied by a conversion factor to convert from to pounds tons.
+
+\begin{equation} 
+  E_{e,c} =  AG_{c} \times EF_{e} \times \text{0.0005 tons per lb} 
+  (\#eq:avstage1ethylenedichlorideemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{e,c} \) = Annual emissions of ethylene dichloride in county *c*, in tons <br> \newline
+  \( AG_{c} \) = Annual consumption of AvGas in county *c*, in gallons <br> \newline
+  \( EF_{e} \) = Emission factor for ethylene dichloride, in lbs. of ethylene dichloride per gallon of AvGas <br> \newline
+</div>
+
+**Aviation Gasoline Distribution Stage 2**
+
+The annual aviation gasoline consumed in each county is used with the emissions factors to estimate emissions. Emissions of VOC are estimated by multiplying gasoline consumed by the emissions factor. For VOC, emissions are multiplied by a conversion factor to convert from tons to pounds. 
+
+\begin{equation} 
+  E_{VOC,c} =  AG_{c} \times EF_{VOC} \times \text{0.0005 tons per lb} 
+  (\#eq:avstage2VOCemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC,c} \) = Annual VOC in county *c*, in tons <br> \newline
+  \( AG_{c} \) = Annual consumption of AvGas in county *c*, in gallons <br> \newline
+  \( EF_{VOC} \) = VOC emission factor, in pounds of VOC per gallon of AvGas <br> \newline
+</div>
+
+Emissions of all HAPs, except ethylene dichloride and lead, are estimated by applying speciation factors to the annual VOC emissions. For HAPs, no conversion factor is needed, and the emissions are reported in tons.
+
+\begin{equation} 
+  E_{h,c} =  E_{VOC,c} \times SF_{h}  
+  (\#eq:avstage2hapemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{h,c} \) = Annual emissions of HAP *h* in county *c*, in tons <br> \newline
+  \( E_{VOC,c} \) = Annual VOC emissions in county *c*, in tons <br> \newline
+  \( SF_{h} \) = Emissions factor for pollutant *h*, in lbs. per MMGAL <br> \newline
+</div>
+
+Ethylene dichloride and lead emissions are calculated by multiplying the gasoline consumed (from equation  \@ref(eq:countyavgas)) by the emission factor. For lead and ethylene dichloride, emissions are multiplied by a conversion factor to convert from pounds to tons.
+
+\begin{equation} 
+  E_{p,c} =  AG_{c} \times EF_{p} \times \text{0.0005 tons per lb} 
+  (\#eq:ethylenedichlorideemissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c} \) = Annual emissions of pollutant *P* in county *c*, in tons <br> \newline
+  \( AG_{c} \) = Annual consumption of AvGas in county *c*, in gallons <br> \newline
+  \( EF_{p} \) = Emission factor for pollutant *p*, in lbs. of pollutant per gallon of AvGas <br> \newline
+</div>
+
+### Point Source Subtraction
+
+There are no point source-specific SCCs for stage 1 and stage 2 aviation gasoline distribution; therefore, point source subtraction is not performed for these sources. However, some stage I gasoline emissions are reported in the point source inventory. To avoid double counting of emissions, point source emissions are subtracted from the total emissions from each source category to estimate the nonpoint emissions from each source category. Point source emissions are mapped to nonpoint source SCCs using the “Gas Distribution” crosswalk in the file “NEI PT-NP Crosswalk_complete_WagonWheel_August2021.xlsx” available on the [2023 NEI Supporting Data and Summaries site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/).
+
+\begin{equation} 
+  NPE_{p,c,SCC} =  E_{p,c,SCC} - PE_{p,c,SCC}
+  (\#eq:PSS)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( NPE_{p,c,SCC} \) = Annual nonpoint source emissions of pollutant *p* from each SCC in county *c* <br> \newline
+  \( E_{p,c,SCC} \) = Annual total emissions of pollutant *p* from each SCC in county *c* <br> \newline
+  \( PE_{p,c,SCC} \) = Annual total point source emissions of pollutant *p* from each SCC in county *c* <br> \newline
+</div>
+
+### Sample Calculations
+
+The tables below show sample calculations for estimating VOC for stage I gasoline distribution. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1, 8, 9, 10, 15, 16, 17, 18, 19, 20, 50),
+  Equation = c(
+    "$GT_{US,bp} = V_{US} \\times 0.09$",
+    "$Emp_{US} = \\sum Emp_{c}$",
+    "$EmpFrac_{c} = \\frac{Emp_{c}}{Emp_{US}}$",
+    "$GT_{c,bp} = GT_{US,bp} \\times EmpFrac_{c}$",
+    "$GasFrac_{s} = \\frac{M_{s}}{M_{US}}$",
+    "$E_{VOC,bt,s} = GasFrac_{s} \\times EF_{VOC,US,bt}$",
+    "$EmpFrac_{c} = \\frac{Emp_{c}}{Emp_{s}}$",
+    "$E_{VOC,bt,c} = EmpFrac_{c} \\times E_{VOC,bt,s}$",
+    "$E_{VOC,c,bp} = \\frac{EF_{VOC,bp}}{\\text{1,000 gal}} \\times GT_{c,bp} \\times 42$",
+    "$E_{VOC,c,bpbt} = E_{VOC,bp,c} + E_{VOC,bt,c}$",
+    "$NPE_{p,c,SCC} = E_{p,c,SCC} - PE_{p,c,SCC}$"
+  ),
+  Values = c(
+    "$\\text{3,404,186 thousand barrels} \\times 0.09$",
+    "$\\sum Emp_{c}$",
+    "$\\frac{\\text{6.54 employees}}{\\text{73,908 employees}}$",
+    "$\\text{306,377 thousand barrels} \\times 0.000089$",
+    "$\\frac{\\text{205 thousand barrels}}{\\text{16,798 thousand barrels}}$",
+    "$0.0052 \\times \\text{120,000 tons}$",
+    "$\\frac{\\text{6.54 employees}}{\\text{732 employees}}$",
+    "$0.0089 \\times \\text{624 tons}$",
+    "$\\text{8.62 lb per 1,000 gal.} \\div 1000 \\times 27.11 \\times 42$",
+    "$\\frac{\\text{9.8 lbs VOC}}{\\text{2,000 lbs per ton}} + \\text{5.55 tons VOC}$",
+    "$\\text{5.5549 tons VOC} - \\text{1 ton}$"
+  ),
+  Result = c(
+    "306,377 thousand barrels at bulk plants",
+    "73,908 employees in the US",
+    "0.000089",
+    "27.11 thousand barrels",
+    "0.0052",
+    "624 tons VOC emissions",
+    "0.0089",
+    "5.55 tons VOC emissions from bulk terminals",
+    "9.8 pounds VOC emissions from bulk plants",
+    "5.5549 tons VOC emissions from bulk plants and bulk terminals",
+    "4.5549 tons nonpoint source VOC emissions"
+  )
+)
+```
+
+```{r bulkterminal-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,
+    caption = "Sample Calculations for VOC emissions from Stage I Gasoline Distribution – Bulk Terminals and Bulk Plants",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"), font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(23, 24, 25, 26, 27, 28),
+  Equation = c(
+    "$E_{VOC,US,pl} = E_{MACT,US,pl} \\times \\frac{G_{y}}{G_{1998}} \\times \\text{1.1203}$",
+    "$PADDFrac_{PD} = \\frac{M_{PD}}{M_{US}}$",
+    "$E_{VOC,PD,pl} = PADDFrac_{PD} \\times E_{VOC,US,pl}$",
+    "$Emp_{PD} = \\sum Emp_{c}$",
+    "$EmpFrac_{c} = \\frac{Emp_{c}}{Emp_{PD}}$",
+    "$E_{VOC,c,pl} = EmpFrac_{c} \\times E_{VOC,PD,pl}$"
+  ),
+  Values = c(
+    "$\\text{137,555 Mg} \\times \\frac{\\text{9,327}}{\\text{8,253}} \\times \\text{1.1203}$",
+    "$\\frac{\\text{3,856 thousand barrels in district}}{\\text{119,634 thousand barrels in US}}$",
+    "$0.32 \\times \\text{171,359 tons}$",
+    "$\\sum Emp_{c}$",
+    "$\\frac{\\text{6.54 employees}}{\\text{10,641 employees}}$",
+    "$0.00061 \\times \\text{5,523 tons}$"
+  ),
+  Result = c(
+    "171,359 tons VOC emissions in the US",
+    "0.32",
+    "5,523 tons VOC emissions in district",
+    "10,641 employees in district",
+    "0.00061",
+    "3.37 tons VOC emissions"))
+```
+
+```{r pipelines-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,
+    caption = "Sample Calculations for VOC emissions from Stage I Gasoline Distribution – Pipelines",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"), font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}"))
+```
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(2, 3, 4, 30),
+  Equation = c(
+    "$GC_{OR,c} = \\sum GC_{OR,m}$",
+    "$GC_{NR,c} = \\sum GC_{NR,m}$",
+    "$GC_{c,t} = (GC_{OR,c}+GC_{NR,c}) \\times 1.09$",
+    "$E_{VOC,c,tt} = EF_{VOC,tt} \\times \\frac{GC_{c,t}}{\\text{1,000}}$"
+  ),
+  Values = c(
+    "$\\sum GC_{OR,m}$",
+    "$\\sum GC_{NR,m}$",
+    "$(\\text{44,007,116.5 gallons} + \\text{913,078.6 gallons}) \\times 1.09$",
+    "$\\text{0.06 lb. per 1,000 gallons} \\times \\frac{\\text{48,963,012.6 gallons}}{\\text{1,000}}$"
+  ),
+  Result = c(
+    "44,007,116.5 gallons of onroad gasoline consumed",
+    "913,078.6 gallons of nonroad gasoline consumed",
+    "48,963,012.6 gallons of gasoline consumed",
+    "2,937.7 pounds VOC emissions"))
+```
+
+```{r tanktrucks-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,
+    caption = "Sample Calculations for VOC emissions from Stage I Gasoline Distribution – Tank Trucks in Transit",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"), font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}"))
+```
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(2, 3, 4, 33),
+  Equation = c(
+    "$GC_{OR,c} = \\sum GC_{OR,m}$",
+    "$GC_{NR,c} = \\sum GC_{NR,m}$",
+    "$GC_{c,t} = (GC_{OR,c}+GC_{NR,c}) \\times 1.09$",
+    "$E_{VOC,c,tt} = EF_{VOC,tt} \\times \\frac{GC_{c,t}}{\\text{1,000 gal.}}$"
+  ),
+  Values = c(
+    "$\\sum GC_{OR,m}$",
+    "$\\sum GC_{NR,m}$",
+    "$(\\text{44,007,116.5 gal.} + \\text{913,078.6 gal.}) \\times 1.09$",
+    "$\\text{1 lb. per 1,000 gal.} \\times \\frac{\\text{48,963,012.6 gal.}}{\\text{1,000 gal.}}$"
+  ),
+  Result = c(
+    "44,007,116.5 gallons of onroad gasoline consumed",
+    "913,078.6 gallons of nonroad gasoline consumed",
+    "48,963,012.6 gallons of gasoline consumed",
+    "48,963 pounds VOC emissions"))
+```
+
+```{r UST-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,
+    caption = "Sample Calculations for VOC emissions from Stage I Gasoline Distribution – Underground Storage Tank (UST) Breathing and Storing",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"), font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}"))
+```
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c("5", "6", "13", "14", "36", "37", "38", "39"),
+  Equation = c(
+    "$GC_{c,t,m,f} = (GC_{c,OR,m,f}+GC_{c,NR,m,f}) \\times 1.09$",
+    "$GC_{c,ft,m,f} = GC_{c,m,f} \\times Perc_{ft,c}$",
+    # Use array (inline‑math friendly) instead of aligned
+    "$\\begin{array}{@{}l@{}}%
+      P_{c,m,f} = \\left[0.7553 - \\frac{413}{T_{c.m} + 459.6}\\right] S^{0.5}  \\\\
+      \\quad \\log_{10}\\!\\left(\\mathrm{RVP}_{c,m,f}\\right) \\\\
+      \\quad - \\left[1.854 - \\frac{1042}{T_{c.m} + 459.6}\\right] S^{0.5} \\\\
+      \\quad + \\left[\\frac{2,416}{T_{c.m} + 459.6} - 2.013\\right] \\log_{10}\\!\\left(\\mathrm{RVP}_{c,m,f}\\right) \\\\
+      \\quad - \\frac{8,742}{T_{c.m} + 459.6} + 15.64
+      \\end{array}$",
+    "$L_{c,m,f} = 12.46 \\times S_{ft} \\times P_{c,m,f} \\times M/T$",
+    "$E_{VOC,c,m,f,ft,ll} = \\frac{GC_{c,ft,m,f}}{\\text{1,000}} \\times L_{c,m,f}$",
+    "$E_{VOC,c,m,f,ft,ct} = E_{VOC,c,m,f,ft,ll} \\times CE_{c}/100$",
+    "$E_{VOC,c,m,f,ft} = E_{VOC,c,m,f,ft,ll} - E_{VOC,c,m,f,ft,ct}$",
+    "$E_{VOC,c,ft} = \\sum E_{VOC,c,m,f,ft}$"
+  ),
+  Values = c(
+    "$(\\text{1,650,266.8 gal.} + \\text{11,985.2 gal.}) \\times 1.09$",
+    "$\\text{18,111,854.7 gal.} \\times \\text{0\\% splash filling}$",
+    # Numeric substitution, also with array
+    "$\\begin{array}{@{}l@{}}%
+      P = \\left[0.7553 - \\frac{413}{60 + 459.6}\\right] 3^{0.5} \\\\
+      \\quad \\log_{10}\\!(10.61) \\\\
+      \\quad - \\left[1.854 - \\frac{1042}{60 + 459.6}\\right] 3^{0.5} \\\\
+      \\quad + \\left[\\frac{2,416}{60 + 459.6} - 2.013\\right] \\log_{10}\\!(10.61) \\\\
+      \\quad - \\frac{8,742}{60 + 459.6} + 15.64
+      \\end{array}$",
+    "$12.46 \\times 1.45 \\times 5.54 \\times 65.5 / 520$",
+    "$\\frac{\\text{0 gal. splash filling}}{\\text{1,000 gal.}} \\times \\text{12.61 lb per 1,000 gal.}$",
+    "$\\text{0 lb} \\times \\text{0 control efficiency}/100$",
+    "$\\text{0 lb} - \\text{0 lb}$",
+    "$\\sum E_{VOC,c,m,f,ft}$"
+  ),
+  Result = c(
+    "18,111,854.7 gal.",
+    "0 gal. splash filling",
+    "5.54 lb per square inch absolute",
+    "12.61 lb per 1,000 gal.",
+    "0 lb VOC emissions",
+    "0 lb controlled VOC emissions",
+    "0 lb total VOC emissions",
+    "0 lb total VOC emissions"
+  ),
+  stringsAsFactors = FALSE
+)
+```
+
+```{r gasservicestation-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,
+    caption = "Sample Calculations for VOC emissions from Stage I Gasoline Distribution – Gasoline Service Station Unloading",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"), font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}"))
+```
+
+**Aviation Gasoline Distribution Stage 1**
+
+Table \@ref(tab:avgas1-sample-calculations) lists sample calculations to determine the VOC emissions from stage 1 aviation gasoline distribution. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(7, 11, 12, 42, 42, 42, 42, 43, 44, 45),
+  Equation = c(
+    "$AG_{s} = AGB_{s} \\times 42\\,\\text{gallons/barrel}$",
+    "$RLTO_{c} = \\frac{LTO_{c}}{LTO_{s}}$",
+    "$AG_{c} = AG_{s} \\times RLTO_{c}$",
+    "$NFE_{r,c} = AG_{c} \\times EF_{VOC,r} / \\text{2,000}$",
+    "$NFE_{r,c} = AG_{c} \\times EF_{VOC,r} / \\text{2,000}$",
+    "$NFE_{r,c} = AG_{c} \\times EF_{VOC,r} / \\text{2,000}$",
+    "$NFE_{r,c} = AG_{c} \\times EF_{VOC,r} / \\text{2,000}$",
+    "$VFE_{c} = BPE \\times V \\times EF_{VOC,r} \\times D \\times \\frac{LTO_{c}}{LTO_{US}} / \\text{2,000}$",
+    "$PFE_{c} = BPE \\times P \\times S \\times EF_{VOC,r} \\times D \\times \\frac{LTO_{c}}{LTO_{US}} / \\text{2,000}$",
+    "$E_{VOC,c} = \\sum_{r}{NFE_{r,c}+VFE_{c}+PFE_{c}}$"
+  ),
+  Values = c(
+    "$\\text{57,000 barrels} \\times 42\\,\\text{gallons/barrel}$",
+    "$\\frac{\\text{3,064 LTOs in county}}{\\text{689,947 LTOs in AL}}$",
+    "$\\text{2,394,000 gal AvGas in AL} \\times 0.004444$",
+    "$\\text{10,633 gal} \\times 9.02 \\times 10^{-3} / \\text{2,000}$",
+    "$\\text{10,633 gal} \\times 3.61 \\times 10^{-3} / \\text{2,000}$",
+    "$\\text{10,633 gal} \\times 1.03 \\times 10^{-2} / \\text{2,000}$",
+    "$\\text{10,633 gal} \\times 1.69 \\times 10^{-3} / \\text{2,000}$",
+    "$2442 \\times 50 \\times 0.573 \\times 300 \\times \\frac{3.064}{28,353,661} / 2000$",
+    "$2442 \\times 2 \\times 4 \\times 5.95 \\times 300 \\times \\frac{3.064}{28,353,661} / 2000$",
+    "$0.131\\,\\text{tons} + 1.13\\,\\text{tons} + 1.89\\,\\text{tons}$"),
+  Result = c(
+    "2,394,000 gal. of AvGas consumed in the state",
+    "0.00444 fraction of LTOs",
+    "10,633 gal. of AvGas consumed",
+    "0.048 tons VOC emissions",
+    "0.0192 tons VOC emissions",
+    "0.0548 tons VOC emissions",
+    "0.00901 tons VOC emissions",
+    "1.13 tons fugitive VOC emissions",
+    "1.89 tons fugitive VOC emissions",
+    "3.15 total annual tons VOC emissions"))
+```
+
+```{r avgas1-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,
+    caption = "Sample Calculations for VOC emissions from Aviation Gasoline Distribution – Stage 1",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"), font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}"))
+```
+
+**Aviation Gasoline Distribution Stage 2**
+
+Table \@ref(tab:avgas2-sample-calculations) lists sample calculations to determine the VOC, lead, and ethylene dichloride emissions from stage 2 aviation gasoline distribution in an example county. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(7, 11, 12, 48),
+  Equation = c(
+    "$AG_{s} = AGB_{s} \\times 42\\,\\text{gallons/barrel}$",
+    "$RLTO_{c} = \\frac{LTO_{c}}{LTO_{s}}$",
+    "$AG_{c} = AG_{s} \\times RLTO_{c}$",
+    "$E_{VOC,c} = AG_{c} \\times EF_{VOC} \\times \\text{0.0005 tons per lb}$"
+  ),
+  Values = c(
+    "$\\text{57,000 barrels} \\times 42\\,\\text{gallons/barrel}$",
+    "$\\frac{\\text{3,064 LTOs in county}}{\\text{689,947 LTOs in AL}}$",
+    "$\\text{2,394,000 gal AvGas in AL} \\times 0.004444$",
+    "$\\text{10,633 gal} \\times \\text{0.0136 lbs VOC per gal} \\times 0.005 \\frac{ton}{lb}$"
+  ),
+  Result = c(
+    "2,394,000 gal. of AvGas consumed in the state",
+    "0.00444 fraction of LTOs",
+    "10,633 gal. of AvGas consumed",
+    "0.0723 tons VOC emissions"))
+```
+
+```{r avgas2-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,
+    caption = "Sample Calculations for VOC emissions from Aviation Gasoline Distribution – Stage 2",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"), font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}"))
+```
+
+### Improvements/Changes in the 2023 NEI
+
+There are no significant changes to the methodology used to calculate emissions from aviation gasoline distribution. Activity data was updated to reflect the most recent, best available data at the time of the NEI. Emissions for bulk terminals and bulk plants were combined under one SCC for the 2023 NEI.
+
+The activity data for bulk terminals was updated to use national-level VOC estimates from the 2022 Regulatory Impact Analysis for the Proposed National Emission Standards for Hazardous Air Pollutants: Gasoline Distribution Technology Review and Standards of Performance for Bulk Gasoline Terminals Review. Earlier methods used modeling from the 1998 MACT standards for gasoline distribution. Note that pipeline calculations continue to use emissions from the 1998 MACT standards. 
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exists to calculate emissions for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the US Virgin Islands. The total emissions in pounds for these two Florida counties are divided by their respective populations creating a pound per capita emission factor. For each Puerto Rico and US Virgin Island County, the pound per capita emission factor is multiplied by the county population (from the same year as the inventory’s activity data) which serves as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”.
+
+## References {#gasdistro-references}
+
+1.	U.S. Environmental Protection Agency, “National Emission Standards for Source Categories:  Gasoline Distribution (Stage I), 40 CFR Part 63.”  Office of Air Quality Planning and Standards, February 28, 1997. Pages 9087-9093.
+2.	U.S. Environmental Protection Agency, "Gasoline Distribution Industry (Stage I) - Background Information for Proposed Standards," EPA 453/R94 002a, Office of Air Quality Planning and Standards, January 1994. https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=2000H4F5.TXT
+3.	Eastern Research Group, Inc., "Volume III: Chapter 11, Gasoline Marketing (Stage I and Stage II), Revised Final," prepared for the Emission Inventory Improvement Program, January 2001. https://www.epa.gov/sites/default/files/2015-08/documents/iii11_apr2001.pdf. 
+4.	TRC Environmental Corporation. 1993. Estimation of Alkylated Lead Emissions, Final Report. Prepared for the U.S. Environmental Protection Agency, Office of Air Quality Planning and Standards. RTP, NC. 
+5.	U.S. Department of Energy, Energy Information Administration, Petroleum Navigator – [Product Supplied](https://www.eia.gov/dnav/pet/pet_cons_psup_dc_nus_mbbl_a.htm). 
+6.	Cavalier, Julia, MACTEC, Inc., personal communication, "RE: Percentage of Gasoline Transported Twice By Truck," with Stephen Shedd, U.S. Environmental Protection Agency, Office of Air Quality Planning and Standards, Emission Standards Division, July 6, 2004.
+7.	Energy Information Administration. [State Energy Data System (SEDS)](https://www.eia.gov/state/seds/).  Consumption in Physical Units. U.S. Department of Energy. Washington, D.C.
+8.	2023 MOVES run results provided by Alison Eyth, U.S. Environmental Protection Agency, Emissions Inventory and Analysis Group, November, 16, 2022.
+9.	Pacific Environmental Services, Inc., "Draft Summary of the Analysis of the Emissions Reported in the 1999 NEI for Stage I and Stage II Operations at Gasoline Service Stations," prepared for the U.S. Environmental Protection Agency and the Emission Inventory Improvement Program, September 2002.
+10.	U.S. Census Bureau, [County Business Patterns](https://www.census.gov/programs-surveys/cbp.html).
+11.	[2023 Aircraft NEI All Info.xlsx], electronic file from Janice Godfrey, U.S. Environmental Protection Agency, OAQPS, to U.S. Environmental Protection Agency, OAQPS. Aircraft operations data for 2023 compiled from FAA’s Terminal Area Forecasts (TAF) and 5010 Forms. 
+12.	Federal Aviation Administration (FAA). 2017. Form 5010. [Airport Data and Contact Information](https://www.faa.gov/airports/airport_safety/airportdata_5010/).  
+13.	U.S. Environmental Protection Agency, “Compilation of Air Pollutant Emission Factors, AP 42, Fifth Edition, Volume I:  Stationary Point and Area Sources, Chapter 7: Liquid Storage Tanks,” Office of Air Quality Planning and Standards, Emission Inventory Group, September 1997. https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-fifth-edition-volume-i-chapter-7-liquid-storage-0.
+14.	U.S. Environmental Protection Agency. 1984. [Locating and Estimating Air Emissions from Sources of Ethylene Dichloride](https://www3.epa.gov/ttn/chief/le/ethyldi.pdf). Table 16, EPA-450/4-84-007d. RTP, NC. 
+15.	Memorandum from Greg LaFlam and Tracy Johnson (PES) to Stephen Shedd (EPA/OAQPS). Speciated Hazardous Air Pollutants - Baseline Emissions and Emissions Reductions Under the Gasoline Distribution NESHAP. August 9, 1996.
+16.	Personal Communication via e-mail from Stephen Shedd (EPA/OAQPS) to Laurel Driver (EPA/OAQPS). E-mail dated May 29, 2002.
+17.	U.S. Department of Energy, Energy Information Administration, [U.S. Daily Average Supply and Distribution of Crude Oil and Petroleum Products](https://www.eia.gov/petroleum/supply/annual/volume1/).
+18.	U.S. Department of Energy, Energy Information Administration, [U.S. Daily Average Supply and Distribution of Crude Oil and Petroleum Products](https://www.eia.gov/petroleum/supply/annual/volume1/). Table 2 in Petroleum Supply Annual 1998, Volume 1, released June 1999. 
+19.	U.S. Department of Energy, Energy Information Administration, [Refinery, Bulk Terminal, and Natural Gas Plant Stocks of Selected Petroleum Products by PAD District and State](https://www.eia.gov/petroleum/supply/annual/volume1/).  
+20.	Hester, Charles, MACTEC, Inc. Memorandum from Charles Hester, MACTEC, Inc., to Stephen Shedd, U.S. Environmental Protection Agency, Office of Air Quality Planning and Standards, Emission Standards Division, "Review of Data on HAP Content in Gasoline," May 18, 2006.
+21.	U.S. Department of Energy, Energy Information Administration, [Movements of Crude Oil and Petroleum Products by Pipeline Between PAD Districts](https://www.eia.gov/petroleum/supply/annual/volume1/). 

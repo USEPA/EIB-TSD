@@ -1,0 +1,234 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Other Ammonia Sources {#othNH3}
+
+## Sector Descriptions and Overview 
+
+In the NEI, we already cover the major sources of ammonia (NH3) air emissions, including livestock/animal waste and agricultural fertilizer application emissions. Direct ammonia emissions from humans also occur from such processes as breath, sweat, infant excretion, and from cigarette smokers. This work centers around estimating ammonia emissions for these and other lesser prominent, non-agricultural sources, that would tend to scale with urban populations, in addition to the human-based sources mentioned above, the other estimates described here occur from cat waste, dog waste, and deer excrement.
+
+Emission impacts from the addition of these sources are expected to be minimal at the national and even state level; however, adding these as an EPA method serves to make the NEI more complete, one of the basic tenets we have with every NEI.
+
+Table \@ref(tab:othNH3-sccs) lists the Source Classification Codes (SCCs) for these sources. All SCCs in Table \@ref(tab:othNH3-sccs) already existed in our EIS system and states could report emissions into them, but EPA did not have, until this time, any national methods to estimate most of the emissions that go into these SCCs. Please note that human respiration and human perspiration are summed into one SCC; this SCC description was updated from SCC level 2 “Other Combustion” to “Human Physiological Processes”, and the old SCC (not shown here) was retired. The SCC level 1 description is “Miscellaneous Area Sources; Other Combustion” for all SCCs. The EIS Sector for the animal waste (cats, dogs, and deer) is “Agriculture - Livestock Waste” and the Sector for the remaining SCCs is “Miscellaneous Non-Industrial NEC”.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-38/Other NH3 SCCs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r othNH3-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Source Classification Codes used for non-agricultural/other sources of NH3.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+## EPA-developed estimates
+
+The general approach for these sources is to multiply an appropriate emissions factor (EF) with appropriate activity to estimate annual county-level emissions. All EFs for these SCCs come from a Sutton et al 2000 study [[ref 1](#othNH3-references)], mostly from Table 7 of that manuscript. While these measurements were conducted in the United Kingdom, the consensus is that these EFs are equally applicable to the US as this research is the best collection of up-to-date data for these sources. There are no controls applied in any of the calculations. 
+
+The EPA Wagon Wheel estimates county-specific ammonia emissions for all processes discussed here. No other pollutants are estimated; therefore, HAP Augmentation, PM Augmentation, and PM Speciation are not considered for these sources. 
+
+### Human Respiration and Perspiration 
+
+A methodology for estimating ammonia emissions from human sweat was suggested by Healy et al. [[ref 2](#othNH3-references)], who provided an upper estimate by assuming complete hydrolysis and volatilization of urea in sweat. This estimate was subsequently used as the basis for sweat emissions by many researchers. A smaller emission estimate was provided earlier Sutton et al. [[ref 3](#othNH3-references)], who suggested that only 20 percent would be volatilized. With this new work [[ref 1](#othNH3-references)], Sutton et al. include other parameters that are important for estimating NH3 from human perspiration, including some default assumptions about amount of exercise activity in a day for adults.
+
+Ammonia emissions from human breath are estimated to be much smaller than from human sweat. Lee and Dollard [[ref 4](#othNH3-references)] was adopted earlier by Sutton et al. [[ref 3](#othNH3-references)]. Breathing rates also vary greatly depending on the amount of physical exercise; those that are smokers may need to be treated differently, and all these features and improvements have been included by the most recent Sutton research [[ref 1](#othNH3-references)]. Although larger than the earlier estimates, these are not major sources of NH3 air emissions.
+
+Ammonia emissions from human respiration and perspiration are estimated by this equation:
+
+\begin{equation} 
+  E_{c} = P_{c} \times EF_{hr} + P_{c} \times EF_{hp}
+  (\#eq:humanresp-emissions)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{c} \) = Ammonia emissions from human respiration and perspiration in county *c* <br> \newline
+  \( P_{c} \) = Population of adults in county *c* <br> \newline
+  \( EF_{hr} \) = Ammonia emissions factor for human respiration per person <br> \newline
+  \( EF_{hp} \) = Ammonia emissions factor for human perspiration per person <br> \newline
+  
+</div>
+
+The population data comes directly from year-specific Census data. The EF comes from Table 7 in [Reference 1](#othNH3-references), one EF for respiration and one for perspiration used for all counties nationwide. The perspiration and respiration emissions are then summed for each county.
+
+### Cigarette Smoke
+
+Several studies have in the past measured NH3 emissions from cigarette smoke. In more recent times, Martin et al. [[ref 5](#othNH3-references)] in 1997 provided the most detailed analyses of NH3 emissions from cigarette smoke. This study surveyed emissions of many chemical species for the top 50 cigarette brands (at the time) using a smoker in an environmental test chamber. These results are considered the most reliable estimates of ammonia emissions from cigarette smoke. The work we rely on here [[ref 5](#othNH3-references)] draws on these estimates and makes some assumptions for cigarette consumption and other characteristics about cigarette usage by the general adult population to derive the average EFs that we use in the NEI. These estimates do not consider use of cigarettes by those less than 18 years of age nor use of other smoking products like vaping or cigars.
+
+This equation is used to compute emissions:
+
+\begin{equation} 
+  E_{c} = P_{c} \times F_{c} \times EF_{cs}
+  (\#eq:smoking-emissions)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{c} \) = Ammonia emissions from cigarette smoking in county *c* <br> \newline
+  \( P_{c} \) = Population of adults in county *c* <br> \newline
+  \( F_{c} \) = Fraction of adult population that smokes in county *c* <br> \newline
+  \( EF_{cs} \) = Ammonia emissions factor for cigarette smoking per person that smokes <br> \newline
+  
+</div>
+
+The population data comes directly from the US Census (as those that are 18 years or older in the US). The fraction of the US adult population that are smokers are state-specific and available from the Centers for Disease Control and Prevention [[ref 8](#othNH3-references)].
+
+The EF comes from [Reference 5](#othNH3-references), Table 7, and is the same for all counties in the US.
+
+### Infant Diaper Use
+
+Readers are referred to [Reference 1](#othNH3-references) for the background on the measurements used to estimate EFs (i.e., volatilization rates, proportions of disposable vs cloth diapers, and the appropriate weighting of emission factors across the two, etc.). We assume that the same conditions as suggested in [Reference 1](#othNH3-references) apply in the US. Reference 1 also suggests the EF should apply from birth to age 3; however, in this analysis we extend the age to 4, as information is available to suggest diapers are used until about age 4 in the US.
+
+The Equation used to estimate NH3 emissions is as follows:  
+
+\begin{equation} 
+  E_{c} = IP_{c} \times EF_{d}
+  (\#eq:diaper-emissions)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{c} \) = Ammonia emissions from infant diaper use in county *c* <br> \newline
+  \( IP_{c} \) = Population of children aged 4 and under in county *c* <br> \newline
+  \( EF_{d} \) = Ammonia emissions factor for diaper use per infant <br> \newline
+  
+</div>
+
+The population of infants in a county 4 years of age or younger is available directly from Census data, and a national EF as listed in [Reference 1](#othNH3-references), Table 7 is used to compute the resulting emissions.
+
+### Dog Waste
+
+Studies have evolved over time on estimating the volatilization of NH3 from dog excrement over the past 3 decades. The work in [Reference 1](#othNH3-references) provides the most recent updates based on all the previous work [[ref 6, ref 7](#othNH3-references)], including using optimal/average values of the volatilization of the total N excretion from dogs.  Comparisons were made with the rates of N loss from livestock and sheep to better calibrate the N volatilization losses from dogs as part of the work completed in [Reference 1](#othNH3-references).
+
+The equation to estimate NH3 emissions from dog waste is as follows:
+
+\begin{equation} 
+  E_{c} = DP_{c} \times ND \times EF_{dog}
+  (\#eq:dog-emissions)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{c} \) = Ammonia emissions from dog waste in county *c* <br> \newline
+  \( DP_{c} \) = Number of dog-owning households in county *c* <br> \newline
+  \( ND \) = Average number of dogs per household that has dogs (1.6) <br> \newline
+  \( EF_{dog} \) = Ammonia emissions factor for dog waste per dog <br> \newline
+  
+</div>
+
+The number of dog owning households is estimated from the total number of households (from Census data) multiplied by 0.614 (this percentage/fraction comes from a 11/22/24 data pull from the American Veterinary Medical Association [[ref 9](#othNH3-references)]). The average number of households that own a dog in the US estimated for the year 2024 was 45.5 percent. Number of dogs per household is set equal to 1.6 * number of dog owning households (from same website cited above). The EF comes from [Reference 1](#othNH3-references), Table 7. No distinctions are made on size of dog or other patterns, as discussed in [Reference 1](#othNH3-references), just an average EF is used.
+
+### Cat Waste
+
+The procedure and methods for cats resembles that for dogs. The EFs on average are smaller because on average cats tend to be smaller than dogs, thus producing less excrement, and, in turn, less volatilization of NH3 into the air. [Reference 1](#othNH3-references) should be consulted for how the update EF was derived for cat waste NH3 based on earlier studies and research.
+
+The equation to estimate NH3 emissions from cat waste is as follows:
+
+\begin{equation} 
+  E_{c} = CP_{c} \times NC \times EF_{cat}
+  (\#eq:cat-emissions)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{c} \) = Ammonia emissions from cat waste in county *c* <br> \newline
+  \( CP_{c} \) = Number of cat-owning households in county *c* <br> \newline
+  \( Nc \) = Average number of cat per household that has cats (1.8) <br> \newline
+  \( EF_{cat} \) = Ammonia emissions factor for cat waste per cat <br> \newline
+  
+</div>
+
+### Deer Waste
+
+Deer are wild animals, and not domesticated like cats and dogs, therefore we cannot work with Census-based human population and household data to estimate the counts of deer. Rather, a search was needed to obtain county-based deer populations. Our search did not find county-based deer populations, only state totals. Thus, we use the state totals and apportion those numbers to county by the size of the county. Our assumption is that the bigger the county the more land area (and forested land by assumption) and the more deer that would exist there. The EFs are still taken from [Reference 1](#othNH3-references), Table 7. However, in [Reference 1](#othNH3-references), two EFs are given for Deer: “small deer” and “large deer”. An average EF was computed as 0.86 kg NH3/deer/year. Details are given in [Reference 1](#othNH3-references) as to how these average EFs were developed based on historical work and updates made to account for the actual volatilization process for wild animals.
+
+The state specific deer counts come from the [a-z-animal website](https://a-z-animals.com/animals/deer/deer-facts/deer-population-in-united-states-by-state/), with search for “deer population by state”. Note that these deer counts include all types of deer that exist in the United States. The state total deer counts are not expected to vary much from one year to the next.
+
+The equation to estimate NH3 emissions from deer waste is as follows:
+
+\begin{equation} 
+  E_{c} = DP_{s} \times FS_{c} \times EF_{deer}
+  (\#eq:deer-emissions)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{c} \) = Ammonia emissions from deer waste in county *c* <br> \newline
+  \( DP_{s} \) = Deer population in state *s* <br> \newline
+  \( FS_{c} \) = Area fraction of state in county *c* <br> \newline
+  \( EF_{deer} \) = Ammonia emissions factor for deer waste per average deer <br> \newline
+  
+</div>
+
+### Sample Calculations
+
+Table \@ref(tab:othNH3-sample-calculations)  lists sample calculations to determine NH3 emissions from other,non-agricultural sources. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c("1", "2", "3", "4", "5", "6"),
+  Equation = c("$E_{c} = P_{c} \\times EF_{hr} + P_{c} \\times EF_{hp}$",
+               "$E_{c} = P_{c} \\times F_{c} \\times EF_{cs}$",
+               "$E_{c} = IP_{c} \\times EF_{d}$",
+               "$E_{c} = DP_{c} \\times ND \\times EF_{dog}$",
+               "$E_{c} = CP_{c} \\times NC \\times EF_{cat}$",
+               "$E_{c} = DP_{s} \\times FS_{c} \\times EF_{deer}$"),
+  Values = c("$60,428 \\text{ people} \\times 3 \\text{ g/person/year} \\times 0.0000011 \\frac{g}{short ton} + 60,428 \\times 14 \\text{ g/person/year} \\times 0.0000011 \\frac{g}{short ton}$",
+             "$116,897 \\text{ adults} \\times 19.2 \\text{ percent} \\times 17.8 \\text{ g/person/year} \\times 0.0000011 \\frac{g}{short ton}$",
+             "$3,475 \\text{ infants} \\times  13.7 \\text{ g/infant/year} \\times 0.0000011 \\frac{g}{short ton}$",
+             "$23,054 \\text{ households} \\times  45.5 \\text{ percent} \\times 1.6 \\text{ dogs per home} \\times  0.61 \\text{ kg/dog/year} \\times 0.0000011 \\frac{g}{short ton}$",
+             "$23,054 \\text{ households} \\times  32.1 \\text{ percent} \\times  1.8 \\text{ dogs per home} \\times  0.11 \\text{ kg/dog/year} \\times 0.0000011 \\frac{g}{short ton}$",
+             "$1.75\\text{ million deer} \\times  1.17 \\text{ percent} \\times  0.86 \\text{ kg/deer/year} \\times 0.0000011 \\frac{g}{short ton}$"),
+  Result = c("1.13 tons NH3 from human resipration and perspiration",
+             "0.44 tons NH3 from cigarette smoking",
+             "0.052 tons NH3 from infant diaper use",
+             "11.3 tons NH3 from dog waste",
+             "1.6 tons NH3 from cat waste",
+             "19.5 tons NH3 from deer waste")
+)
+```
+```{r othNH3-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+
+### Improvements/Changes in the 2023 NEI
+
+These sources had not previously been estimated by the EPA; therefore, these are new sources of emissions for the 2023 NEI. NEIs prior to 2017 reflected sparse emissions from the few States that submitted; however, for the 2020 NEI, we removed any State-submitted estimates. SLTs can again submit their own estimates for the 2023 NEI and subject to quality assurance checks, would be present in the 2023 NEI in lieu of EPA estimates discussed in this section.
+
+State and Local data submitters have the option to provide more local information on the following activity data: smoker fraction of population, population between ages 0 and 4 years of age (diapers), fraction of homes with cats, fraction of homes with dogs, and deer population. See Section 6 (Nonpoint Overview) for more details.
+
+## References {#othNH3-references}
+
+1.	M.A. Sutton, U. Dragosits, Y.S. Tang, D. Fowler, 2000, Ammonia emissions from non-agricultural sources in the UK, Atmospheric Environment 34 (2000) 855-869. https://doi.org/10.1016/S1352-2310(99)00362-3 
+2.	Healy, T.V., McKay, H.A.C., Pilbeam, A., Scargill, D., 1970, Ammonia and ammonium sulphate in the troposphere over the United Kingdom. Journal of Geophysical Research 75, 2317-2321. https://doi.org/10.1029/JC075i012p02317 
+3.	Sutton, M.A., Place, C.J., Eager, M., Fowler, D., Smith, R.I., 1995. Assessment of the magnitude of ammonia emissions in the United Kingdom. Atmospheric Environment 29, 1393-1411. https://doi.org/10.1016/1352-2310(95)00035-W 
+4.	Lee, D.S., Dollard, G.J., 1994. Uncertainties in current estimates of emissions of ammonia in the United Kingdom. Environmental Pollution 86, 267-277. https://doi.org/10.1016/0269-7491(94)90167-8 
+5.	Martin, P., Heavner, D.L., Nelson, P.R., Maiolo, K.C., Risner, C.H., Simmons, P.S., Morgan, W.T., Ogden, M.W., 1997, Environmental Tobacco Smoke (ETS): a market cigarette study. Environmental International 23, 75-90. https://doi.org/10.1016/S0160-4120(96)00079-7 
+6.	Cass, G.R., Gharib, S., Peterson, M., Tilden, J.W., 1982. The origin of ammonia emissions to the atmosphere in an urban area. Open File Report 82-6, Environmental Quality Laboratory. California Institute of Technology, Pasadena, CA, USA.
+7.	Eggleston, H.S., 1992. An improved UK ammonia emission inventory. In: Klaassen, G. (Ed.), Ammonia Emissions in Europe: Emission Coefficients and Abatement Costs. IIASA, A-2361 Laxenburg, Austria, pp. 95-107. 
+8.	Centers for Disease Control and Prevention. 2024. [Tobacco Product Use Among Adults—United States](https://www.cdc.gov/tobacco/stateandcommunity/state-fact-sheets/index.htm#USA), 2022. 
+9.	American Veterinary Medical Association. 2025. U.S. [Pet Ownership Statistics](https://www.avma.org/resources-tools/reports-statistics/us-pet-ownership-statistics).

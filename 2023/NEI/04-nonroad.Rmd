@@ -1,0 +1,200 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Nonroad Mobile {#nonroadmobile}
+
+## Sector Description
+
+The nonroad mobile data category includes emissions from mobile sources that do not operate on roads, excluding commercial marine vessels, locomotives, and aircraft. The emissions included in the NEI for this category are modeled using MOVES and cover nonroad equipment in 10 broad economic sectors: construction, agriculture, industrial, lawn & garden (commercial and residential), commercial, logging, railroad support (excluding locomotives), recreational vehicles, recreational marine (pleasure craft; excluding commercial marine vessels), and underground mining. Nonroad equipment emissions were computed by running the Nonroad component of [MOVES5](https://www.epa.gov/moves) [[ref 1](#nonroadmobile-references)] for all states other than California, which developed their nonroad emissions inventory using their own tools. 
+
+## Computing Nonroad emissions using MOVES
+
+MOVES5, the latest public release of EPA’s MOtor Vehicle Emissions Simulator (MOVES), estimates daily emissions for total hydrocarbons (THC), nitrogen oxides (NOx), carbon monoxide (CO), carbon dioxide (CO<sub>2</sub>), particulate matter 10 microns and less (PM<sub>10</sub>), and sulfur dioxide (SO<sub>2</sub>), as well as calculating fuel consumption. MOVES5 [[ref 1](#nonroadmobile-references)] uses ratios from some of these emissions to calculate emissions for particulate matter 2.5 microns and less (PM<sub>2.5</sub>), methane, ammonia (NH<sub>3</sub>), four more aggregate hydrocarbon groups (NMHC, NMOG, TOG, and VOC), 16 hazardous air pollutants (HAPs), 17 dioxin/furan congeners, 32 polycyclic aromatic hydrocarbons, and six metals. For a complete list of these pollutants, see Table \@ref(tab:nonroadmobile-pollutants). All the input and activity data required to run MOVES-Nonroad are contained within the MOVES default database, which is distributed with the model. However, EPA uses alternative equipment spatial allocations for the construction and agricultural sectors that differ from the publicly distributed default database tables. State- and county-specific data can be incorporated by creating a supplemental database known as a county database (CDB) and specifying it in the MOVES run specification (runspec). In this way, State, local and Tribal (S/L/T) agencies can update the data within their respective CDBs to produce emissions estimates that accurately reflect local conditions and equipment usage. MOVES first uses the data in the CDBs and fills in any missing data from the MOVES default database. 
+
+To develop the 2023 NEI nonroad emissions inventory, EPA ran MOVES5, the most current public version of MOVES available. The default database used for the NEI nonroad runs was movesdb20241112_nrupdates, which is a modified version of the default database (movesdb20241112) released with MOVES5. The ‘nrupdates’ version of the MOVES default database contains alternative nonroad equipment spatial allocations by replacement of the three tables nrBaseYearEquipPopulation, nrStateSurrogate, and nrSurrogate. 
+
+The national updates made to the MOVES5 default database are the same as those made previously to the MOVES default databases for the 2020 NEI, 2017 NEI, 2022 Emissions Modeling Platform, and the 2016 Emissions Modeling Platform. The updated tables allocate national populations of Agricultural and Construction equipment to the state and county levels, as described in the 2016v1 Platform Nonroad Mobile Emissions Specification Sheet [[ref 2](#nonroadmobile-references)].
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-4/nonroad-pollutants.xlsx",
+  col_types = rep("text"))
+df[is.na(df)] <- ""
+```
+
+```{r nonroadmobile-pollutants, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'Pollutants produced by MOVES-Nonroad for 2023 NEI.',
+  col.names = c("Pollutant ID", "Pollutant Name", "Pollutant ID", "Pollutant Name")
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("repeat_header", "hold_position", "scale_down")
+)
+```
+
+## Additional Data: Nonroad County Databases (CDBs)
+
+EPA encouraged S/L/T agencies to submit MOVES-Nonroad CDBs to the Emission Inventory System (EIS) for the 2023 NEI. Data not provided in CDBs is automatically supplied from the modified MOVES default database. As is also true for MOVES onroad runs, even if an agency submitted fuel or meteorological data, EPA used “EPA default” values for these data parameters. Fuel inputs for 2023 are based on MOVES defaults, which rely on nationwide retail fuel survey data that were incorporated this into MOVES5. The EPA default meteorological data were derived from a Weather Research and Forecasting Model (WRF) version 4.1.1 [[ref 3](#nonroadmobile-references)].
+
+The modified MOVES default database for MOVES5 containing refinements to the construction and agricultural sectors (movesdb20241112_nrupdates) and state-submitted inputs in CDBs were used to run MOVES-Nonroad to produce emissions for all states other than California. EPA replaces most nonroad emissions calculated with MOVES for California with California-submitted emissions. Table \@ref(tab:nonroad-selection-heirarchy) shows the data selection hierarchy for the nonroad category. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-4/nonroad-selection-heirarchy.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r nonroad-selection-heirarchy, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE, 
+  longtable = TRUE,
+  caption = 'Selection hierarchy for the Nonroad Mobile data category'
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("repeat_header", "hold_position", "scale_down")
+  ) %>%
+  column_spec(1, width = "1cm") %>%
+  column_spec(2, width = "3cm") %>%
+  column_spec(3, width = "9cm")
+```
+
+Table \@ref(tab:submitted-nonroad-tables) shows the S/L/T agencies that submitted nonroad model inputs for the 2023 NEI via the EIS Gateway. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-4/submitted-nonroad-tables.xlsx", col_types = "text")
+df[is.na(df)] <- ""
+```
+
+```{r submitted-nonroad-tables, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,
+    booktabs = TRUE,
+    longtable = TRUE,
+    caption = "Number of counties with submitted data, by agency and MOVES Nonroad CDB table"
+  ) %>%
+    kableExtra::kable_styling(
+      full_width = FALSE,
+      position = "center",
+      font_size = 7, 
+      latex_options = c("repeat_header", "hold_position", "scale_down")
+      ) %>%
+    scroll_box(width = "100%", height = "400px")
+)
+```
+(A) Submitted data with recreational marine populations specific to CT. Other populations use EPA NEI defaults or MOVES defaults.
+(B) Month and day distribution data carried forward from 2017 NEI based on a prior LADCO study. Other states (IL, IN, IA, MI, MN, MO, OH) also used distributions from the LADCO study, though these are not listed in the table because they were not new 2023 NEI submittals.
+(C) Submitted data for ATVs, off-highway motorcycles, snowmobiles, and off-highway trucks. UT off-highway truck data was not used the 2023 NEI.
+(D) Submitted month distribution data for the agricultural sector based on the prior LADCO study. 
+
+The 1,105 submitted CDBs (listed in Table 4-3 and carried over from past NEIs) in the MOVES-Nonroad run are packaged together in ‘2023_NonroadCDBs.zip’ available at the [2023 NEI Supporting nonroad mobile data FTP site](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/nonroad/Inputs/). The rest of the counties were run using the modified MOVES default database. A list of all 3,225 U.S. counties and their corresponding CDBs, if any, is available in ‘2023_nonroad_counties_FinalList.xlsx’. These supplemental nonroad mobile data contents are listed in Table \@ref(tab:nonroad-supplement) and are all available on the [2023 NEI Supporting nonroad mobile data FTP site](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/nonroad/Inputs/). 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-4/nonroad-supplement.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r nonroad-supplement, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'Contents of the Nonroad Mobile supplemental inputs folder'
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("repeat_header", "hold_position", "scale_down")
+  ) %>%
+  column_spec(1, width = "7cm") %>%
+  column_spec(2, width = "5cm")
+```
+
+## MOVES runs and Postprocessing Steps
+
+MOVES was run for each county in a single, separate run specification file (runspec). All the runspecs are in the ‘2023_NonroadRunspecs.zip’ file in the online [NRSupplemental Data folder](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/nonroad/Inputs/). The MOVES-Nonroad runs were checked for completeness and absence of error messages in the run logs. The output was post-processed to consolidate each county into a single database and to produce SMOKE-ready inputs. The scripts that performed these processes are in ‘2023_postprocess_speciation.zip’ in the [2023 NEI Supplemental nonroad mobile data FTP site](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/nonroad/Inputs/). The MOVES runs created monthly, day type (weekday and weekend) total inventories for every U.S. county, and post-processing scaled the day totals to monthly and annual values. 
+
+The following additional steps were taken on the monthly MOVES nonroad outputs to prepare data for loading into EIS:
+
+1.	The gas and particle components of PAHs (e.g., Chrysene, Fluorene) were combined.
+2.	The individual mercury species were combined into total mercury (i.e., pollutant 7439976).
+3.	Emissions were aggregated from the more detailed SCCs modeled in MOVES to the SCCs modeled in SMOKE. Information about this aggregation is contained in the ‘2023NonroadSCCaggregation.xlsx’ file posted on the [2023 NEI Supplemental data ftp site](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/nonroad/Inputs/).
+4.	Pollutants produced by MOVES but not accepted in the NEI were removed (e.g., ethanol, NONHAPTOG, and total hydrocarbons).
+5.	Five speciated PM2.5 species were added based on speciation profiles (i.e., elemental carbon, organic carbon, nitrate, sulfate and other PM2.5). 
+6.	DIESEL-PM10 and DIESEL-PM25 were added by copying the PM10 and PM2.5 pollutants (respectively) as DIESEL-PM pollutants for all diesel SCCs.
+7.	Airport ground support equipment emissions were removed.
+8.	Oil and gas field equipment emissions were removed.
+9.	Incorporated California-submitted nonroad emissions.
+
+Note that starting in 2022, the U.S. Census Bureau retired some Connecticut counties and assigned new county equivalents to more clearly illustrate the break in planning regions. Current Connecticut counties/county equivalents include Fairfield (FIPS 09001), Hartford (FIPS 09003), Litchfield (FIPS 09005), Middlesex (FIPS 09007), New Haven (FIPS 09009), New London (FIPS 09011), Tolland (FIPS 09013), and Windham (FIPS 09015). Because these updated counties are not yet reflected in MOVES, EPA permitted Connecticut to submit nonroad CDBs that are based on the pre-2022 counties and boundaries still reflected in MOVES. Connecticut provided county-equivalent apportionment factors by NONROAD equipment category. EPA then reapportioned Connecticut nonroad emissions to the current county areas prior to uploading emissions to the Emissions Inventory System (EIS). For example, emissions from Fairfield County (09001) were translated to the three new county equivalents which overlap Fairfield County: Greater Bridgeport (09120), Naugatuck Valley (09140), and Western Connecticut (09190).
+
+Following the completion of the MOVES runs, railway maintenance emissions were removed from specific counties / census areas in Alaska because Alaska DEC specified that this type of activity does not happen in those areas. Specifically, emissions from SCCs 2285002015, 2285004015, and 2285006015 were removed from the following counties / census areas: 02013, 02016, 02050, 02060, 02070, 02100, 02105, 02110, 02130, 02150, 02164, 02180, 02185, 02188, 02195, 02198, 02220, 02240, 02261, 02275, and 02282.  Alaska DEC also specified some counties / census areas in which logging and agricultural emissions do not happen, but the emissions for the specified SCCs were already zero in the specified areas.
+
+## Use of California Submitted Emissions
+
+California submitted criteria and HAP nonroad emissions for EPA’s use in the NEI. California estimates emissions with California-specific inventory tools and converts them from their EIC codes to SCC codes via a crosswalk ([Nonroad CARB SCC Xwalk.xlsx](https://gaftp.epa.gov/Air/nei/2020/doc/supporting_data/nonroad/Inputs/Nonroad CARB SCC Xwalk.xlsx)). The California criteria emissions and most HAP emissions were used directly. PAHs were not included in the California estimates dataset, so PAH emissions were taken from MOVES rather than from CARB. A list of the PAHs which are based on MOVES data rather than CARB data in California is in Table \@ref(tab:nonroad-PAHs).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-4/nonroad-PAHs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r nonroad-PAHs, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'PAHs calculated using MOVES for California Nonroad SCCs'
+) %>%
+kable_styling(
+  full_width = FALSE, 
+  position = "center", 
+  latex_options = c("repeat_header", "hold_position", "scale_down")
+  )
+```
+
+EPA also speciated CARB total PM2.5 and PM10 using the same approach as for other states and copied the PM2.5 and PM10 to DIESEL-PM “pollutants” for all diesel SCCs. The California nonroad inventory included total chromium emissions, from which hexavalent chromium (pollutant code 18540299) was estimated as 0.29484% of total chromium. Table \@ref(tab:pollutant-datasource) illustrates pollutants and data source in the 2023 NEI.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-4/pollutant-datasource.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r pollutant-datasource, tidy=FALSE, echo=FALSE,warning=FALSE, message=FALSE}
+kableExtra::kbl(
+  df, 
+  booktabs = TRUE,
+  longtable = TRUE,
+  caption = 'Pollutant and data source in nonroad for the 2023 NEI'
+) %>%
+kable_styling(
+  position = "center", 
+  font_size = 11, 
+  latex_options = c("repeat_header", "hold_position")
+  ) %>%
+  column_spec(1, width = "2cm") %>%
+  column_spec(2, width = "4cm") %>%
+  column_spec(3, width = "3cm") %>%
+  column_spec(4, width = "6cm")
+```
+
+## References {#nonroadmobile-references}
+
+1.	USEPA. 2024. [Nonroad Technical Reports.](https://www.epa.gov/moves/moves-nonroad-technical-reports) MOVES5. Office of Transportation and Air Quality. US Environmental Protection Agency. Ann Arbor, MI. November 2024.
+2.	National Emissions Inventory Collaborative (2019). Specification Sheet – 2016v1 Platform Nonroad Mobile Emissions. Retrieved from the [Specification Sheet: Mobile Nonroad. ](https://views.cira.colostate.edu/wiki/Attachments/Inventory%20Collaborative/Documentation/2016v1/National-Emissions-Collaborative_2016v1_mobile-nonroad_18Oct2019.pdf)
+3.	NCAR. 2022. [The Weather Research & Forecasting Model.](https://www.mmm.ucar.edu/models/wrf) 2022. Jatin Kala, Louis Marelle, J. Shpund, Jordan Schnell, Robert Gilliam, Tim Juliano, and Maria Frediani, National Center for Atmospheric Research, Mesoscale and Microscale Meteorology Division, Boulder CO. August 2022. 
+
