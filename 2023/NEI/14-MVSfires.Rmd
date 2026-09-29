@@ -1,0 +1,247 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Motor Vehicle and Structure Fires {#MVSfires}
+
+## Sector Description and Overview 
+
+Structure and motor vehicle fires are sources of both gaseous and particulate pollutants [[ref 1](#MVSfires-references), [ref 2](#MVSfires-references), [ref 3](#MVSfires-references)]. In previous NEI cycles, only a handful of States/Locals/Tribal (SLT) agencies have submitted estimates for these sources. EPA has removed (“tagged out”) these sources in previous NEIs because of how limited these submittals have been and the overall insignificance of their emissions relative to other sources. 
+
+Structure fires result from unintentional actions, arson, or natural events. Most motor vehicle fires are the result of unintentional actions or arson. Structure fires include those from residential, commercial, and industrial sites where a fire incident is reported [[ref 4](#MVSfires-references)]. Fires that are contained with the structure, such as a trash fire or incinerator or commercial compactor fire with no flame damage to structure, are not included. Similarly, motor vehicle fires include all onroad mobile and offroad vehicles including recreational vehicles, campers, trailers, bulldozers, farm equipment, dirt bikes, and heavy equipment, but does not include rail vehicles, water vehicles, and aircraft fires.
+
+For the 2023 NEI, we crafted a national set of emission estimates for both motor vehicle fires and structure fires based on commonly available dataset, with assumptions refined from those available in previous methodology documents [[ref 2](#MVSfires-references), [ref 3](#MVSfires-references)]. All estimates for motor vehicle fires and structure fires are provided in a single, separate SCC for each type.
+
+Here, an introduction to the new methods utilized to estimate motor vehicle fires and structure fires emissions are outlined.  While the emissions impact from this addition are minimal at the national and even State level, adding structure fires and motor vehicle fires as an EPA method serves to make the NEI more complete, one of the basic tenets we have with every NEI. Table \@ref(tab:MVSfiresSCCs) lists the SCCs for these sources. The SCC level 1 and 2 descriptions are “Miscellaneous Area Sources; Other Combustion” for both SCCs. The EIS Sector for both SCCs is “Miscellaneous Non-Industrial NEC”.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-14/structurevehiclefiresSCCs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r MVSfiresSCCs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Structure Fires and Motor Vehicle Fires Source Classification Codes',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+## EPA-developed estimates
+
+Structure fires include fires from residential and commercial structures as well as mobile homes. Mobile vehicle fires cover all fires from onroad motor vehicles, including campers, recreational vehicles, and motorcycles, as well as nonroad equipment, excluding aircraft, marine vessels, and locomotives. To estimate emissions from both source categories, first the average amount of structure/vehicle and content material burned are estimated. These estimates are year-specific and based on fire incident reports from the annual National Fire Incident Reporting System (NFIRS) public release [[ref 4](#MVSfires-references)]. NFIRS is released by U.S. Fire Administration (USFA), under the Federal Emergency Management Agency (FEMA). Next, fire department incidents for each fire type are assigned a valid state-county FIPS and to create a total county count of each incident type. Fuel loading and median emission factors for each fire type are based on a recent study [[ref 1](#MVSfires-references)]. Annual county level estimates are computed separately for each fire type by multiplying the county total incidents, average fuel loading, and emission factors.
+
+### Activity Data
+
+Activity data for both structure fires and motor vehicle fires are the number of fire incidents in each county, provided by the annual release of the NFIRS public release of fire incident information. Included in these data are uniform format basic incident reports by fire station identifier (FDID) for all types of fires, as reported by fire departments. The basic incidents report includes counts of specific types of structure fires and motor vehicle fires. The following Incident Types, as defined in Chapter 3, Section C of the “NFIRS_Complete_Reference_Guide_2015.pdf” are included in the incident counts for structure fires and motor vehicle fires, as defined here in Table \@ref(tab:incidenttypes).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-14/IncidentTypes.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r incidenttypes, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Incident types included in the methodology',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 11) %>%
+  column_spec(1, width = "2cm") %>%
+  column_spec(2, width = "2cm") %>%
+  column_spec(3, width = "8cm")
+```
+
+EPA does not include contained fires (incident codes 113 – 118, e.g., 118: Trash or rubbish fire in a structure, with no flame damage to structure or its contents). File formats are defined in the included in the NFIRS file “Public Data Release Format v1_8.pdf” included in every annual package download.
+
+NFIRS does not provide valid state-county FIPS for many FDIDs in the basic incident report. There is a hierarchy used to assign valid state-county FIPS for these FDIDs. First, an associated FDID cross reference file (fdheader) provides some matches. Second, for FDIDs with a valid zip code, FDIDs are apportioned to associated FIPS based on proportion of population in different counties for each zip code. As a last resort, all remaining FDIDs without valid FIPS and zip codes are assigned FIPS based on a manual search by fire department name and search engine and mapping results. 
+
+### Fuel Loading
+
+For both structure fires and motor vehicle fires, fuel loading estimates are needed to associate the number of fires to units compatible with emission factors, which are based on the weight of the material burned.
+
+#### Structure Fires
+
+The fuel loading factor for structure fires is based on an estimate of the combustible structural content for an average-sized residence. Structural content includes both structural mass and building contents:
+
+Fuel loading = structure loss + Content loss
+
+In 1999, the average size of existing homes was assumed to be 1,649 square feet with a corresponding average of 11,000 board feet of lumber; an assumption of one ton of material per 1,000 board feet therefore yields approximately 11 tons of combustible material per structure fire in 1999 [[ref 2](#MVSfires-references)].
+
+An average loss percentage of 7.3 percent for each fire incident is assumed from the 1999 CARB report [[ref 2](#MVSfires-references)]. Note that this is far less than the 80% loss assumption from the 2022 WUI study [[ref 1](#MVSfires-references)] as those fires are based on wildland fires impacting residential and commercial buildings. This loss rate percentage should be adjusted locally based on more information if available. As shown in equation \@ref(eq:structureloss), applying this 7.3 percent loss rate leads to an estimated structure loss component of fuel load of 0.80 tons per fire. 
+
+\begin{equation} 
+  \text{Structure Loss (tons per fire)} = \text{Combustible Material (tons)} \times \frac{\text{Loss Rate}}{100} 
+  (\#eq:structureloss)
+\end{equation} 
+
+Next, weighted average combustible contents within the structure are also estimated as most fires start in the kitchen or a bedroom. Applying the same 7.3 percent loss rate to weighted average of 7.91 pounds per square foot of combustible contents yields an additional 0.48 tons of building contents per fire as shown in equation \@ref(eq:contentloss).
+
+\begin{equation} 
+  \text{Content Loss (tons per fire)} = SF \times WACC \times \frac{1 ton}{2,000 lbs} \times \frac {\text{Loss Rate}}{100} 
+  (\#eq:contentloss)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( SF \) = Average housing square footage = 1,649 in 1999 <br> \newline
+  \( WACC \) = Weighted average combustible contents = 7.91 lbs per square foot <br> \newline
+  \( \text{Loss Rate} \) = Average loss rate for structure fires in percent = 7.3 <br> \newline
+</div>
+
+Cumulatively, the fuel load is therefore assumed to be 1.28 tons (0.80 tons from structure loss and 0.48 tons from content loss) per fire based on 1999 assumptions.  However, based on the 2023 study [[ref 1](#MVSfires-references)], we have scaled up fuel loads for both structure and content losses based on the average sized house increasing from 1,649 to 2,150, yielding 1.67 tons per structure fire:
+
+\begin{equation} 
+  FL_{y} = \text{(Structure Loss + Content Loss)} \times \frac{SF_{y}}{SF_{1999}}
+  (\#eq:fuelload)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FL_{y} \) = Fuel load in inventory year *y* in tons per fire <br> \newline
+  \( \text{Structure Loss} \) = Average Structure Loss in 1999 = 0.80 tons <br> \newline
+  \( \text{Content Loss} \) = Average Content Loss in 1999 = 0.48 tons <br> \newline
+  \( SF_{y} \) = Average housing square footage in current inventory year *y* (2,150 square feet in 2023) <br> \newline
+  \( SF_{1999} \) = Average housing square footage in 1999 = 1,649 square feet  <br> \newline
+</div>
+
+#### Motor Vehicle Fires
+
+The fuel loading for motor vehicle fires is based on the 2023 study of wildland urban interface fires [[ref 1](#MVSfires-references)]. Unlike structure fires, there is no assumption of reduced loss rate for motor vehicle fires that typically spread rapidly to consume much of the combustible composition of the vehicle. Appendix Table S6 aggregates the sum of combustible materials from plastics, coatings, textiles, fluids and lubricants, rubber (tire), fuel, and other non-metal combustible components from a typical year 2017 mid-sized car (4,032 lbs). The total combustible materials, and thus fuel loading was computed as 1,016 lbs, or 0.508 tons.
+
+### Allocation Procedure
+
+Emissions are estimated for each fire station identifier (FDID) which, after preprocessing discussed above, are associated with specific state-county(s) FIPS. 
+
+### Emission Factors
+
+Emission factors for both structure fires and motor vehicle fires are based on the 2023 study [[ref 1](#MVSfires-references)], which is based on a compilation from a comprehensive literature search of fire simulations of structures, vehicles, and their components. Numerous caveats were used to filter out outliers and those studies that only provided concentration data. 
+
+From the comprehensive set of emission factors, an emission factor dataset was developed by taking the median of all observations for all structure materials. For motor vehicle fires, the median emission factors from the full-scale tests were used and where full-scale vehicle tests were not available, the median emission factor from the entire dataset for any vehicle material was used.
+
+The EPA Wagon Wheel estimate emissions for all CAPs, acid gases, and HAP-Metals; all HAP VOCs and HAP-VOC/PAH pollutants are estimated in EIS via HAP Augmentation multiplication factors that are simply the emission factor for the HAP-VOC divided by VOC emission factor. All PM species (EC, OC, NO3, SO4, and PMFINE) are estimated in EIS via PM speciation. Structure fire emission factors are provided in Table \@ref(tab:structurefireEFs).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-14/StructureFiresEFs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r structurefireEFs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Structure fire emission factors (lb/ton)'
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("repeat_header"), font_size = 10)
+```
+
+Several errors for motor vehicle emission factors were found in Supplementary data Table S-2 [[ref 1](#MVSfires-references)], and these corrections [[ref 5](#MVSfires-references)] are reflected in the table of emission factors included here in Table \@ref(tab:motorvehiclefireefs). Note, Chromium VI (18540299) and Chromium III (16065831) are computed as 34 percent and 66 percent, respectively, of total Chromium.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-14/MotorVehicleFiresEFs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r motorvehiclefireefs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Motor vehicle fire emission factors (lb/ton)',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("repeat_header"), font_size = 10)
+```
+
+### Controls
+
+There are no controls assumed for this category. 
+
+### Emissions
+
+Emissions are quantified using county-level estimates on the number of incident reports, assumed fuel loading per incident, and the emission factors provided above as follows: 
+
+\begin{equation} 
+  E_{t,p,c} =  I_{t,c} \times FL_{t} \times EF_{t,p} \times \frac{1 ton}{2,000 lbs} 
+  (\#eq:emissions-structurevehiclefires)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{t,p,c} \) = Estimated annual emissions for fire type (i.e., structure, motor vehicle) *f*, pollutant *p*, and county *c*, in tons <br> \newline
+  \( I_{t,c} \) = Number of total fire incidents by fire type *t* in county *c* <br> \newline
+  \( FL_{t} \) = Average fuel load for each fire type incident *t*, in tons <br> \newline
+  \( EF_{t,p} \) = Emissions factor for pollutant *p* and fire type *t*, in lbs/ton <br> \newline
+</div>
+
+State and Local data submitters have the option to provide, separately for structure fires vs motor vehicle fires, more local information on the number of fires in each county (incidents), fuel loadings and emission factors.
+
+Please note that there are no point source SCCs that overlap with the processes described here. Therefore, point source subtraction is not performed. 
+
+### Sample Calculations
+
+Table \@ref(tab:structurevehiclefires-sample-calculations) lists sample calculations to determine the benzene emissions for nonpoint source POTWs. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1, 2, 3, 4),
+  Equation = c(
+    "$\\text{Combustible Material} \\times \\frac{\\text{Loss Rate}}{100}$", 
+    "$SF \\times \\frac{WACC}{2,000} \\times \\frac {\\text{Loss Rate}}{100}$",
+    "$\\text{(Structure Loss + Content Loss)} \\times \\frac{SF_{y}}{SF_{1999}}$",
+    "$I_{t,c} \\times FL_{t} \\times \\frac{EF_{t,p}}{2,000}$"
+    ),
+  Values = c("$\\text{11 tons} \\times \\frac{\\text{7.3}}{100}$", 
+    "$\\text{1,649 sq feet} \\times 7.91 \\frac{lbs}{\\text{sq feet}} \\times \\frac {1}{2000} \\times \\frac{\\text{7.3}}{100}$",
+    "$\\text{(0.80 tons + 0.48 tons)} \\times \\frac{\\text{2,150 square feet (2023)}}{\\text{1,649 square feet (1999)}}$",
+    "$\\text{61.67 structure fires} \\times \\text{1.67 ton/fire} \\times \\frac{78.6}{2000}$"
+    ),  
+  Result = c("0.80 tons Structure Loss per average fire",
+             "0.48 tons Content Loss per average fire",
+             "1.67 tons per structure fire",
+             "4.05 tons PM2.5 in county “c”")
+)
+```
+```{r structurevehiclefires-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+### Improvements/Changes in the 2023 NEI
+
+These sources had not previously been estimated by the EPA; therefore, these are new sources of emissions for the 2023 NEI. Any NEI prior to 2017 reflected sparse emissions from the few States that submitted; however, for the 2020 NEI, we removed any State-submitted estimates. SLTS could again submit their own estimates for the 2023 NEI and subject to quality assurance checks; these submissions are present in the 2023 NEI in lieu of EPA estimates discussed in this section.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exists to calculate emissions for the counties in Puerto Rico and the U.S. Virgin Islands, we based emissions for those domains on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the U.S. Virgin Islands. The total emissions in pounds for these two Florida counties are divided by their respective populations creating a pound per capita emission factor. For each Puerto Rico and U.S. Virgin Island county, the pound per capita emission factor is multiplied by the county population (from the same year as the inventory’s activity data) which serves as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”.
+
+### Lahaina Fire of August 2023
+
+We account for the Lahaina PM fire, the most devastating of several fires on Maui Hawaii on August 8-9 2023, via data compiled for the [Lahaina Fire Incident Analysis Report](https://doi.org/10.60752/102376.26858962), particularly, Table 4.2.1.1 highlighting the number of destroyed and damaged structures based on Fire Safety Research Institute (FSRI) and FEMA independent review.
+
+For structure fires fuel loading, the default 7.3 percent loss rate was replaced with 100 percent for these fires, which translates to 22.87 tons per structure fire for Maui County Hawaii in 2023. No change was needed for motor vehicle fuel loading as the default loss rate is already 100 percent.
+
+For number of incidents of structure fires, we use the 2,117 destroyed structures from FSRI and a scaled portion of the FEMA estimated 283 damaged structures because the FSRI damaged structures include a significant amount of structures that suffered wind rather than fire damage. Because we are assigning 100 percent structure loss in the fuel loading computation, we then scaled these 283 fires back down to the 7.3 percent loss rate used elsewhere yielding an equivalent of 20.7 structures (100 percent) consumed. In total, this yields 2,137.7 incidents for Maui in 2023 vs 45 in the default NFIRS dataset for 2023.
+
+For number of incidents of motor vehicle fires, the default 158 incidents in NFIRS is replaced with an estimate of 3,643 based on a [2024 report](https://www.civilbeat.org/2024/09/3152-burned-vehicles-have-been-removed-from-lahaina-but-more-than-350-remain/) where, according to U.S. Army Corps of Engineers, 3,502 burned vehicles were accounted for along with 141 boats.
+
+## References {#MVSfires-references}
+
+1.	Holder, A.L., A. Ahmed, J.M. Vukovich, and V. Rao. Supplementary data Table S-2 PNAS Nexus, Volume 2, Issue 6, June 2023, pgad186.  [Hazardous air pollutant emissions estimates from wildland urban interface](https://doi.org/10.1093/pnasnexus/pgad186).
+2.	California Air Resources Board, 1999. [Emissions Inventory Procedural Manual, Volume III: Methods for Assessing Area Source Emissions: Section 7.14 Structure and Automobile Fires](https://www.arb.ca.gov/ei/areasrc/fullpdf/full7-14.pdf), updated March 1999.
+3.	U.S. Environmental Protection Agency, 2001. [Emission Inventory Improvement Program (EIIP), Volume 3: Area Sources and Area Source Method Abstracts, Chapter 18 Structure Fires](https://www.epa.gov/sites/default/files/2015-08/documents/iii18_apr2001.pdf). 
+4.	Federal Emergency Management Agency, National Fire Incident Reporting System (NFIRS). [Annual All Incidents Public Data Release](https://www.fema.gov/about/openfema/data-sets/fema-usfa-nfirs-annual-data). 
+5.	Holder, A.L., 2024. Correction to Table S2, “Supplementary_Data_20240210.xlsx”

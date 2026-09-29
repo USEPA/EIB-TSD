@@ -1,0 +1,368 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Dust: Mining and Quarrying {#miningquarrying}
+
+## Sector Descriptions and Overview 
+
+Mining and quarrying activities produce particulate matter (PM) emissions due to the variety of processes used to extract the ore and associated overburden, including drilling and blasting, loading and unloading, and overburden replacement. Fugitive dust emissions for mining and quarrying operations are the sum of emissions from the mining of metallic and nonmetallic ores and coal. Each of these mining operations has specific emissions factors accounting for the different means by which the resources are extracted.
+
+## EPA-developed estimates
+
+Four specific activities are included in the emissions estimate for mining and quarrying operations: overburden removal, drilling and blasting, loading and unloading, and overburden replacement. Not included are the transfer and conveyance operations, crushing and screening operations, and storage since the dust emissions from these activities are assumed to be well controlled. Fugitive dust emissions for mining and quarrying operations are the sum of emissions from the mining of metallic and nonmetallic ores and coal. Emissions for each activity are calculated by multiplying the emissions factors by the activity data.
+
+### Activity Data
+
+Activity data for this source category include state-level metallic and non-metallic (a.k.a. mineral) crude ore handled at surface mines from the U.S. Geologic Survey (USGS) [[ref 1](#miningquarrying-references)] and mine-specific coal production data for surface mines from the Energy Information Administration (EIA) [[ref 2](#miningquarrying-references)]. Emissions are not estimated for underground mining given that emissions factors are calculated exclusively for surface activity.
+
+In some cases, the amount of mining waste is withheld for some states to avoid disclosing company proprietary data. To estimate state-level withheld waste data the fraction of crude ore production in the state is multiplied by the amount of waste data withheld at the national level. The national-level amount of waste withheld is calculated by subtracting all known state-level waste values (i.e. those that are not withheld) from the national-level waste value. Note that this calculation only needs to be completed for states where state-level mining waste data are withheld.
+
+\begin{equation} 
+  W_{s} = \frac{O_{s}}{O_{US}} \times W_{US}
+  (\#eq:mining-county-distribution)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( W_{s} \) = Amount of metallic and non-metallic mining waste for state *s*, in metric tons <br> \newline
+  \( W_{US} \) = Amount of metallic and non-metallic mining waste withheld at the national level, in metric tons <br> \newline
+  \( O_{s} \) = Amount of crude ore produced in state *s*, in metric tons  <br> \newline
+  \( O_{US} \) = Amount of crude ore produced at the national level, in metric tons  <br> \newline
+</div>
+
+The data on state-level mining production and waste is split into production and waste for metallic and nonmetallic ores using the fraction of national-level metallic and non-metallic ore production. Values are also converted from metric tons to short tons. Throughout the remainder of this section, references to “ton(s)” refer to short tons, while metric tons will be explicitly labeled.
+
+\begin{equation}
+  MP_{t,s} = (W_{s} + O_{s}) \times \frac{MP_{t,US}}{MP_{US}} \times 1.1023 \frac{\text{ton}}{\text{metric ton}}
+  (\#eq:metallicnonmetallic)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(MP_{t,s} \) = Amount of mining material type *t* (i.e., either metallic or non-metallic ore) produced in state *s*, in tons <br>\newline
+  \(W_{s} \) = Amount of total metallic and non-metallic mining waste for state *s*, in metric tons <br>\newline
+  \(O_{s} \) = Amount of crude ore produced in state *s*, in metric tons <br>\newline
+  \(MP_{t,US} \) = Amount of mining material of type *t* produced at the national level, in metric tons <br>\newline
+  \(MP_{US} \) = Total metallic and non-metallic ore production at the national level, in metric tons <br>\newline
+</div>
+
+### Allocation Procedure
+
+The state-level data on metallic and non-metallic mining materials (from Equation \@ref(eq:miningempfrac)) is distributed to the county level based on the proportion of employees in the metallic and non-metallic ore sectors (see Table \@ref(tab:miningNAICS) for a list of NAICS codes), from the U.S. Census Bureau County Business Patterns [[ref 3](#miningquarrying-references)]. Separate fractions are determined for metallic ore mining employees and non-metallic ore mining employees in each county. 
+
+\begin{equation}
+  EmpFrac_{t,c} = \frac{Emp_{t,c}}{Emp_{t,s}}
+  (\#eq:miningempfrac)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(EmpFrac_{t,c} \) = The fraction of mining employees for material type *t* in county *c* <br>\newline
+  \(Emp_{t,c} \) = The number of mining employees for material type *t* in county *c* <br>\newline
+  \(Emp_{t,s} \) = The number of mining employees for material type *t* in state *s* <br>\newline
+</div>
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-24/MiningNAICScodes.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r miningNAICS, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'NAICS codes for metallic and non-metallic mining.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+Due to concerns with releasing confidential business information, the CBP does not release exact numbers for a given NAICS code if the data can be traced to an individual business. Instead, a series of range codes is used.  To estimate employment in counties and states with withheld data, the following procedure is used for NAICS code being computed. 
+To gap-fill withheld state-level employment data:
+
+1.	State-level data for states with known employment in each NAICS are summed to the national level.
+2.	The total sum of state-level known employment from step 1 of this section is subtracted from the national total reported employment for each NAICS in the national-level CBP to determine the employment total for the withheld states.
+3.	Each of the withheld states is assigned the midpoint of the range code reported for that state. Table \@ref(tab:miningwithheldranges) lists the range codes and midpoints.
+4.	The midpoints for the states with withheld data are summed to the national level. 
+5.	An adjustment factor is created by dividing the number of withheld employees (calculated in step 2) by the sum of the midpoints (step 4).
+6.	For the states with withheld employment data, the midpoint of the range for that state (step 3) is multiplied by the adjustment factor (step 5) to calculate the adjusted state-level employment for landfills.
+These same steps are then followed to fill in withheld data in the county-level business patterns.
+7.	County-level data for counties with known employment are summed by state. 
+8.	County-level known employment is subtracted from the state total reported in state-level CBP (or, if the state-level data are withheld, from the state total estimated using the procedure discussed above).
+9.	Each of the withheld counties is assigned the midpoint of the range code (Table \@ref(tab:miningwithheldranges)).
+10.	The midpoints for the counties with withheld data are summed to the state level. 
+11.	An adjustment factor is created by dividing the number of withheld employees (step 8) by the sum of the midpoints (step 10).
+12.	For counties with withheld employment data, the midpoints (step 9) are multiplied by the adjustment factor (step 11) to calculate the adjusted county-level employment for mining and quarrying.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-24/Withheldranges.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r miningwithheldranges, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Withheld data ranges and midpoints',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+As an example, sample county CBP data for NAICS 2123 (Nonmetallic Mineral Mining and Quarrying) are provided in Table \@ref(tab:miningNAICSexample). The values in the table and subsequent steps are for demonstration purposes and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-24/MiningNAICSexample.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r miningNAICSexample, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Example County Business Patterns for NAICS 2123',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+1.	The total number of employees reported at the county level is 1,181.
+2.	The state-level CBP reports 1,195 employees for NAICS 2123.  This means that there are 14 employees withheld at the county level.
+3.	The counties with withheld data are assigned midpoints according to the employment codes. For example, County 009 is given a midpoint of 60 employees (since employment code B is 20-99).
+4.	The sum of the midpoints for all withheld counties is 80 employees. 
+5.	The adjustment factor is 14/80 = 0.175.
+6.	The adjusted employment for county 009 is 60 × 0.175 = 10.5 employees. 
+Once county- and state-level metal and non-metal employment are known for each county, the ratio of county to state employees (from Equation \@ref(eq:miningempfrac)) is multiplied by the state-level metal and non-metal production (from Equation \@ref(eq:metallicnonmetallic)) to calculate county-level production.
+
+\begin{equation}
+  MP_{t,c} = MP_{t,s} \times EmpFrac_{t,c}
+  (\#eq:materialproduced)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(MP_{t,c} \) = Amount of material type *t* produced in county *c*, in tons <br>\newline
+  \(MP_{t,c} \) = Amount of material type *t* produced in state *s*, in tons <br>\newline 
+  \(EmpFrac_{t,c} \) = The fraction of mining employees for material type *t* in county *c* <br>\newline
+</div>
+
+### Emission Factors
+
+#### Metallic Ore Mining
+
+The emissions factor for metallic ore mining includes emissions from overburden removal, drilling and blasting, and loading and unloading activities, and are taken from emissions factors for copper ore mining from EPA’s National Air Pollutant Emission Trends Procedures Document for 1900-1996 [[ref 4](#miningquarrying-references)]. The emissions factors are applied to all three activities with PM10/TSP ratios of 0.35 for overburden removal [[ref 5](#miningquarrying-references)], 0.81 for drilling and blasting [[ref 6](#miningquarrying-references)], and 0.43 for loading and unloading operations [[ref 6](#miningquarrying-references)]. 
+
+\begin{equation} 
+  EF_{PM10,m} = EF_{o} + (B \times EF_{b}) + EF_{l} + EF_{d}
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{PM10,m} \) = PM10-PRI metallic ore mining emissions factor, in lbs./ton <br> \newline
+  \( EF_{o} \) = PM10-PRI open pit overburden removal emissions factor for copper ore, in lbs./ton <br> \newline
+  \( B \) = Fraction of total ore production that is obtained by blasting at metallic ore mines <br> \newline
+  \( EF_{b} \) = PM10-PRI drilling/blasting emissions factor for copper ore, in lbs./ton <br> \newline
+  \( EF_{l} \) = PM10-PRI loading emissions factor for copper ore, in lbs./ton <br> \newline
+  \( EF_{d} \) = PM10-PRI dumping emissions factor for copper ore, in lbs./ton <br> \newline
+</div>
+
+Using values from the *National Air Pollutant Emissions Trends Procedures Document for 1900-1996, Table 3.1-3*, [ref 4](#miningquarrying-references)], the PM10-PRI emissions factor is calculated as:
+
+\begin{equation}
+  0.0548 \frac{lbs.}{ton} = 0.0003 + (057625 \times 0.0008) + 0.022 + 0.032
+\end{equation}
+
+The PM25-PRI emissions factor is assumed to be 12.5% of the PM10-PRI emissions factor.
+
+\begin{equation}
+  EF_{PM25,m} = EF_{PM10,m} \times 0.125
+\end{equation}
+
+\begin{equation}
+  0.0069 = 0.0548 \times 0.125
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{PM25,m} \) = PM25-PRI metallic ore mining emissions factor, in lbs./ton <br> \newline
+  \( EF_{PM10,m} \) = PM10-PRI metallic ore mining emissions factor, in lbs./ton <br> \newline
+</div>
+
+#### Non-Metallic Ore Mining
+
+The emissions factor for non-metallic ore mining includes overburden removal, drilling and blasting, and loading and unloading activities. The emissions factor is based on western surface coal mining operations from AP-42 [[ref 7](#miningquarrying-references)] and a PM10/TSP ratio.
+
+\begin{equation}
+  EF_{PM10,nm} = EF_{v} + (D \times EF_{r}) + EF_{a} + (0.5 \times (EF_{e} + (EF_{t}))
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{PM10,nm} \) = PM10-PRI non-metallic ore mining emissions factor, in lbs./ton <br> \newline
+  \( EF_{v} \) = PM10-PRI open pit overburden removal emissions factor for at western surface coal mining operations, in lbs./ton <br> \newline
+  \( D \) = Fraction of total ore production that is obtained by blasting at non-metallic mines <br> \newline
+  \( EF_{r} \) = PM10-PRI drilling/blasting emissions factor at western surface coal mining operations, in lbs./ton <br> \newline
+  \( EF_{a} \) = PM10-PRI loading emissions factor at western surface coal mining operations, in lbs./ton <br> \newline
+  \( EF_{e} \) = PM10-PRI truck unloading: end dump-coal emissions factor at western surface coal mining operations, in lbs./ton <br> \newline
+  \( EF_{t} \) = PM10-PRI truck unloading: bottom dump-coal emissions factor at western surface coal mining operations, in lbs./ton <br> \newline
+</div>
+
+Applying the TSP emissions factors developed for western surface coal mining operations from AP-42 [[ref 7](#miningquarrying-references)] and a PM10/TSP ratio of 0.4 [[ref 8](#miningquarrying-references)] yields the following non-metallic ore mining emissions factor:
+
+\begin{equation}
+  0.293 \frac{lbs.}{ton} = 0.0225 + (0.61542 \times 0.00005) + 0.05 + 0.5(0.0035 + 0.033)
+\end{equation}
+
+The PM25-PRI emissions factor is assumed to be 12.5% of the PM10-PRI emissions factor.
+
+\begin{equation}
+  EF_{PM25,nm} = EF_{PM10,nm} \times 0.125
+\end{equation}
+
+\begin{equation}
+  0.037 = 0.293 \times 0.125
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{PM25,nm} \) = PM25-PRI non-metallic ore mining emissions factor, in lbs./ton <br> \newline
+  \( EF_{PM10,nm} \) = PM10-PRI non-metallic ore mining emissions factor, in lbs./ton <br> \newline
+</div>
+
+#### Coal Mining
+
+The emissions factor for coal mining includes overburden removal, drilling and blasting, loading, and unloading and overburden replacement activities. The amount of overburden material handled is assumed to equal ten times the quantity of coal mined, and coal unloading is assumed to split evenly between end-dump and bottom-dump operations. The emissions factor is based on the PM10 emissions factors developed for western surface coal mining operations from AP-42 [[ref 7](#miningquarrying-references)]. 
+
+\begin{equation}
+  EF_{PM10,co} = (10 \times (EF_{to} + EF_{or} + EF_{dt})) + EF_{v} + EF_{r} + EF_{a} + (0.5 \times (EF_{e} + EF_{t}))
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{PM10,co} \) = PM10-PRI coal mining emissions factor, in lbs./ton <br> \newline
+  \( EF_{to} \) = PM10-PRI emissions factor for truck loading overburden at western surface coal mining operations, in lbs./ton of overburden <br> \newline
+  \( EF_{or} \) = PM10-PRI emissions factor for overburden replacement at western surface coal mining operations, in lbs./ton of overburden <br> \newline
+  \( EF_{dt} \) = PM10-PRI truck unloading: bottom dump-overburden emissions factor at western surface coal mining operations, in lbs./ton <br> \newline
+  \( EF_{v} \) = PM10-PRI open pit overburden removal emissions factor for at western surface coal mining operations, in lbs./ton <br> \newline
+  \( EF_{r} \) = PM10-PRI drilling/blasting emissions factor at western surface coal mining operations, in lbs./ton <br> \newline
+  \( EF_{a} \) = PM10-PRI loading emissions factor at western surface coal mining operations, in lbs./ton <br> \newline
+  \( EF_{e} \) = PM10-PRI truck unloading: end dump-coal emissions factor at western surface coal mining operations, in lbs./ton <br> \newline
+  \( EF_{t} \) = PM10-PRI truck unloading: bottom dump-coal emissions factor at western surface coal mining operations, in lbs./ton <br> \newline
+</div>
+
+Applying the PM10-PRI emissions factors developed for western surface coal mining operations [[ref 7](#miningquarrying-references)] yields the following coal mining emissions factor:
+\begin{equation}
+  0.513 = (10 \times (0.015 + 0.001 + 0.006)) + 0.225 + 0.00005 + 0.05 + (0.5 \times (0.0035 + 0.033))
+\end{equation}
+
+The PM25-PRI emissions factor is assumed to be 12.5% of the PM10-PRI emissions factor.
+
+\begin{equation}
+  EF_{PM25,co} = EF_{PM10,co} \times 0.125
+\end{equation}
+
+\begin{equation}
+  0.0641 = 0.513 \times 0.125
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{PM25,co} \) = PM25-PRI coal mining emissions factor, in lbs./ton <br> \newline
+  \( EF_{PM10,co} \) = PM10-PRI coal mining emissions factor, in lbs./ton <br> \newline
+</div>
+
+#### PM-FIL and PM25-PRI Emission Factors
+
+PM-FIL emissions factors are assumed to be the same as PM-PRI emissions factors. In reality, there is a small amount of PM-CON emissions included in the PM-PRI emissions, but insufficient data exists to estimate the PM-CON portion. In 2006, the EPA adopted new PM2.5/PM10 ratios for several fugitive dust categories and concluded that the PM2.5/PM10 ratios for fugitive dust categories should be in the range of 0.1 to 0.15 [[ref 9](#miningquarrying-references)]. Consequently, a ratio of 0.125 was applied to the PM10 emissions factors to estimate PM2.5 emissions factors for mining and quarrying. 
+
+### Controls
+
+There are no controls assumed for this category. 
+
+### Emissions
+
+Emissions from mining and quarrying are calculated by multiplying the amount of mining material produced (from Equation \@ref(eq:materialproduced) for metallic and non-metallic mining, and from the EIA [[ref 2](#miningquarrying-references)] for coal) by an emissions factor. 
+
+\begin{equation} 
+  E_{p,t,c} =  EF_{t,p} \times MP_{t,c}
+  (\#eq:emissions-mining)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,t,c} \) = Annual emissions of pollutant *p* from mining material type *t* in county *c*, in lbs. per year <br> \newline
+  \( EF_{t,p} \) = Emissions factor for pollutant *p* from mining material type *t*, in lbs./ton of material produced <br> \newline
+  \( MP_{t,c} \) = Amount of mining material type *t* produced in county *c* <br> \newline
+</div>
+
+The final step of the process is to sum the mining emissions estimates for each pollutant in each county. Emissions estimates are then converted from pounds to tons.
+
+\begin{equation} 
+  AE_{p,c} =  \sum_{t} E_{p,t,c} \times 0.0005 \frac{ton}{lb.}
+  (\#eq:emissions-mining-sum)
+\end{equation}
+
+### Sample Calculations
+
+The steps below provide sample calculations to determine the PM25-PRI emissions from mining and quarrying operations. Constant emissions factor calculations that are used in all counties are not repeated here.
+Table \@ref(tab:mining-sample-calculations) provides a summary of these calculations for metallic ore mining. These calculations are repeated for non-metallic and coal mining and summed to calculate the total emissions from mining and quarrying. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1, 2, 3, 4, 17, 18),
+  Equation = c("$W_{s} = \\frac{O_{s}}{O_{US}} \\times W_{US}$",
+               "$MP_{t,s} = (W_{s} + O_{s}) \\times \\frac{MP_{t,US}}{MP_{US}} \\times 1.1023 \\frac{\\text{short ton}}{\\text{metric ton}}$",
+               "$EmpFrac_{t,c} =  \\frac{Emp_{t,c}}{Emp_{t,s}}$",
+               "$MP_{t,c} = MP_{t,s} \\times EmpFrac_{t,c}$",
+               "$E_{p,t,c} = EF_{t,p} \\times MP_{t,c}$",
+               "$AE_{p,t,c} = \\sum_{t} E_{p,t,c} \\times 0.0005 \\frac{\\text{short ton}}{\\text{lb.}}$"),
+  Values = c("N/A",
+             "$(3,720 + 42,900) \\times (2,660,000 \\div 5,060,000) \\times 1.1023\\frac{ton}{metric ton}$",
+             "$\\frac{\\text{25 metallic mining employees in the county}}{\\text{1,662 metallic mining employees in the state}}$",
+             "$\\text{25,071 thousand tons} \\times  0.015$",
+             "$0.0068\\frac{lbs.}{ton} \\times \\text{376,071 tons}$",
+             "$\\text{184,922.19 lbs.} \\times 0.0005 \\frac{ton}{lb.}$"),  
+  Result = c("Waste data is not withheld for the state",
+             "27,015 thousand tons metallic ore in the state",
+             "Metallic employee fraction of 0.015",
+             "376.1 thousand tons metallic ore",
+             "2,557 lbs. PM25-PRI emissions from metallic ore",
+             "1.28 tons PM25-PRI emissions from metallic ore")
+)
+```
+```{r mining-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+### Improvements/Changes in the 2023 NEI
+
+There have been no significant changes to this category since the 2020 NEI.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exists to calculate emissions for the counties in Puerto Rico and the U.S. Virgin Islands, we based emissions for those domains on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the U.S. Virgin Islands. The total emissions in pounds for these two Florida counties are divided by their respective populations creating a pound per capita emission factor. For each Puerto Rico and U.S. Virgin Island county, the pound per capita emission factor is multiplied by the county population (from the same year as the inventory’s activity data) which serves as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”.
+
+## References {#miningquarrying-references}
+
+1.  U.S. Geologic Survey. [2017 Minerals Yearbook: Mining and Quarrying Trends](https://www.usgs.gov/centers/national-minerals-information-center/mining-and-quarrying#myb). 
+2.	U.S. Department of Energy, Energy Information Administration. “[Detailed data from the EIA-7A and the U.S. Mine Safety and Health Administration](https://www.eia.gov/coal/data.php)”, data pulled for year 2023. 
+3.	U.S. Census Bureau. [2023 County Business Patterns](https://www.census.gov/programs-surveys/cbp.html). 
+4.	U.S. Environmental Protection Agency. 1998. [National Air Pollutant Emission Trends Procedure Document for 1900-1996](https://www.epa.gov/sites/default/files/2015-07/documents/trends_procedures_old.pdf), EPA-454/R-98-008.
+5.	U.S. Environmental Protection Agency, AP-42, Fifth Edition, Volume 1, [Chapter 13: Miscellaneous Sources, Section 13.2.4: Aggregate Handling and Storage Piles](https://www.epa.gov/sites/default/files/2020-10/documents/13.2.4_aggregate_handling_and_storage_piles.pdf).
+6.	U.S. Environmental Protection Agency. 1986. [Generalized Particle Size Distributions for Use in Preparing Size-Specific Particulate Emissions Inventories](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=2000FTAM.TXT), EPA-450/4-86-013.  
+7.	U.S. Environmental Protection Agency, AP-42, Fifth Edition, Volume 1, [Chapter 11: Mineral Products Industry, Section 11.9: Western Surface Coal Mining](https://www.epa.gov/sites/default/files/2020-10/documents/c11s09.pdf).
+8.	United States Environmental Protection Agency, [AIRS Facility Subsystem Source Classification Codes and Emission Factor Listing for Criteria Air Pollutants](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=2000NAHA.TXT), EPA-450/4-90-003, March 1990.  
+9.	Midwest Research Institute. 2006. [Background Document for Revisions to Fine Fraction Ratios Used for AP-42 Fugitive Dust Emission Factors](https://www.epa.gov/sites/default/files/2020-10/documents/background_document_for_revisions_to_fine_fraction_ratios_used_for_ap-42_fugitive_dust_emission.pdf), MRI Project No. 110397.  

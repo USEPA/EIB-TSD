@@ -1,0 +1,156 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Portable Fuel Containers {#PFC}
+
+## Sector Descriptions and Overview 
+
+There are several sources of emissions associated with portable fuel containers (PFC) used for storage of gasoline. These sources include vapor displacement and spillage while refueling the gas can at the pump, spillage during transport, permeation and evaporation from the gas can during transport and storage, and vapor displacement and spillage while refueling equipment. Vapor displacement and spillage while refueling nonroad equipment from PFCs, and spillage during transport and at the pump are included in the nonroad inventory. This section describes how the nonpoint data category PFC emissions (permeation, evaporation, and vapor displacement at the pump) are accounted for in the NEI. This source category is one of many components in the Miscellaneous Non-industrial sector.
+
+Table \@ref(tab:pfc-sccs) shows the SCCs covered by this source category, and those for which we generate nonpoint estimates. While EPA is not retiring the nonpoint “spillage” PFC SCCs that are included in the MOVES model [[ref 1](#PFC-references)], and hence nonroad data category, they should not be reported (by EPA or SLTs) if MOVES is used for nonroad inventory development.  
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-12/PFC_SCCs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r pfc-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Source Classification Codes used for portable fuel containers.',
+  format.args = list(scientific = FALSE, trim = TRUE)
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+## EPA-developed estimates
+
+We have relied on an inventory developed for the Tier 3 motor vehicle and fuel standards rule [[ref 2](#PFC-references)] dating back to the 2024 NEI. This inventory assumes all fuel dispensed from PFCs was E10, with an average RVP of 8.7 psi. Use of ethanol in gasoline fuels can increase evaporative emissions from PFCs, relative to E0, for several reasons. First, if E10 fuels have higher volatility than corresponding E0 fuels, that can increase evaporation and vapor displacement.  Second, ethanol in gasoline increases permeation of fuel through gas can materials. Finally, the lower energy content of ethanol fuels leads to more frequent refueling, and, thus, greater emissions from spillage and displacement while filling the gas can at the pump.
+
+The use of ethanol also changes the mix of hydrocarbons in the evaporated fuel. In particular, it can change the fraction of several hazardous air pollutants as well as ethanol.
+
+As part of the 2007 regulation controlling emissions of hazardous pollutants from mobile sources (MSAT2 rule), EPA promulgated requirements to control VOC emissions from gas cans. The methodology we used to develop emission inventories for gas cans was developed for that regulation and is described in the regulatory impact analysis for the rule and in an accompanying technical support document [[ref 3, ref 4](#PFC-references)]. However, while that regulation included estimates for spillage, emissions occur when refueling equipment. Most of these emissions are already included in the nonroad equipment inventory. Thus, we do not include these emissions in the PFC inventory for the NEI.  Vapor displacement for nonroad equipment container refueling was also subtracted from vapor displacement in the PFC inventory to avoid double counting these emissions.
+
+Ozone Transport Commission (OTC) [portable fuel containers controls](https://otcair.org/upload/Interest/StationaryArea Sources/CM_Gas Cans 060315.pdf) are also not reflected in the EPA PFC estimates. 
+
+### VOC Allocation
+
+For the NEI, emissions were separated into commercial and residential fuel container emissions. Total state level PFC emissions were allocated to the categories by using national level residential and commercial emission splits from the MSAT2 rule for each of the categories using the following equations:
+
+\begin{equation} 
+  \text{E}_{residential,XXXX,YY} =  E \times (\frac{Res}{Res + Com})
+  (\#eq:residential)
+\end{equation} 
+
+\begin{equation} 
+  \text{E}_{commercial,XXXX,YY} =  E \times (\frac{Com}{Res + Com})
+  (\#eq:commercial)
+\end{equation} 
+
+where E was the emissions of the category being split, XXXX was year, YY was state, and Res and Com were the national residential and commercial PFC emissions.
+
+Permeation and evaporation were also separated as follows:
+
+\begin{equation} 
+  \text{E}_{AAA,XXXX,YY,perm} =  E_{AAA,XXXX,YY,perm+evap} \times 0.3387
+  (\#eq:perm)
+\end{equation} 
+
+\begin{equation} 
+  \text{E}_{AAA,XXXX,YY,evap} =  E_{AAA,XXXX,YY,perm+evap} \times (1 - 0.3387)
+  (\#eq:evap)
+\end{equation} 
+
+The fraction 0.3387 represents the fraction of combined permeation and evaporative emissions attributable to permeation, based on data from the California Air Resources Board.
+
+### VOC Emissions
+
+VOC emissions estimates are based on gasoline volumes for calendar year 2018, calculated with NONROAD2005 for the Tier 3 rule. Nonroad gasoline consumption estimates from the newer MOVES3 model are used to update the NONROAD2005 gasoline volume estimates; these updated values are then adjusted to calendar year 2023. PFC emissions from permeation and evaporation are developed separately from PFC emissions from vapor displacement.
+
+*Permeation and evaporation estimated for year 2018 from Tier 3 rule*
+
+These emissions are represented by the following SCCs:
+
+- 2501011011 – Residential Portable Fuel Containers: Permeation
+- 2501011012 – Residential Portable Fuel Containers: Evaporation
+- 2501012011 – Commercial Portable Fuel Containers: Permeation
+- 2501012012 – Commercial Portable Fuel Containers: Evaporation
+
+Emissions from these SCCs are impacted by 2007 MSAT rule standards limiting evaporation and permeation emissions from these containers to 0.3 grams of hydrocarbons per day [[ref 5](#PFC-references)]. Inventory estimates developed for calendar year 2018 in EPA’s Tier 3 vehicle rule modeling platform [[ref 6](#PFC-references)] reflect the impact of these standards, as well as impacts of RVP and oxygenate use. These Tier 3 inventories were interpolated from earlier 2015 and 2020 MSAT2 rule inventories and assumed 100 percent E10.
+
+*Vapor Displacement estimated for year 2018 from Tier 3 rule*
+
+Vapor displacement emissions occur while refueling containers at the pump.  These emissions are represented by the following SCCs:
+
+- 2501011014 – Residential Portable Fuel Containers: Refilling at the Pump: Vapor Displacement
+- 2501012014 – Commercial Portable Fuel Containers: Refilling at the Pump: Vapor Displacement
+
+These emissions are not impacted by MSAT2 rule standards but are impacted by RVP and oxygenate use. Inventory estimates were developed for calendar year 2018 in EPA’s Tier 3 vehicle rule modeling platform. 
+
+### Hazardous air pollutants
+
+Hazardous air pollutants found in liquid gasoline will be present as a component of VOC emissions. These MSATs include benzene, ethyl benzene, toluene, hexane, xylenes, 2,2,4-trimethylpentane, and naphthalene. For vapor displacement emissions of benzene and naphthalene, toxic to VOC ratios were obtained from headspace vapor profiles from EPAct test fuels [[ref 7](#PFC-references)]. For permeation emissions of these pollutants, vehicle permeation speciation data from Coordinating Research Council (CRC) technical reports E-77-2b and E-77-2c were used [[ref 8, ref 9](#PFC-references)]. We relied on three-day diurnal profiles from the CRC data. For evaporative emissions resulting from changes in ambient temperatures, speciation data from the Auto/Oil program were used for E0 and E10 [[ref 10](#PFC-references)]. Table \@ref(tab:BenzNaph) lists the toxic to VOC ratios for each type of PFC emission.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-12/BenzNaph.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r BenzNaph, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Toxic to VOC ratios for benzene and naphthalene from PFCs.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+Emissions of other air toxics for permeation, evaporation, and vapor displacement were all estimated from the EPAct headspace vapor displacement profile for E10 (SPECIATE profile 8870). Toxic to VOC ratios are provided in Table \@ref(tab:OtherToxics).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-12/OtherToxics.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r OtherToxics, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Toxic to VOC ratios for Other HAPs (Vapor Displacement, Permeation, and Evaporation).',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+### Evolution of PFC estimates since the 2017 NEI
+
+Inventories for the 2017 NEI were based on gasoline volumes for year 2018 using the NONROAD2005 estimates. These 2018 estimates were then adjusted to account for the differences in gasoline volumes used for PFCs in MOVES3 versus NONROAD2005. Next, MOVES3 was run to estimate nonroad fuel consumption for year 2020, and these adjustments were applied between year 2018 and 2020 MOVES3 consumption estimates.
+
+For the 2023 NEI the following steps were applied to the 2020 estimates:
+- Fuel consumption for gasoline engine nonroad equipment as computed by MOVES3 (June 14, 2021) for year 2020.
+- Fuel consumption for gasoline engine nonroad equipment as computed by MOVES5 [[ref 11](#PFC-references)] (March 12, 2025) for year 2023.
+- Aggregate 2023:2020 scalars computed separately for all residential vs commercial refueling as based on nonroad SCCs: 1.0178 for Residential, 1.0338 for Commercial.
+- Apply these scalars to 2020 residential and commercial portable fuel container inventory to create 2023 estimates.
+
+This approach reflects the following assumptions: 
+- This methodology assumes no change in emission rates between 2020 and 2023. Inventory adjustments were made based on the gasoline volumes estimated by MOVES nonroad model. 
+- Also, it does not account for current levels of noncompliance due the lack of available data; this will be an improvement sought for the 2026 NEI PFC estimates.
+
+## References {#PFC-references}
+
+1. MOVES-Nonroad, its documentation and technical reports can be found here: [Nonroad Technical Reports](https://www.epa.gov/moves/nonroad-technical-reports).
+2. U. S. EPA. 2014. “Development of Air Quality Reference Case Upstream and Portable Fuel Container Inventories for the Tier 3 Final Rule.” Memorandum from Rich Cook, Margaret Zawacki and Zoltan Jung to Docket, February 25, 2014, Docket No. EPA-HQ-OAR-2011-0135.
+3. U. S. EPA. 2007. [Final Regulatory Impact Analysis: Control of Hazardous Air Pollutants from Mobile Sources](https://www.epa.gov/mobile-source-pollution/final-rule-control-hazardous-air-pollutants-mobile-sources); EPA420-R-07-002; Office of Transportation and Air Quality, Ann Arbor, MI. 
+4. Landman, L. C. (2007) [Estimating Emissions Associated with Portable Fuel Containers (PFCs)](https://nepis.epa.gov/Exe/ZyNET.exe/P1004LMT.txt?ZyActionD=ZyDocument&Client=EPA&Index=2006%20Thru%202010&Docs=&Query=&Time=&EndTime=&SearchMethod=1&TocRestrict=n&Toc=&TocEntry=&QField=&QFieldYear=&QFieldMonth=&QFieldDay=&UseQField=&IntQFieldOp=0&ExtQFieldOp=0&XmlQuery=&File=D%3A%5CZYFILES%5CINDEX%20DATA%5C06THRU10%5CTXT%5C00000009%5CP1004LMT.txt&User=ANONYMOUS&Password=anonymous&SortMethod=h%7C-&MaximumDocuments=1&FuzzyDegree=0&ImageQuality=r75g8/r75g8/x150y150g16/i425&Display=hpfr&DefSeekPage=x&SearchBack=ZyActionL&Back=ZyActionS&BackDesc=Results%20page&MaximumPages=1&ZyEntry=1&slide). U. S. EPA, Assessment and Standards Division, National Vehicle and Fuel Emissions Laboratory, Ann Arbor, MI, Report No. EPA420-R-07-001. 
+5. Federal Register. 2007. [Control of Hazardous Air Pollutants from Mobile Sources](https://www.federalregister.com/Browse/Document/usa/na/fr/2007/2/26/e7-2667?search=Control%2Bof%2BHazardous%2BAir%2BPollutants%2Bfrom%2BMobile%2BSources#74263093). 72 (37): 8428-8570.
+6. U.S. EPA. 2014. [Emissions Modeling Technical Support Document: Tier 3 Motor Vehicle and Emission and Fuel Standards](https://nepis.epa.gov/Exe/ZyNET.exe/P100HX5N.TXT?ZyActionD=ZyDocument&Client=EPA&Index=2011+Thru+2015&Docs=&Query=&Time=&EndTime=&SearchMethod=1&TocRestrict=n&Toc=&TocEntry=&QField=&QFieldYear=&QFieldMonth=&QFieldDay=&IntQFieldOp=0&ExtQFieldOp=0&XmlQuery=&File=D%3A%5Czyfiles%5CIndex%20Data%5C11thru15%5CTxt%5C00000009%5CP100HX5N.txt&User=ANONYMOUS&Password=anonymous&SortMethod=h%7C-&MaximumDocuments=1&FuzzyDegree=0&ImageQuality=r75g8/r75g8/x150y150g16/i425&Display=hpfr&DefSeekPage=x&SearchBack=ZyActionL&Back=ZyActionS&BackDesc=Results%20page&MaximumPages=1&ZyEntry=1&SeekPage=x&ZyPURL).  Office of Air Quality Planning and Standards, Research Triangle Park, NC, Report No. EPA-454/R-13-003, February 2014. 
+7. U. S. EPA. 2011. [Hydrocarbon Composition of Gasoline Vapor Emissions from Enclosed Fuel Tanks](https://nepis.epa.gov/Exe/ZyNET.exe/P100GPED.TXT?ZyActionD=ZyDocument&Client=EPA&Index=2011+Thru+2015&Docs=&Query=&Time=&EndTime=&SearchMethod=1&TocRestrict=n&Toc=&TocEntry=&QField=&QFieldYear=&QFieldMonth=&QFieldDay=&IntQFieldOp=0&ExtQFieldOp=0&XmlQuery=&File=D%3A%5Czyfiles%5CIndex%20Data%5C11thru15%5CTxt%5C00000007%5CP100GPED.txt&User=ANONYMOUS&Password=anonymous&SortMethod=h%7C-&MaximumDocuments=1&FuzzyDegree=0&ImageQuality=r75g8/r75g8/x150y150g16/i425&Display=hpfr&DefSeekPage=x&SearchBack=ZyActionL&Back=ZyActionS&BackDesc=Results%20page&MaximumPages=1&ZyEntry=1&SeekPage=x&ZyPURL). Office of Research and Development and Office of Transportation and Air Quality. Report No. EPA-420-R-11-018. EPA Docket EPA-HQ-OAR-2011-0135.
+8. U. S. EPA. 2010. [Evaporative Emissions from In-Use Vehicles: Test Fleet Expansion (CRC E-77-2b)](https://nepis.epa.gov/Exe/ZyNET.exe/P100XCJC.TXT?ZyActionD=ZyDocument&Client=EPA&Index=2006+Thru+2010&Docs=&Query=&Time=&EndTime=&SearchMethod=1&TocRestrict=n&Toc=&TocEntry=&QField=&QFieldYear=&QFieldMonth=&QFieldDay=&IntQFieldOp=0&ExtQFieldOp=0&XmlQuery=&File=D%3A%5Czyfiles%5CIndex%20Data%5C06thru10%5CTxt%5C00000042%5CP100XCJC.txt&User=ANONYMOUS&Password=anonymous&SortMethod=h%7C-&MaximumDocuments=1&FuzzyDegree=0&ImageQuality=r75g8/r75g8/x150y150g16/i425&Display=hpfr&DefSeekPage=x&SearchBack=ZyActionL&Back=ZyActionS&BackDesc=Results%20page&MaximumPages=1&ZyEntry=1&SeekPage=x&ZyPURL). Prepared by Harold Haskew and Associates for Assessment and Standards Division, Office of Transportation and Air Quality, October, 2010.
+9. Coordinating Research Council. 2010. [Study to Determine Evaporative Emission Breakdown, Including Permeation Effects and Diurnal Emissions, Using E20 Fuels on Aging Enhanced Evaporative Emissions Certified Vehicles](http://crcsite.wpengine.com/wp-content/uploads/2019/05/E-77-2c-Final-Report-for-sure-1-28-11.pdf). Report No. E-77-2c.
+10. Auto/Oil Air Quality Improvement Research Program. 1996.  Phase I and II Test Data.  Prepared by Systems Applications International, Inc.
+11. MOVES5: [Latest Version of Motor Vehicle Emission Simulator (MOVES)](https://www.epa.gov/moves/latest-version-motor-vehicle-emission-simulator-moves). 

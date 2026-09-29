@@ -1,0 +1,298 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Dust: Agriculture Crops and Livestock {#agdust}
+
+## Sector Descriptions and Overview
+
+Fugitive dust emissions from agricultural tilling include the airborne soil particulate emissions produced during the preparation of agricultural lands for planting. Dust kicked up by animals refers to the dust emitted from different types of livestock feet. These emissions are primarily considered to be made by cattle and swine, but poultry emissions of dust are also examined. Fugitive dust emissions from both agricultural tilling and livestock feet are estimated for PM10-PRI, PM10-FIL, PM25-PRI, and PM25-FIL. Since there are no PM-CON emissions for this category, PM10-PRI emissions are equal to PM10-FIL emissions and PM25-PRI emissions are equal to PM25-FIL. Table \@ref(tab:agdustSCCs) shows the SCCs assigned to the various ag tilling and livestock feet; SCC level 1 are “Miscellaneous Area Sources” for all SCCs.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-19/AgDust1_SCCs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r agdustSCCs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'SCCs for agricultural tilling and dust kicked up by animals',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+## EPA-developed estimates
+
+The calculations for estimating emissions from agricultural tilling involves distributing state-level tilling data by tilling type (conservation, no-till, and conventional) to the county level and calculating a ratio of conservation, no-till, and conventional tilling for each county. That ratio is used to estimate the type of tillage for each crop type for each tilling type in each county. The type of tillage is used to develop a county-level emissions factor for each crop type and tilling type, which is used to calculate county-level PM10-FIL, PM10-PRI, PM25-FIL, and PM25-PRI emissions.
+
+The calculations for estimating the emissions from dust kicked up by animals involves multiplying the livestock counts by an emission factor for PM10-PRI, PM10-FIL, PM25-PRI, and PM25-FIL.
+
+### Activity Data {#activity-data}
+
+#### Agricultural Tilling {#agtillingactivity}
+
+The basis of agricultural tilling emission estimates is the number of acres of crops tilled in each county by crop type and tillage type. These data are obtained from the 2017 Census of Agriculture developed by the United States Department of Agriculture [[ref 1](#agtilling-references)]. The USDA Census of Agriculture reports acres harvested for a given crop at the county level but does not provide tilling data for each crop type at the county level.
+
+The USDA Census of Agriculture redacts some county level data to avoid disclosing data for individual farms. Missing county-level data for acres harvested by crop type and tilling type are calculated using the difference between the state and national level reported data and the sum of the county-level data by state.
+
+When county level tilling data are unavailable, the total state level tilling data by tilling type, conservation, no-till, and conventional are distributed to the county level for each crop. The difference between the county-level data for acres harvested by crop tilling type and the state-level data for acres harvested by crop tilling are equally distributed to the counties without data.
+
+\begin{equation} 
+  a_{m,t} = \frac{a_{s,t} - \sum{a_{c,t}}}{C_{m,t}}
+  (\#eq:agtilling-missing-county)
+\end{equation}
+
+<div style="margin-left: 2em;">
+Where: <br> \newline 
+  \(a_{m,t} \) = County-level land tilled by crop tilling type, *t*, for counties missing tilling data, *m*, in acres <br> \newline 
+  \(a_{s,t} \) = Land tilled by crop tilling type t in state *s*, in acres <br> \newline $a_{c,t}$ = Sum of county-level land tilled by crop tilling type, *t*, in acres <br> \newline 
+  \(C_{m,t} \) = Number of counties missing county-level land tilled data by crop tilling type, *t* <br> \newline
+</div>
+
+USDA provides data on the number of acres tilled by tillage type (conservation, no-till, and conventional) in each county [[ref 2](#agtilling-references)], but not by tillage type and crop type in each county. To estimate tillage by crop type in each county, a ratio is determined based on the number of acres in each county tilled by each tillage type to the total acres tilled by all tillage types. This calculation uses either the data directly reported by USDA or the data gap-filled by Equation \@ref(eq:agtilling-missing-county).
+
+\begin{equation} 
+  r_{c,t} = \frac{a_{c,t}\ \text{(or } a_{m,t}\text{)}}{\sum a_{c,t}\ \text{(or } a_{m,t}\text{)}}
+  (\#eq:tillingratio)
+\end{equation}
+
+<div style="margin-left: 2em;">
+Where: <br> \newline 
+  \(r_{c,t} \) = Ratio of crop tilling type t to total all crop tilling types in county *c* <br> \newline 
+  \(a_{c,t} \) = Land tilled by crop tilling type *t* in county *c*, in acres <br> \newline
+  \(a_{m,t} \) = Land tilled by crop tilling type *t* for counties missing data, *m*, in acres <br> \newline
+</div>
+
+The ratio is then used to estimate the county-level acres harvested by crop type from the *Census of Agriculture* to the tilling type (conservation, no-till, and conventional) at the county-level.
+
+\begin{equation} 
+  a_{t,c,x} = r_{c,t} \times a_{c,x}
+  (\#eq:acrestilled)
+\end{equation}
+
+<div style="margin-left: 2em;">
+Where: <br> \newline 
+  \(a_{t,c,x} \) = Land tilled by crop tilling type *t* and crop type *x* in county *c*, in acres <br> \newline 
+  \(r_{c,t} \) = Ratio of crop tilling type *t* to total all crop tilling types in county *c* <br> \newline 
+  \(a_{c,x} \) = Acres harvested of crop type *x* in county *c*, in acres <br> \newline
+</div>
+
+Tilling data for permanent pasture followed a different methodology. Conventional tilling data are available for the state of Utah [[ref 3](#agtilling-references)]. For Utah, a ratio of the conventional tilling acres to the total acres of permanent pasture is developed (0.0023) and applied to the total acreage data for permanent pasture from the *Census of Agriculture* to determine the number of conventional tilled permanent pasture acres by county in other states. It is assumed that the remainder of the permanent pasture acres is not tilled, so the remaining distribution of permanent pasture acres is then distributed to no till acres and conservation tilling acres are left as zero.
+
+#### Dust kicked up by animals {#animaldustactivity}
+
+The activity data for this dust kicked up by animals is based on livestock counts (average annual number of standing head) and population information by state and county used to develop U.S. EPA’s Greenhouse Gas Inventory [[ref 8](#animaldust-references)]. This data set is derived from multiple data sets from the United States Department of Agriculture (USDA), particularly the National Agricultural Statistics Service (NASS) survey and census [[ref 9](#animaldust-references)]. The USDA NASS survey dataset, which represents latest available, national livestock data, is used to obtain the livestock counts for as many counties as possible across the United States. For a full description of the GHG livestock population estimation methodology, refer to the above referenced citation for the EPA’s GHG inventory document.
+
+Generally, counties not specifically included in the NASS survey data set (e.g., due to business confidentially reasons) were gap-filled based on the difference in the reported state total animal counts and the sum of all county-level reported animal counts. State-level data on animal counts from the GHG inventory were distributed to counties based on the proportion of animal counts in those counties from the NASS census.
+
+\begin{equation}
+  P_{a,c} = P_{a,s} \times r_{a,c,2012}
+  (\#eq:animalpop)
+\end{equation}
+
+<div style="margin-left: 2em;">
+Where: <br> \newline 
+  \(P_{a,c} \) = Estimated population of animal type *a* in county *c* <br>\newline 
+  \(P_{a,s} \) = NASS survey reported state-level population of animal type *a* in state *s* <br>\newline 
+  \(r_{a,c,2012} \) = Ratio of animal county- to state-level animal counts from the 2012 NASS census for animals type *a* in county *c* <br>\newline
+</div>
+
+### Allocation Procedure {#allocation-procedure}
+
+Activity data are reported at the county level for agricultural tilling, so allocation is not needed. 
+
+The USDA survey reports the livestock counts at the county level for many counties, so no allocation is necessary for dust kicked-up by animals. The procedure for gap-filling missing county-level data using state-level data is discussed above.
+
+### Emission Factors
+
+#### Agricultural Tilling
+
+The county-level emissions factors for agricultural tilling are specific to the crop and tilling type (e.g. conventional tillage corn, no-till soybean, etc.) and are calculated using the following equation [[ref 4](#agtilling-references)],[[ref 5](#agtilling-references)].
+
+\begin{equation}
+  EF_{p,t,x,c} = c \times k \times s_{c}^{0.6} \times p_{t} 
+  (\#eq:EF-tilling)
+\end{equation}
+
+<div style="margin-left: 2em;">
+Where: <br> \newline 
+  \(EF_{p,t,x,c} \) = Emissions factor for pollutant *p*, crop tilling type *t*, and crop type *x* in county *c*, in lbs./acre <br>\newline 
+  \(c \) = Constant 4.8 lbs./acre-pass <br>\newline 
+  \(k \) = Dimensionless particle size multiplier (PM10-FIL and PM10-PRI = 0.21; PM25-FIL and PM25-PRI = 0.042) <br>\newline
+  \(s_{c} \) = Percent silt content of surface soil (%) in county *c*, defined as the mass fraction of particles smaller than 50 μm diameter found in surface soil <br>\newline $p_{t}$ = Number of passes or tilling in a year by crop tilling type, *t* <br>\newline
+</div>
+
+The U.S. Department of Agriculture and the National Cooperative Soil Survey define silt content of surface soil as the percentage of particles (mass basis) of diameter smaller than 50 micrometers (µm) found in the surface soil.\footnote{Note that this definition is different than the U.S. Environmental Protection Agency’s definition that includes all particles (mass basis) of diameter smaller than 75 micrometers.} The soil sample data used to estimate county-level, average silt content values are from the National Cooperative Soil Survey Microsoft Access Soil Characterization Database [[ref 8](#animaldust-references)]. This database contains the most commonly requested data from the National Cooperative Soil Survey Laboratories including data from the Kellogg Soil Survey Laboratory and cooperating universities. EPA applied specific selection criteria to the database to ensure that all samples are comparable and relevant to this analysis. The selection criteria included selecting only samples taken inside the United States with a preparation code of S and a horizon top of zero centimeters or a master horizon of A or O. A preparation code of S signifies that the sample is the air-dried whole soil passing through a 3 inch sieve and a horizon top of zero or master horizon of A or O ensures that the sample is taken at the surface.
+
+In some cases, the sample metadata did not indicate a county, but included latitude and longitude coordinates. In these cases, the state and county information are determined based on the latitude and longitude coordinates and added to the sample entry in the database. The average silt content for a county is calculated by summing the total silt content of all the samples in the county and dividing by the number of samples in the county. For counties without samples, the average silt content is calculated by summing the total silt content of soil samples in neighboring counties and dividing by the number of samples in the neighboring counties. If neighboring counties also lacked sample data, then the county is assigned the average silt value of soil samples within the state. Table \@ref(tab:agdusttillingpasses) shows the number of passes or tillings in a year for each crop for conservation use, no-till and conventional use [[ref 7](#agtilling-references)]. These values are used as pt in Equation \@ref(eq:EF-tilling) to estimate the county-level emissions factors. Mulch till and ridge till tillage systems are classified as conservation use, while 0 to 15 percent residue and 15 to 30 percent residue tillage systems are classified as conventional use.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-19/AgDust2_TillingPasses.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r agdusttillingpasses, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Number of Passes or Tillings per Year',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+#### Dust kicked up by animals
+
+Dust emission factors are from different literature articles for each livestock type. No references for PM2.5 emission factors were found in the literature for Beef Cattle. To calculate PM2.5 for Beef Cattle, the Dairy Cattle PM10 to PM2.5 ratio of 4.81 from this tool was used and is based on ratios in the PM Augmentation tool [[ref 10](#animaldust-references)]. In general, if the study calculated an emission factor, it was converted to units of ton/year/head and is used in this tool. If the study did not calculate an emission factor, then it was calculated by dividing the emission rate in tons per year by animal units according to an equation used by the NRC’s Scientific Basis for Estimating Air Emissions from Animal Feeding Operations: Interim Report [[ref 11](#animaldust-references)]. Animal units are calculated by multiplying an equivalent factor by the livestock population according to an equation from the Wisconsin Department of Natural Resources [[ref 12](#animaldust-references)]. After converting the AU to number of animals, assuming that 1 AU is equivalent to 500 kilograms, the emission factor is calculated in units of tons per year per head.
+
+### Controls
+
+There are no controls assumed for this category.
+
+### Emissions
+
+#### Agricultural Tilling
+
+Particulate matter emissions from agricultural tilling are computed by multiplying crop- and county-specific emissions factors by crop- and county-specific data on tilling activity. The emissions are then summed across all tilling types and crop types.
+
+\begin{equation} 
+  E_{p,c} = \sum_{t=1}^{T} \sum_{x=1}^{X} EF_{p,t,x,c} \times a_{t,c} \times \frac{\text{1 ton}}{\text{2,000 lb}} 
+  (\#eq:emissions-mining)
+\end{equation}
+
+<div style="margin-left: 2em;">
+Where: <br> \newline 
+  \(E_{p,c} \) = Annual total agricultural tilling county level emissions of pollutant *p* in county *c* from all crop tilling types, in tons <br> \newline 
+  \(EF_{p,t,x,c} \) = Emissions factor for pollutant *p*, crop tilling type *t*, and crop type *x* in county *c*, in lbs./acre <br> \newline
+  \(a_{t,x,c} \) = Land tilled by crop tilling type *t*, and crop type *x* in county *c*, in acres <br> \newline
+</div>
+
+#### Dust kicked up by animals
+
+For dust from animal, each animal type and pollutant the livestock count is multiplied by the emissions factors to estimate emissions.
+
+\begin{equation} 
+  E_{p,c,a} =  P_{a,c} \times EF_{p,a}
+  (\#eq:emissions-mining)
+\end{equation}
+
+<div style="margin-left: 2em;">
+Where: <br> \newline 
+  \(E_{p,c,a} \) = Annual emissions of pollutant *p* in county *c* for animal type *a*, in tons per year <br> \newline 
+  \(P_{a,c} \) = Population of livestock for animal type *a* in county *c* <br> \newline
+  \(EF_{p,a} \) = Emissions factor for pollutant *p* and animal type *a*, in tons per year per head <br> \newline
+</div>
+
+### Sample Calculations
+
+#### Agricultural Tilling
+
+Table \@ref(tab:agtilling-sample-calculations) provides a sample calculation for PM10-FIL emissions for conservation tilling from corn. For total PM10-FIL emissions, the calculations below would need to be repeated for all crop types for all three tilling types, and then summed in equation 5 for total emissions. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1, 2, 3, 5, 6),
+  Equation = c("$a_{m,t} = \\frac{a_{s,t} - \\sum{a_{c,t}}}{C_{m,t}}$",
+               "$r_{c,t} = \\frac{a_{c,t}\ \\text{(or } a_{m,t}\\text{)}}{\\sum a_{c,t}\ \\text{(or } a_{m,t}\\text{)}}$",
+               "$a_{t,c,x} = r_{c,t} \\times a_{c,x}$",
+               "$EF_{p,t,x,c} = c \\times k \\times s_{c}^{0.6} \\times p_{t}$",
+               "$E_{p,c} = \\sum_{t=1}^{T} \\sum_{x=1}^{X} 
+EF_{p,t,x,c} \\times a_{t,c} \\times \\frac{\\text{1 ton}}{\\text{2,000 lb}}$"),
+  Values = c("$\\frac{311,942 acres - 298,042 acres}{13}$",
+             "$\\frac{1,069.23}{1,489.23}$",
+             "$0.718 \\times 89$",
+             "$4.8 \\frac{pounds}{acre-pass} \\times 0.21 \\times 28.93^{0.6} \\times \\text{1 pass}$",
+             "$7.59 \\frac{pounds}{acre} \\times \\text{63.9 acres} \\times \\frac{1}{2000}$"),  
+  Result = c("1,069.23 acres for conservation tilling",
+             "0.718 ratio of conservation tilling to all tilling",
+             "63.9 acres corn harvested using conservation tilling",
+             "7.59 pounds per acre for conservation tilling from corn",
+             "0.24 tons PM10-FIL emissions from conservation tilling for corn*")
+)
+```
+
+```{r agtilling-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations for PM10-FIL emissions from conservation tilling from corn",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+*Note that this calculation must be completed for all crop types and tilling types in the county to determine the total emissions for that county. 
+
+#### Dust kicked up by animals
+
+Table \@ref(tab:animaldust-sample-calculations) lists sample calculations to determine PM10-PRI emissions from dust kicked up by animals. The sample calculations use swine as an example, but the calculations would need to be repeated to calculate values for all livestock types. Again, the values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(4, 7),
+  Equation = c("$P_{a,c} = P_{a,s} \\times r_{a,c,2012}$",
+               "$E_{p,c,a} =  P_{a,c} \\times EF_{p,a}$"),
+  Values = c("N/A",
+             "$5813 \\times 0.000803607$"),  
+  Result = c("swine population is available by county.",
+             "4.67 tons PM10-PRI emissions from swine")
+)
+```
+
+```{r animaldust-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations for PM10-PRI emissions from dust kicked up by animals",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+
+### Improvements/Changes in the 2023 NEI
+
+There have been no significant changes to this category since the 2020 NEI.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exists to calculate emissions for ag tilling for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the US Virgin Islands. The total emissions in tons for these two Florida counties are divided by their respective populations creating a tons per capita emissions factor. For each Puerto Rico and US Virgin Island county, the tons per capita emissions factor is multiplied by the county population (from the same year as the inventory’s activity data) which served as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”.
+
+## References
+
+### Agricultural Tilling {#agtilling-references}
+
+1.  U.S. Department of Agriculture. [2017 Census of Agriculture.](https://www.nass.usda.gov/Publications/AgCensus/2017/index.php)
+2.  Personal communication from Christy Meyer, U.S. Department of Agriculture, National Agricultural Statistics Service to Marissa Hoer, Abt Associates, September 2015.
+3.  Personal communication from Greg Mortensen, Utah Department of   Environmental Quality to Jonathan Dorn, Abt Associates,  2014_UtahDeptAg_DNR_Tilling_Stats.xlsx, February 2016.
+4.  U.S. Environmental Protection Agency. 1985. [Compilation of Air  Pollutant Emission Factors, 4th Edition, AP-42, Volume I: Stationary Point and Area Sources,](https://www.epa.gov/system/files/documents/2024-04/ap42_4thed_orig.pdf) page 11.2.2-1. Research Triangle Park, North Carolina. 
+5.  Midwest Research Institute. 1981. The Role of Agricultural Practices in Fugitive Dust Emissions, page 117. Prepared for California Air Resources Board.
+6.  U.S. Department of Agriculture, National Cooperative Soil Survey, [NCSS Microsoft Access Soil Characterization Database.](http://ncsslabdatamart.sc.egov.usda.gov/)
+7.  Woodard, Kenneth R. 1996. [Agricultural Activities Influencing Fine Particulate Matter Emissions,](https://gaftp.epa.gov/ap42/ch09/s01/related/rel03_c09s01.pdf) Midwest Research Institute; corn and soybean tilling passes updated based on data from Kansas and Iowa.
+   
+
+### Dust kicked up by animals {#animaldust-references}
+
+8.  U.S. EPA. 2024. [Inventory of Greenhouse Gas Emissions and Sinks, 1990-2022.](https://www.epa.gov/ghgemissions/inventory-us-greenhouse-gas-emissions-and-sinks) Chapter 5.2, Manure Management. EPA 430-R-24-004.
+9.  United States Department of Agriculture. 2020. [National Agricultural Statistics Service Quick Stats.](https://quickstats.nass.usda.gov/)
+10. U.S. EPA. 2023. Air Emissions Inventories, [PM Augmentation.](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/PM_Augmentation_2023NEI_17apr2026.zip)
+11. National Research Council. 2002. [The Scientific Basis for Estimating Air Emissions from Animal Feeding Operations: Interim Report.](https://www.epa.gov/sites/default/files/2020-10/documents/interimanimalfeed.pdf) Washington, DC: The National Academies Press.
+12. State of Wisconsin Department of Natural Resources. 2012. [Animal Unit Calculation Worksheet Form 3400-025A.](https://dnr.wi.gov/files/PDF/forms/3400/3400-025A.pdf)
+13. Joo, H.S., Ndegwa, P.M., Heber, A.J., Ni, J.Q., Bogan, B.W., Ramirez-Dorronsoro, J.C. and Cortus, E.L., 2013. [Particulate matter dynamics in naturally ventilated freestall dairy barns.](https://doi.org/10.1016/j.atmosenv.2012.12.006) Atmospheric Environment, 69, pp.182-190. 

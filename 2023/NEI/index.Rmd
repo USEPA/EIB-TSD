@@ -1,0 +1,41 @@
+--- 
+site: bookdown::bookdown_site
+documentclass: book
+classoption: oneside
+#bibliography: [book.bib, pakages.bib]
+biblio-style: apalike
+link-citations: yes
+colorlinks: yes
+lot: yes
+lof: yes
+fontsize: 11pt
+---
+
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# {-}
+
+<p style="text-align: right;">EPA-454/B-26-008<br>
+September 2026</p>
+
+![](figures/epa-logo.jpg){width=20%}  
+<span style="font-size: 30px;">**2023 National Emissions Inventory Technical Support Document**</span>
+
+<br> <br> <br> <br> <br> <br> <br>
+
+<div style="text-align: center;">
+U.S. Environmental Protection Agency <br>
+Office of State Air Partnerships <br>
+Air Quality Assessment Division <br>
+Emissions Inventory Branch <br>
+Research Triangle Park, NC <br>
+</div>

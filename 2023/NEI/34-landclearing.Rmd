@@ -1,0 +1,731 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Open Burning – Land Clearing Debris {#landclearing}
+
+## Sector Descriptions and Overview 
+
+This source category covers intentional burning for waste disposal purposes of land clearing debris. Open burning of land clearing debris is the purposeful burning of debris, such as trees, shrubs, and brush, from the clearing of land for the construction of new buildings and highways. Emission estimates from open burning of land clearing debris are a function of the amount of material or fuel subject to burning per year. The SCC (2610000500) description for land clearing debris is “Waste Disposal, Treatment, and Recovery; Open Burning; All Categories; Land Clearing Debris" (use 28-10-005-000 for Logging Debris Burning).
+
+## EPA-developed estimates
+
+The emissions from open burning from land clearing debris are estimated based on the number of acres disturbed from non-residential, residential, and road construction. The number of acres disturbed is multiplied by a fuel loading factor to determine the amount of land clearing debris burned in each county. This number is multiplied by emissions factors to determine emissions of CAPs and HAPs.
+
+### Activity Data
+
+The amount of material burned is estimated using the county-level total number of acres disturbed by residential,
+non-residential, and road construction. County-level weighted loading factors are applied to the total number of
+construction acres to convert acres to tons of available fuel.
+
+#### Acres Disturbed from Non-Residential Construction
+
+The activity data for this non-residential construction is the acreage disturbed from non-residential construction, which is estimated using data from the U.S. Census Bureau’s *Annual Value of Construction Put in Place in the U.S* [[ref 1](#landclearing-references)]. and a conversion factor from MRI’s *Estimating Particulate Matter Emissions from Construction Operations, Final Report* [[ref 2](#landclearing-references)]. The national-level non-residential construction spending data are allocated to the county-level based on the proportion of non-residential construction employees in each county. Employment data are taken from the U.S. Census Bureau’s County Business Patterns (CBP) and gaps in employment data are filled using a process described in detail in the allocation section.
+
+\begin{equation} 
+  EmpFr_{c} =  \frac{Emp_{c}}{Emp_{US}}
+  (\#eq:employeefrac)
+\end{equation}
+
+\begin{equation} 
+   CS_{c} = EmpFr_{c} \times CS_{US}
+  (\#eq:constructspend)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EmpFr_{c} \) = The fraction of non-residential construction employees in county *c* <br> \newline
+  \( Emp_{c} \) = The number of non-residential construction employees in county *c* <br> \newline
+  \( Emp_{US} \) = The number of non-residential construction employees in the US <br> \newline
+  \( CS_{c} \) = Non-residential construction spending in county *c*  <br> \newline
+  \( CS_{US} \) = Non-residential construction spending in the US  <br> \newline
+  
+</div>
+
+Non-residential construction spending is converted to acres disturbed using a conversion factor from MRI’s report [[ref 2](#landclearing-references)]. For the average acres disturbed per million dollars of non-residential construction, MRI reported a conversion factor of 2 acres per $1 million (in 1992 constant dollars). The 1992 conversion factor is adjusted to 2023 using the Price Deflator (Fisher) Index of New Single‐Family Houses under Construction [[ref 3](#landclearing-references)]. In 2023 the conversion factor was 0.61 acres per million dollars spent on non-residential construction activities.
+
+\begin{equation} 
+  Apd_{y} =  \frac{\text{2 acres}}{\text{1 million}} \times \frac{PD_{1992}}{PD_{y}}
+  (\#eq:acrespricedeflate)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( Apd_{y} \) = Acres disturbed per million dollars in inventory year *y* <br> \newline
+  \( PD_{1992} \) = Price Deflator (Fisher) Index value in 1992 <br> \newline
+  \( PD_{y} \) = Price Deflator (Fisher) Index value in inventory year *y* <br> \newline
+</div>
+
+County-level non-residential construction spending from equation \@ref(eq:constructspend) is then multiplied by this conversion factor to estimate county-level acreage disturbed from non-residential construction activities
+
+\begin{equation} 
+  ANR_{c} =  CS_{c} \times Apd_{y}
+  (\#eq:nonrescntyacredisturbed)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( ANR_{c} \) = Acres disturbed from non-residential construction in county *c* <br> \newline
+  \( CS_{c} \) = Non-residential construction spending in county *c*, in million dollars <br> \newline
+  \( Apd_{y} \) = Acres disturbed per million dollars in inventory *y* <br> \newline
+
+</div>
+
+#### Acres Disturbed from Residential Construction
+
+The US Census Bureau has data for Housing Starts - New Privately Owned Housing Units Started [[ref 4, ref 5](#landclearing-references)], which provides regional level housing starts based on the groupings of 1 unit, 2-4 units, 5 or more units. Regional-level results are also provided for quarterly totals and 1-unit structures [[ref 5](#landclearing-references)]. The 2- to 4-unit category is broken down using a ratio calculated from the 2000 US Census Bureau National Housing Starts data for 2 and 3-4 units [[ref 6](#landclearing-references)], for each quarter of the NEI year. Note that 2000 is the last full year when Census housing starts data were available separately for 2-unit and 3-4-unit homes.
+
+\begin{equation} 
+  S_{Q,n} = \left(\frac{U_{n}}{U_{t}}\right) \times S_{Q,2-4}
+  (\#eq:reshousestarts)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( S_{Q,n} \) = Housing starts, by quarter, *Q*, and number of units, *n* (2 units or 3-4 units), in thousand units <br> \newline
+  \( U_{n} \) = Number of housing starts by number of units, *n*, from the 2000 *National Housing Starts* data, in thousand housing starts <br> \newline
+  \( U_{t} \) = Total number of housing starts for both 2 units and 3-4 units from the 2000 *National Housing Starts* data, in thousand housing starts <br> \newline
+  \( S_{Q,2-4} \) = Number of 2-4 units by quarter, *Q*, from the *New Privately Owned Housing Units Started by Purpose and Design* data, in thousand units <br> \newline
+
+</div>
+
+Ratios of the number of 2, 3 and 4, and 5-unit structures are then used to estimate the number of structures of each type in each region. The ratios are calculated by dividing the housing starts by quarter for each unit type by the total housing starts for buildings with more than 2 units.
+
+\begin{equation} 
+  r_{Q,n} = \frac{S_{Q,n}}{S_{Q,t}}
+  (\#eq:resstructratio)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( r_{Q,n} \) = Ratio of structures with number of units, *n*, to total number of units by quarter, *Q*  <br> \newline
+  \( S_{Q,n} \) = Housing starts, by quarter, *Q*, and number of units, *n*, from distributed calculation in Step 1 for the 2-unit or 3-4-unit categories or directly from the *New Privately Owned Housing Units Started by Purpose and Design* data for the 5 units or more category, in thousand housing starts <br> \newline
+  \( S_{Q,t} \) = Total number of housing starts for both 2 units and 3-4 units from the 2000 *National Housing Starts* data, in thousand housing starts <br> \newline
+</div>
+
+The ratio is then used to distribute the *New Privately Owned Housing Units Started by Purpose and Design* [[ref 5](#landclearing-references)] regional data for all unit types to the 2, 3-4, or 5 or more unit categories within each Census region – Northeast, Midwest, South, and West. 
+
+\begin{equation} 
+  A_{Q,n,rgn} = r_{Q,n} \times ({RS_{t,rgn}}-{RS_{1,rgn}})
+  (\#eq:resregionhouseunits)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( A_{Q,n,rgn} \) = Number of housing units started in quarter *Q*, by number of units, *n*, and region of the country, *rgn*, in thousand units  <br> \newline
+  \( r_{Q,n} \) = Ratio of structures with number of units, *n*, to total number of units by quarter, *Q*  <br> \newline
+  \( RS_{t,rgn} \) = Total regional starts from *New Privately Owned Housing Units Started by Purpose and 
+			Design* data, in thousand housing starts <br> \newline
+  \( RS_{1,rgn} \) = Regional starts of structures with 1 unit from the *New Privately Owned Housing Units Started by Purpose and Design* data, in thousand housing starts <br> \newline
+</div>
+
+Data from the Census report *New Privately Owned Housing Units Authorized Unadjusted Units* [[ref 7](#landclearing-references)] is used to calculate a conversion factor to determine the ratio of structures to units in the 5 or more unit category. The conversion factor is calculated by dividing the total number of units in structures with 5 or more units by region [[ref 6](#landclearing-references)] by the total number of buildings with 5 or more units by region [[ref 7](#landclearing-references)]. 
+
+\begin{equation} 
+  CF_{5} = \frac{U_{5,rgn}}{B_{5,rgn}}
+  (\#eq:res5unitsCF)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( CF_{5,rgn} \) = Ratio of 5 units or more to the number of buildings with 5 units or more by region, *rgn*  <br> \newline
+  \( U_{5,rgn} \) = Total number of 5 or more units by region, *rgn*  <br> \newline
+  \( B_{5,rgn} \) = Total number of buildings with 5 or more units by region, *rgn* <br> \newline
+</div>
+
+Structures started by category are then calculated at a regional level by summing the number of housing unit starts across all four quarters and dividing the by number of units in each building type. For the 3-4-unit type, the number of units per building is 3.5. The value is multiplied by 1,000 because the Census data are in units of thousand building starts.
+
+For buildings with 1, 2, or 3-4 units:
+\begin{equation} 
+ B_{n,rgn} =\frac{(\sum^{Q4}_{Q1} \times A_{Q,n,rgn}) \times 1,000}{n}
+  (\#eq:resBuildstarts1to4)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( B_{n,rgn} \) = Number of building starts by the unit number category, *n*, and by region, *rgn*  <br> \newline
+  \( A_{Q,n,rgn} \) = Number of housing units started in quarter *Q*, by number of units, *n*, and region of the country, *rgn*, in thousand units  <br> \newline
+  \( n \) = Number of units per building <br> \newline
+</div>
+
+For buildings with 5 or more units:
+
+\begin{equation} 
+ B_{n,rgn} =\frac{(\sum^{Q4}_{Q1} \times A_{Q,n,rgn}) \times 1,000}{CF_{5}}
+  (\#eq:resBuildstarts5)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( B_{n,rgn} \) = Number of building starts by the unit number category, *n*, and by region, *rgn*  <br> \newline
+  \( A_{Q,n,rgn} \) = Number of housing units started in quarter *Q*, by number of units, *n*, and region of the country, *rgn*, in thousand units  <br> \newline
+  \( CF_{5} \) = Ratio of 5 units or more to the number of buildings with 5 units or more <br> \newline
+</div>
+
+Annual county building permit data were obtained from the US Census Bureau [[ref 8](#landclearing-references)]. The County Level Residential Building Permit dataset has data to allocate regional housing starts to the county level. This results in county level housing starts by number of units for the NEI year.
+
+The number of building permits for each unit number category by region is calculated by summing the county-level Census data to the region level.
+
+\begin{equation} 
+ BP_{n,rgn} =\sum{BP_{n,c}}
+  (\#eq:resBuildunits)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( BP_{n,rgn} \) = Number of building permits by the unit number category, *n*, and by region, *rgn*  <br> \newline
+  \( BP_{n,c} \) = Number of building permits by the unit number category, *n*, and by county, *c*  <br> \newline
+</div>
+
+The ratio of the number of building permits by county to the total number of building permits by region in which the county is located, for each unit number category, is then calculated. 
+
+\begin{equation} 
+ R_{BP,c} =\frac{BP_{n,c}}{BP_{n,rgn}}
+  (\#eq:resBuildpermitratio)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( R_{BP,c} \) = Ratio building permits, *BP*, to total regional building permits in county *c*  <br> \newline
+  \( BP_{n,c} \) = Number of building permits by the unit number category, *n*, and by county, *c*  <br> \newline
+  \( BP_{n,rgn} \) = Number of building permits by the unit number category, *n*, and by region, *rgn*  <br> \newline
+</div>
+
+The final number of building starts for each unit type category is then calculated at the county-level by multiplying the number of structures started at the regional level and the building permit ratio.
+
+\begin{equation} 
+ B_{n,c} =B_{n,rgn} \times R_{BP,c}
+  (\#eq:rescntybuildstarts)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( B_{n,c} \) = Number of building starts by the unit number category, *n*, and by county, *c*  <br> \newline
+  \( B_{n,rgn} \) = Number of building starts by the unit number category, *n*, and by region, *rgn*  <br> \newline
+  \( R_{BP,c} \) = Ratio building permits, *BP*, to total regional building permits in county, *c*  <br> \newline
+</div>
+
+The number of acres of surface area disturbed by the construction of residential buildings is calculated for apartment buildings, buildings with 2 units, and buildings with 1 unit. Table \@ref(tab:lcdsoilremoved) shows the assumptions used for the surface area disturbed for each unit type. Buildings with unit types of 3-4 and 5 or more are grouped together as apartments in this step.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-34/lcd_soil_removed.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r lcdsoilremoved, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Surface soil removed per unit type',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+The acres of soil disturbed by the construction of residential buildings are calculated for apartment buildings, buildings with 2 units, and buildings with 1 unit.
+
+\begin{equation} 
+ AR_{n,c} = B_{n,c} \times a_{n}
+  (\#eq:rescntysoildisturbed)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( AR_{n,c} \) = Surface soil disturbed by building construction by county, *c*, and unit type category, *n*, in acres  <br> \newline
+  \( B_{n,c} \) = Number of building starts by the unit number category, *n*, and by county, *c*  <br> \newline
+  \( a_{n} \) = Acres of surface soil disturbed by each unity type category, n. See Table \@ref(tab:lcdsoilremoved).  <br> \newline
+</div>
+
+#### Acres Disturbed by Road Construction
+
+The activity data for this source category is the acreage disturbed from new road construction, which is estimated using data from FHWA’s *Highway Statistics, State Highway Agency Capital Outlay, Table SF-12A* [[ref 9](#landclearing-references)] and FLDOT’s *Generic Cost per Mile Models* [[ref 10](#landclearing-references)]. From the FHWA table, the following columns are used: New Construction, Relocation, Added Capacity, Major Widening, and Minor Widening. These columns are also differentiated according to the following six classifications:
+
+1.	Interstate, urban
+2.	Interstate, rural
+3.	Other arterial, urban
+4.	Other arterial, rural
+5.	Collectors, urban
+6.	Collectors, rural
+
+Construction spending for each road type is summed across all construction types to determine the total annual highway spending for each road type. 
+
+\begin{equation} 
+ HS_{s,r} =\sum\nolimits_{ct}S_{s,r}
+  (\#eq:roadhwyspend)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( HS_{s,r} \) = Annual highway spending for road type *r* in state *s*, in dollars  <br> \newline
+  \( ct \) = Construction type  <br> \newline
+  \( S_{s,r} \) = Annual spending per construction type for road type *r* in state *s*, in dollars  <br> \newline
+</div>
+
+State expenditure data are converted to miles of new road and acres disturbed per mile of new road based on conversions obtained from FLDOT [[ref 10](#landclearing-references)]. These conversions are shown in Table \@ref(tab:lcdspendacres) and the acres disturbed per mile conversions are calculated by multiplying the total affected roadway width (including all lanes, shoulders, and areas affected beyond the road width) by one mile and converting the resulting land area to acres.
+
+\begin{equation} 
+ RC_{m,s,r} = \frac{HS_{s,r}}{\text{TDM}}
+ (\#eq:roadfhwamiles)
+\end{equation}
+
+\begin{equation} 
+ RC_{a,s,r} = RC_{m,s,r} \times \text{ADM}
+ (\#eq:roadfhwaacresdisturbed)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( RC_{m,s,r} \) = Miles of FHWA road type *r* constructed in state *s*  <br> \newline
+  \( RC_{a,s,r} \) = Acres of land disturbed for construction of FHWA road type *r* in state *s*  <br> \newline
+  \( HS_{s,r} \) = Annual highway spending for road type *r* in state *s*  <br> \newline
+  \( TDM \) = Conversion of dollars spent to road miles constructed, in thousand dollars per mile  <br> \newline
+  \( ADM \) = Conversion of road miles constructed to acres disturbed, in acres per mile  <br> \newline
+</div>
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-34/lcd_spending_acres.xlsx")
+ df[is.na(df)] <- ""
+```
+
+```{r lcdspendacres, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Spending per Mile and Acres Disturbed per Mile by Highway Type',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position"), font_size = 11) %>%
+  column_spec(1, width = "3cm") %>%
+  column_spec(2, width = "3cm") %>%
+  column_spec(3, width = "3cm") %>%
+  column_spec(4, width = "3cm")
+```
+$^1$Total Affected Roadway Width = (lane width (12 ft) $\times$ number of lanes) + (shoulder width $\times$ number of shoulders) + area affected beyond road width (25 ft)
+
+The acres of land disturbed by road type can then be summed across all road types in a state to calculate the total state-level acreage disturbed due to new road construction.
+
+\begin{equation} 
+ ARC_{s} =\sum\nolimits_{r}RC_{a,s}
+ (\#eq:roadstacresdisturbed)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( ARC_{s} \) = Acres of land disturbed for all road construction in state *s*  <br> \newline
+  \( RC_{a,s} \) = Acres of land disturbed for construction of FHWA road type *r* in state *s*  <br> \newline
+</div>
+
+Similar to residential construction, county-level building permits data from the U.S. Census Bureau are used to allocate the state-level acres disturbed by road construction to the county [[ref 8](#landclearing-references)]. Specifically, the ratio of the county-to state-level number of building starts is calculated and multiplied by the state-level acreage disturbed from equation \@ref(eq:roadstacresdisturbed) to estimate the county-level acreage disturbed by road construction.
+
+\begin{equation} 
+ BFrac_{c} =\frac{Build_{c}}{Build_{s}}
+ (\#eq:roadbuildstartfrac)
+\end{equation}
+
+\begin{equation} 
+ ARC_{c} = ARC_{s} \times BFrac_{c}
+ (\#eq:roadcntyacreslanddisturbed)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( BFrac_{c} \) = The fraction of building starts in county *c*  <br> \newline
+  \( Build_{c} \) = The number of building starts in county *c*  <br> \newline
+  \( Build_{s} \) = The number of building starts in state *s*  <br> \newline
+  \( ARC_{c} \) = Acres of land disturbed for road construction in county *c*  <br> \newline
+  \( ARC_{s} \) = Acres of land disturbed for all road construction in state *s*  <br> \newline
+</div>
+
+#### Converting Acres Disturbed to Tons of Land Clearing Debris Burned
+
+The total acres disturbed by all construction types is calculated by summing the acres disturbed from residential, non-residential, and road construction.
+
+\begin{equation} 
+ TAD_{c} = ANR_{c}+ (\sum{AR_{n,c}}) + ARC_{c}
+ (\#eq:lcdtotaldisturbed)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( TAD_{c} \) = Total acres disturbed in from nonresidential, residential, and road construction in county *c*  <br> \newline
+  \( ANR_{c} \) = Acres disturbed from non-residential construction in county *c*  <br> \newline
+  \( AR_{n,c} \) = Acres of surface soil disturbed from residential construction in county *c* and unit type category *n* (summed to one value for residential construction for the county)  <br> \newline
+  \( ARC_{c} \) = Acres of land disturbed for road construction in county *c*  <br> \newline
+</div>
+
+Version 2 of the Biogenic Emissions Land cover Database (BELD2) within EPA’s Biogenic Emission Inventory System (BEIS) [[ref 11](#landclearing-references)] is used to identify the acres of hardwoods, softwoods, and grasses in each county.
+
+Because BELD2 does not contain data on Alaska and Hawaii, the acres of hardwoods, softwoods, and grasses in each county is estimated by using the state-level land cover statistics from the USGS National Land Cover Database on the percent land cover under each vegetation type [[ref 12](#landclearing-references)]. These percentages are multiplied by the county area (acres), from the U.S. Census Bureau [[ref 13](#landclearing-references)].
+
+\begin{equation} 
+ A_{AK/HI,c,f} = LA_{AK/HI,c} \times LC_{AK/HI,\%,f}
+ (\#eq:lcdAKHItotalacres)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( A_{AK/HI,c,f} \) = Total acres of each fuel type, *f*, for each county, *c*, in Alaska or Hawaii  <br> \newline
+  \( LA_{AK/HI,c} \) = County acres from the U.S. Census Bureau of each fuel type, *f*, for each county, *c*, in Alaska or Hawaii  <br> \newline
+  \( LA_{AK/HI,\%,f} \) = Land cover percentages for each fuel type (hardwood, softwood, grass) in Alaska or Hawaii  <br> \newline
+</div>
+
+Table \@ref(tab:lcdloadfactors) presents the average fuel loading factors by vegetation type. The average loading factors for slash hardwood and slash softwood are adjusted by a factor of 1.5 to account for the mass of tree that is below the soil surface that would be subject to burning once the land is cleared [[ref 14](#landclearing-references)]. Weighted average county-level loading factors are calculated by multiplying the average loading factors by the percent contribution of each type of vegetation class to the total land area for each county. 
+
+\begin{equation} 
+ WFLF_{c,f} = \frac{A_{c,f}}{A_{c,total}} \times LF_{f}
+ (\#eq:lcdwgtdloadfactor)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( WFLF_{c,f} \) = Weighted average fuel loading factor by for fuel type *f* in county *c*  <br> \newline
+  \( A_{c,f} \) = Acres of land cover in county *c*, by fuel type *f* (from BELD2 for continental U.S. [[ref. 11](#landclearing-references)]; from equation \@ref(eq:lcdAKHItotalacres) for Alaska and Hawaii)  <br> \newline
+  \( A_{c,total} \) = Total acres of land cover of all fuel types in county *c*  <br> \newline
+  \( LF_{f} \) = Fuel loading factor by fuel type, *f*, in tons/acre, from Table \@ref(tab:lcdloadfactors) <br> \newline
+</div>
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-34/lcd_loadingfactors_vegtype.xlsx")
+ df[is.na(df)] <- ""
+```
+
+```{r lcdloadfactors, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Fuel Loading Factors by Vegetation Type',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+The weighted average county-level loading factors for each fuel type are then summed across fuel types to calculate a single weighted average loading factor for each county.
+
+\begin{equation} 
+ WFLF_{c} = \sum\nolimits_{f}WFLF_{c,f}
+ (\#eq:lcdCNTYwgtdloadfactor)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( WFLF_{c} \) = Weighted average fuel loading factors for county *c*  <br> \newline
+  \( WFLF_{c,f} \) = Weighted average fuel loading factor by for fuel type *f* in county *c*  <br> \newline
+</div>
+  
+The county-level total acres disturbed are then multiplied by the weighted average loading factor to derive tons of land clearing debris. 
+
+\begin{equation} 
+ LCD_{c} = TAD_{c} \times WFLF_{c}
+ (\#eq:CNTYlandcleardebris)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( LCD_{c} \) = Land clearing debris in county *c*, in tons  <br> \newline
+  \( TAD_{c} \) = Total acres disturbed in county *c*  <br> \newline
+  \( WFLF_{c} \) = Weighted average fuel loading factors for county *c*  <br> \newline
+</div>
+
+The total land clearing debris burned per county is calculated by multiplying acres of land clearing debris by county
+by a control factor, based on the percent of urban land from the 2010 U.S. Census data [[ref 13](#landclearing-references)]. See the controls section for more information on the control factor.
+
+\begin{equation} 
+ BLCD_{c} = LCD_{c} \times CF_{c}
+ (\#eq:CNTYlandcleardebrisburned)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( BLCD_{c} \) = Land clearing debris burned in county *c*, in tons  <br> \newline
+  \( LCD_{c} \) = Land clearing debris in county *c*, in tons  <br> \newline
+  \( CF_{c} \) = Control factor. The control factor is 1 for counties with less than 80% urban population and 0 for   Colorado or in counties with an urban population of 0.8% or more based on the 2010 U.S. Census data [[ref 13](#landclearing-references)] as no burning occurs in these counties. See the controls section for more information on the control factor.  <br> \newline
+</div>
+
+### Allocation procedure
+
+#### Acres disturbed by Non-residential Construction – County business patterns allocation
+
+Employment data are obtained from the U.S. Census Bureau’s County Business Patterns (CBP) [[ref 15](#landclearing-references)]. Due to concerns with releasing confidential business information, the CBP does not release exact numbers for a given NAICS code if the data can be traced to an individual business. Instead, a series of employment flags is used. To estimate employment in counties and states with withheld data, the following procedure is used for NAICS code 2362 (non-residential construction). 
+
+To gap-fill withheld state-level employment data:
+
+1.	State-level data for states with known employment are summed to the national level.
+2.	State-level known employment is subtracted from the national total reported in the national-level CBP.
+3.	Each of the withheld states is assigned the midpoint of the employment flag. Table \@ref(tab:lcdCBPranges) lists the employment flags and midpoints.
+4.	The midpoints for the states with withheld data are summed to the national level. 
+5.	An adjustment factor is created by dividing the number of withheld employees (calculated in step 2 of this section) by the sum of the midpoints (step 4).
+6.	For the states with withheld employment data, the midpoint of the range for that state (step 3) is multiplied by the adjustment factor (step 5) to calculate the adjusted state-level employment for non-residential construction.
+
+These same steps are then followed to fill in withheld data in the county-level business patterns.
+
+1.	County-level data for counties with known employment are summed by state. 
+2.	County-level known employment is subtracted from the state total reported in state-level CBP (or, if the state-level data are withheld, from the state total estimated using the procedure discussed above).
+3.	Each of the withheld counties is assigned the midpoint of the employment flag (Table \@ref(tab:lcdCBPranges)).
+4.	The midpoints for the counties with withheld data are summed to the state level. 
+5.	An adjustment factor is created by dividing the number of withheld employees (step 2) by the sum of the midpoints (step 4).
+6.	For counties with withheld employment data, the midpoints (step 3) are multiplied by the adjustment factor (step 5) to calculate the adjusted county-level employment for non-residential construction.
+
+Note that step 5 adjusts all counties within each state with withheld employment data by the same state-based proportion. It is unlikely that actual employment corresponds exactly with this smoothed adjustment method, but this method is the best option given the availability of the data.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-34/lcd_CBP_range.xlsx")
+ df[is.na(df)] <- ""
+```
+
+```{r lcdCBPranges, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Ranges and midpoints for data withheld from State and County Business Patterns',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+For example, take the CBP data for NAICS 2362 (nonresidential construction) in an example state provided in Table \@ref(tab:lcdExCBPvalues). The values in this table are only for example purposes and are not representative of any specific NEI year or state.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-34/lcd_example_CBP_values.xlsx")
+ df[is.na(df)] <- ""
+```
+
+```{r lcdExCBPvalues, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Example CBP vales for NAICS 2362 for a state',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+1.	The total of employees not including withheld counties is 11,831.
+2.	The state-level CBP reports 11,721 employees for NAICS 2362. The difference is 110.
+3.	Withheld counties are given the midpoint of the employment range. County 001 is given a midpoint of 60 (since employment flag A is 20 – 99) and County 012 is given a midpoint of 10 (since employment flag H is 0 – 19).
+4.	State total for these all-withheld counties is 130. 
+5.	110/130 = 0.846.
+6.	The adjusted employment for county 001 is 60 × 0.846 = 51.36 employees. County 012 has an adjusted employment of 10 × 0.846 = 8.46 employees.
+
+The county-level employment data are used to allocate the national-level non-residential construction spending data to the county-level (see equation \@ref(eq:employeefrac)).
+
+#### Acres disturbed by Residential Construction – Building permits allocation
+
+Annual county building permit data were obtained from the U.S. Census Bureau [[ref 8](#landclearing-references)] and used to allocate regional housing starts to the county level. This results in county level housing starts by number of units. See equations \@ref(eq:resBuildunits), \@ref(eq:resBuildpermitratio), and \@ref(eq:rescntybuildstarts) in the activity section.
+
+#### Acres Disturbed by Road Construction – Building permits allocation
+
+State-level estimates of acres disturbed by road construction is distributed to the counties based on county-level data on residential building starts from the U.S. Census Bureau [[ref 4](#landclearing-references)]. See equations \@ref(eq:roadbuildstartfrac) and \@ref(eq:roadcntyacreslanddisturbed) in the activity section.
+
+### Emission Factors
+
+Emissions factors for CAPs and HAPs are from the AP-42 and U.S. EPA Emissions Inventory Improvement Program [[ref 16, ref 17](#landclearing-references)]. The PM25 to PM10 emissions factor ratio for brush burning (0.7709) is multiplied by the PM10 emissions factors for land clearing debris burning to develop PM25 emissions factors. Emission factors for NH3 were derived from the 2002 NEI crop residue emission estimates using the ratio of NH3/NOx for pasture grass from Pouliot et al. (2017) [[ref 18](#landclearing-references)] and the NOx emission factor from AP-42 [[ref 16](#landclearing-references)]. Emissions factors for HAPs are from an EPA Control Technology Center report [[ref 19](#landclearing-references)]. 
+
+### Controls
+
+Controls for land clearing debris burning are generally in the form of a ban on open burning of waste in a given municipality or county. Counties that are more than 80% urban by land area determined by the 2010 U.S. Census data [[ref 13](#landclearing-references)], are assumed not to practice any open burning of land clearing debris. Therefore, CAP and HAP emissions from open burning of land clearing debris are zero in these counties. 
+
+Additionally, it is assumed that even in counties that are less than 80% urban by land area, open burning will only be practiced in areas that are rural. Therefore, the total land clearing debris burned per county (from equation \@ref(eq:CNTYlandcleardebrisburned)) will be scaled based on the fraction of rural land area in each county from the 2010 Census.
+
+\begin{equation} 
+ BLCD_{r,c} = BLCD_{c} \times \frac{RLand_{c}}{TLand_{c}}
+ (\#eq:rurallandburnedfrac)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( BLCD_{r,c} \) = Land clearing debris burned in rural areas by county, *c*, in tons  <br> \newline
+  \( BLCD_{c} \) = Land clearing debris burned by county, *c*, in tons  <br> \newline
+  \( RLand_{c} \) = Amount of rural land by land area in county *c*  <br> \newline
+  \( TLand_{c} \) = Total amount of land in county *c* <br> \newline
+</div>
+ 
+Further controls on burning (i.e., burn bans in rural areas) are represented by multiplying the land clearing debris burned in rural counties by a burn ban’s effectiveness; effectiveness is a value between 0 and 1.
+
+\begin{equation} 
+ BLCD_{r,c} = BLCD_{r,c} \times BE_{c}
+ (\#eq:burnbaneffect)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( BLCD_{r,c} \) = Land clearing debris burned in rural areas by county, *c*, in tons  <br> \newline
+  \( BE_{c} \) = Burn ban effectiveness in county *c*  <br> \newline
+</div>
+
+In this methodology, burn ban effectiveness is represented by a single value between 0 and 1 that is multiplied by the amount of land clearing debris burned in the rural areas of each county. In practice, the burn ban effectiveness is a function of both a rule’s penetration and effectiveness. Rule penetration refers to the extent to which a regulation covers emissions for a specified controlled area, and effectiveness concerns the ability of the regulatory program to achieve emissions reductions compared to full compliance. By default, the burn ban effectiveness for each county is 1 (i.e., the methodology assumes no burn bans in each county), although this may be updated by state, local, or tribal agencies.
+
+### Emissions
+
+County-level criteria pollutant and HAP emissions are calculated by multiplying the mass of land clearing debris burned in rural areas per year (from equation \@ref(eq:burnbaneffect)) by an emissions factor. 
+
+\begin{equation} 
+  E_{c,p} =  BLCD_{r,c} \times EF_{p} \times \frac{\text{1 ton}}{\text{2,000 lbs}} 
+  (\#eq:emissions-lcd)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{c,p} \) = Emissions by county, *c*, and pollutant, *p*, in tons <br> \newline
+  \( BLCD_{r,c} \) = Land clearing debris burned in rural areas by county, *c*, in tons <br> \newline
+  \( EF_{p} \) = Emissions factor by pollutant, p, in pounds/ton <br> \newline
+</div>
+
+### Sample Calculations
+
+Table \@ref(tab:lcd-sample-calculations) shows sample calculations for PM25-PRI emissions from open burning of land clearing debris for a county in the Midwest. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county. These calculations use the first quarter (Q1) for 2-unit structures as an example. However, these calculations would need to be repeated to calculate values for all 4 quarters for all 3 unit sizes. Note that structures with 5 or more units and structures with 1 unit with or without a basement have additional steps not shown in the sample calculations here. The equations related to road clearing use urban roads as an example for acres of land disturbed from road construction. For full calculations of acres of land disturbed from road construction the calculations for rural roads would also need to be incorporated. 
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,15,15,16,16,16,17,17,17,18,19,20,21,22,23,23,23,24,25,26,27,29),
+  Equation = c("$EmpFr_{c} = \\frac{Emp_{c}}{Emp_{US}}$",
+           "$CS_{c} = {EmpFr_{c}} \\times {CS_{US}}$",
+           "$Apd_{2017} = \\frac{\\text{2 acres}}{\\text{1 million}} \\times \\frac{PD_{1992}}{PD_{2017}}$",
+           "$ANR_{c} = CS_{c} \\times Apd_{y}$",
+           "$S_{Q,n} = \\left(\\frac{U_{n}}{U_{t}}\\right) \\times {S_{Q,2-4}}$",
+           "$r_{Q,n} = \\frac{S_{Q,n}}{S_{Q,t}}$",
+           "$A_{Q,n,rgn} = {r_{Q,n}} \\times {\\left({RS_{t}} - {RS_{1}}\\right)}$",
+           "$CF_{5} = \\frac{U_{5,rgn}}{B_{5,r}}$",
+           "$B_{n,rgn} = \\frac{{\\left(\\sum{A_{Q,n,rgn}}\\right)} \\times \\text{1,000}}{n}$",
+           "$B_{n,rgn} = \\frac{{\\left(\\sum{A_{Q,n,rgn}}\\right)} \\times \\text{1,000}}{CF_{5}}$",
+           "$BP_{n,rgn} = \\sum{BP_{n,c}}$",
+           "$R_{BP,c} = \\frac{BP_{n,c}}{BP_{n,rgn}}$",
+           "$B_{n,c} = {B_{n,rgn}} \\times {R_{BP,c}}$",
+           "$AR_{n,c} = {B_{n,c}} \\times {a_{n}}$",
+           "$HS_{s,r} = \\sum\\nolimits_{ct}{S_{s,r}}$",
+           "$HS_{s,r} = \\sum\\nolimits_{ct}{S_{s,r}}$",
+           "$HS_{s,r} = \\sum\\nolimits_{ct}{S_{s,r}}$",
+           "$RC_{m,s,r} = \\frac{HS_{s,r}}{TDM}$",
+           "$RC_{m,s,r} = \\frac{HS_{s,r}}{TDM}$",
+           "$RC_{m,s,r} = \\frac{HS_{s,r}}{TDM}$",
+           "$RC_{a,s,r} = {RC_{m,s,r}} \\times \\text{ADM}$",
+           "$RC_{a,s,r} = {RC_{m,s,r}} \\times \\text{ADM}$",
+           "$RC_{a,s,r} = {RC_{m,s,r}} \\times \\text{ADM}$",
+           "$ARC_{s} = \\sum\\nolimits_{r}{RC_{a,s}}$",
+           "$BFrac_{c} = \\frac{Build_{c}}{Build_{s}}$",
+           "$ARC_{c} = {ARC_{s}} \\times {BFrac_{c}}$",
+           "$TAD_{c} = {ANR_{c}} + {\\left(\\sum{S_{n,c}}\\right)} + {ARC_{c}}$",
+           "$A_{AK/HI,c,f} = {LA_{AK/HI,c}} \\times {LC_{AK/HI,\\%,f}}$",
+           "$WFLF_{c,f} = \\frac{A_{c,f}}{A_{total}} \\times {LF_{f}}$",
+           "$WFLF_{c,f} = \\frac{A_{c,f}}{A_{total}} \\times {LF_{f}}$",
+           "$WFLF_{c,f} = \\frac{A_{c,f}}{A_{total}} \\times {LF_{f}}$",
+           "$WFLF_{c} = \\sum{WFLF{_c,f}}$",
+           "$LCD_{c} = {TAD_{c}} \\times {WFLF_{c}}$",
+           "$BLCD_{c} = {LCD_{c}} \\times {CF_{c}}$",
+           "$BLCD_{r,c} = {BLCD_{c}} \\times \\frac{RLand_{c}}{TLand_{c}}$",
+           "$E_{c,p} = BLCD_{r,c} \\times EF_{p} \\times \\frac{\\text{1 ton}}{2,000\\text{ lbs}}$"),
+  Values = c("$\\frac{140}{581,963}$",
+          "$0.000241 \\times 347,666$",
+          "$\\frac{\\text{2 acres}}{\\text{1 million}} \\times \\frac{57\\text{ in 1992}}{113\\text{ in NEI year}}$",
+          "$83.79\\text{ million dollars} \\times 1.009 \\frac{\\text{acres disturbed}}{\\text{million dollars}}$",
+          "$(\\frac{14}{38}) \\times 2\\text{ two to four unit starts in Q1}$",
+          "$\\frac{\\text{0.74 two unit housing starts}}{\\text{72 two or more unit housing starts}}$",
+          "$0.01 \\times (21\\text{ total Q1 starts} - 14\\text{ one unit starts})$",
+          "${N/A}$",
+          "$\\frac{0.775\\text{ two unit structures} \\times 1,000}{2\\text{ units per building}}$",
+          "${N/A}$",
+          "$\\sum{\\text{Midwest two unit building permits}}$",
+          "$\\frac{1\\text{ County building permits}}{1,571\\text{ Midwest building permits}}$",
+          "$388\\text{ two unit building starts} \\times 0.000637$",
+          "$\\text{0.25 two unit structures} \\times \\text{0.33 acres per structure}$",
+          "20,399,000 + 33,029,000 + 93,892,000",
+          "58,519,000 + 2,626,000 + 35,137,000 + 206,057,000 + 17,193,000",
+          "16,093,000 + 338,000 + 355,000",
+          "$\\frac{147,320,000}{6,895,000\\text{ per mile}}$",
+          "$\\frac{319,532,000}{4,112,000\\text{ per mile}}$",
+          "$\\frac{16,786,000}{4,112,000\\text{ per mile}}$",
+          "$\\text{21.4 miles} \\times \\text{11.4 acres per mile}$",
+          "$\\text{77.7 miles} \\times \\text{7.6 acres per mile}$",
+          "$\\text{4.1 miles} \\times \\text{7.6 acres per mile}$",
+          "$\\text{242.9 acres + 589.6 acres + 31 acres}$", 
+          "$\\frac{\\text{246 building starts in County}}{\\text{20,578 building starts in State}}$",
+          "$\\text{863.5 acres} \\times 0.012$",
+          "$\\text{84.4 acres} + \\text{62.02 acres} + \\text{13.95 acres}$",
+          "${N/A}$",
+          "$\\frac{\\text{17,516 acres}}{\\text{758,793 acres}} \\times \\text{99 tons per acre}$",
+          "$\\frac{\\text{0 acres}}{\\text{758,793 acres}} \\times \\text{57 tons per acre}$",
+          "$\\frac{\\text{741,276 acres}}{\\text{758,793 acres}} \\times \\text{4.5 tons per acre}$",
+          "${2.3\\frac{tons}{acre}} + {0.0\\frac{tons}{acre}} + {4.4\\frac{tons}{acre}}$",
+          "$\\text{160.4 acres} \\times \\frac{6.7 tons}{acre}$",
+          "$\\text{1,071 tons} \\times \\text{1 control factor}$",
+          "$\\text{1,071 tons} \\times \\frac{\\text{2,923,414,473 sq. meters rural land}}{\\text{3,064,933,852 sq. meters total land}}$",
+          "$\\text{1,022 tons} \\times 13.1053\\frac{lb}{ton} \\times \\frac{\\text{1 ton}}{\\text{2000 lbs}}$"),
+  Result = c("0.000241 fraction on non-residential construction employees",
+             "83.79 million in non-residential construction spending",
+             "1.009 acres disturbed per million dollars spent on non-residential contruction spending, nationally",
+             "84.4 acres disturbed from non-residential construction",
+             "0.74 thousand housing starts for 2-unit structures in Q1 2017, nationally",
+             "0.01 ratio of buildings with 2 units to all units greater than 2 for Q1, nationally",
+             "0.07 thousand housing starts for 2-unit structures for Q1 in the Midwest",
+             "Equation is for 5 or more unit buildings; example is for 2-unit buildings",
+             "388 2-unit structures constructed in the Midwest",
+             "Equation is for 5 or more buildings; example is for 2-unit buildings",
+             "1,571 2-unit structure building permits in the Midwest",
+             "0.000637 ratio of county-level building permits to regional-level building permits",
+             "0.25 total 2-unit structure building starts",
+             "0.08 acres surface soil disturbed by 2-unit structures",
+             "147,320,000 spent on urban interstate construction in the state",
+             "319,532,000 spent on urban other arterial construction in the state",
+             "16,786,000 spend on urban collector construction in the state",
+             "21.4 miles of urban interstate constructed in the state",
+             "77.7 miles of urban other arterial constructed in the state",
+             "4.1 miles of urban collector constructed in the state",
+             "242.9 acres disturbed from urban interstate construction in the state",
+             "589.6 acres disturbed from urban other arterial construction in the state",
+             "31 acres disturbed from urban collector construction in the state",
+             "863.5 acres disturbed from urban road construction in the state",
+             "0.012 fraction of building starts",
+             "10.4 acres disturbed from urban road construction",
+             "160.4 total acres disturbed",
+             "Equation is for Alaska or Hawaii",
+             "2.3 tons per acre weighted factor for hardwood fuel",
+             "0.0 tons per acre weighted factor for softwood fuel",
+             "4.4 tons per acre weighted factor for grass fuel",
+             "6.7 tons per acre weighted factor for all fuels",
+             "1,071 tons of land clearing debris",
+             "1,071 tons of land clearing debris burned",
+             "1,022 tons of land clearing debris burned in rural areas",
+             "6.7 tons PM25-PRI emissions"))
+```
+
+```{r lcd-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample calculations for PM25-PRI emissions from open burning of land clearing debris",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+
+### Improvements/Changes in the 2023 NEI
+
+There have been no significant changes to this category since the 2020 NEI.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exist to calculate emissions for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the US Virgin Islands. The total emissions in tons for these two Florida counties are divided by their respective populations creating a tons per capita emissions factor. For each Puerto Rico and US Virgin Island County, the tons per capita emissions factor is multiplied by the county population (from the same year as the inventory’s activity data) which served as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”.
+
+## References {#landclearing-references}
+
+1.	U.S. Census Bureau. 2023. [Value of Construction Put in Place](https://www.census.gov/construction/c30/about_the_survey.html) 
+2.	Midwest Research Institute. 1999. [Estimating Particulate Matter Emissions from Construction Operations](https://nepis.epa.gov/Exe/ZyNET.exe/9100KK1W.txt?ZyActionD=ZyDocument&Client=EPA&Index=1995%20Thru%201999&Docs=&Query=&Time=&EndTime=&SearchMethod=1&TocRestrict=n&Toc=&TocEntry=&QField=&QFieldYear=&QFieldMonth=&QFieldDay=&UseQField=&IntQFieldOp=0&ExtQFieldOp=0&XmlQuery=&File=D%3A%5CZYFILES%5CINDEX%20DATA%5C95THRU99%5CTXT%5C00000027%5C9100KK1W.txt&User=ANONYMOUS&Password=anonymous&SortMethod=h%7C-&MaximumDocuments=1&FuzzyDegree=0&ImageQuality=r75g8/r75g8/x150y150g16/i425&Display=hpfr&DefSeekPage=&SearchBack=ZyActionL&Back=ZyActionS&BackDesc=Results%20page&MaximumPages=1&ZyEntry=1), Final Report (prepared for the Emission Factor and Inventory Group, Office of Air Quality Planning and Standards, U.S. Environmental Protection Agency). 
+3.	U.S. Census Bureau. 2023. [Price Deflator (Fisher) Index of New Single‐Family Houses Under Construction](https://www.census.gov/construction/nrs/pdf/price_uc.pdf). 
+4.	U.S. Census Bureau, New Privately Owned Housing Units Started by Purpose and Design in 2023, [Annual Data](https://www.census.gov/construction/nrc/pdf/quarterly_starts_completions.pdf), accessed March 2026. 
+5.	U.S. Census Bureau, New Privately Owned Housing Units Started by Purpose and Design in 2023, [Quarterly Data](https://www.census.gov/construction/nrc/pdf/quarterly_starts_completions.pdf), accessed March 2026. 
+6.	U.S. Census Bureau, 2001. Housing Starts, Table 1. [New Privately-Owned Housing Units Started](https://www.census.gov/construction/nrc/xls/starts_cust.xlsx). 
+7.	U.S. Census Bureau, [New Privately-Owned Housing Units Authorized – Unadjusted Units for Regions, Divisions, and States, Annual 2020](https://www.census.gov/construction/bps/stateannual.html). 
+8.	U.S. Census Bureau. [Annual Housing Units Authorized by Building Permits](https://www2.census.gov/econ/bps/County/). ASCII files by State, MSA, County or Place, co2023a. 
+9.	Federal Highway Administration. [Table SF-12A](https://www.fhwa.dot.gov/policyinformation/statistics/2023/sf12a.cfm), State Highway Agency Capital Outlay -2023. 
+10.	Florida Department of Transportation. [Generic Cost per Mile Models for 2020](https://www.fdot.gov/). 
+11.	U.S. Environmental Protection Agency. 2023. [Biogenic Emission Inventory System (BEIS)](https://www.epa.gov/air-emissions-modeling/biogenic-emission-inventory-system-beis). 
+12.	U.S. Geological Survey (USGS). 2015. [National Land Cover Database](https://www.usgs.gov/centers/eros/science/national-land-cover-database). 
+13.	U.S. Census Bureau, Decennial Censuses. 2010. [Census: Summary File 1](https://www.census.gov/data/datasets/2010/dec/summary-file-1.html). 
+14.	D.V. Sandberg, D.E. Ward, R.D. Ottmar, C.C. Hardy, T.E. Reinhardt, and J.N. Hall. 1989. [Mitigation of Prescribed Fire Atmospheric Pollution through Increased Utilization of Hardwoods, Piled Residues, and Long-Needled Conifers](https://nfsl.contentdm.oclc.org/digital/collection/p17053coll2/id/1576/). Final Report. USDA Forest Service, Pacific Northwest Research Station, Fire and Air Resource Management.
+15.	U.S. Census Bureau, County Business Patterns. 2023. [CBP Tables](https://www.census.gov/programs-surveys/cbp/data/tables.html). 
+16.	U.S. Environmental Protection Agency. 1992. AP-42, Fifth Edition, Volume 1, [Chapter 2: Solid Waste Disposal](https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-fifth-edition-volume-i-chapter-2-solid-waste-0).
+17.	U.S. Environmental Protection Agency. 2001. Emission Inventory Improvement Program, Volume III, [Chapter 16, Open Burning](https://www.epa.gov/sites/default/files/2015-08/documents/iii16_apr2001.pdf). 18.	G. Pouliot, V. Rao, J.L. McCarty, and A. Soja. 2017. Development of the crop residue and rangeland burning in the 2014 National Emissions Inventory using information from multiple sources. Journal of the Air & Waste Management Association, 67(5), 613-622. https://doi.org/10.1080/10962247.2016.1268982
+19.	U.S. Environmental Protection Agency. 1997. [Evaluation of Emissions from the Open Burning of Household Waste in Barrels](https://nepis.epa.gov/Exe/ZyNET.exe/30003LB4.TXT?ZyActionD=ZyDocument&Client=EPA&Index=1995+Thru+1999&Docs=&Query=&Time=&EndTime=&SearchMethod=1&TocRestrict=n&Toc=&TocEntry=&QField=&QFieldYear=&QFieldMonth=&QFieldDay=&IntQFieldOp=0&ExtQFieldOp=0&XmlQuery=&File=D%3A%5Czyfiles%5CIndex%20Data%5C95thru99%5CTxt%5C00000009%5C30003LB4.txt&User=ANONYMOUS&Password=anonymous&SortMethod=h%7C-&MaximumDocuments=1&FuzzyDegree=0&ImageQuality=r75g8/r75g8/x150y150g16/i425&Display=hpfr&DefSeekPage=x&SearchBack=ZyActionL&Back=ZyActionS&BackDesc=Results%20page&MaximumPages=1&ZyEntry=1&SeekPage=x&ZyPURL), EPA-600/R-97-134a.

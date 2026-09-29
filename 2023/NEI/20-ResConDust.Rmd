@@ -1,0 +1,454 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Dust: Residential Construction {#ResConDust}
+
+## Sector Descriptions and Overview 
+
+Construction dust refers to residential and non-residential construction activity, which are functions of acreage disturbed for construction. The SCC for residential construction dust is 2311010000.
+
+## EPA-developed estimates
+
+Emissions from residential construction activity are a function of the acreage disturbed and volume of soil excavated for residential construction. Residential construction activity is developed from data obtained from the U.S. Department of Commerce (DOC)’s Bureau of the Census.
+
+### Activity Data
+
+There are two activity calculations performed for residential construction: acres of soil disturbed, and volume of soil removed for basements.
+
+*Determine the Number of Housing Starts in Each County*
+ 
+The US Census Bureau has data for New Privately Owned Housing Units Started by Purpose and Design [[ref 1](#ResConDust-reference)] which provides data on housing starts based on the groupings of 1 unit, 2-4 units, and 5 or more units. Regional-level results are also provided for quarterly totals and 1-unit structures in Table \@ref(tab:housing-starts) [[ref 1](#ResConDust-reference)]. In order to breakdown the 2 to 4-unit category, data from a consultation with the Census Bureau in 2002 are used; approximately 1/3 of the housing starts are for 2-unit structures, and 2/3 are for 3- and 4-unit structures.
+ 
+The US Census Bureau New Privately Owned Housing Units Started by Purpose and Design [[ref 1](#ResConDust-reference)] data for 2-4 units are distributed to two categories, 2 and 3-4 units, based on a ratio for 2 and 3-4 units calculated from the 2000 US Census Bureau National Housing Starts data [[ref 2](#ResConDust-reference)], for each quarter. Note that 2000 is the last full year when Census housing starts data are available separately for 2-unit and 3-4-unit homes. Table \@ref(tab:breakdown-2-4-units) shows a breakdown of the 2 unit and 3-4-unit structures based on the following calculation.
+
+\begin{equation} 
+  S_{Q,n} = \frac{U_{n}}{U_{t}} \times S_{Q,2-4}
+  (\#eq:housing-twofour-unit-breakdown)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( S_{Q,n} \) = Housing starts, by quarter *Q* and number units *n* (2 units or 3-4 units), in thousand units <br> \newline
+  \( U_{n} \) = Number of housing starts by number of units, *n*, from the 2000 *National Housing Starts* data, in thousand housing starts <br> \newline
+  \( U_{t} \) = Total number of housing starts for both 2 units and 3-4 units from the 2000 *National Housing Starts* data, in thousand housing starts <br> \newline
+  \( S_{Q,2-4} \) = Number of 2-4 units by quarter, *Q* from the *New Privately Owned Housing Units Started by Purpose and Design* data, in thousand units  <br> \newline
+</div>
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-20/housing-starts-2023.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r housing-starts, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Housing Start Data for 2023',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-20/breakdown-2-to-4-units.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r breakdown-2-4-units, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Breakdown of 2 to 4-unit structures',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+Ratios of the number of 2, 3-4, and 5 or more-unit structures are then used to estimate the number of structures of each type in each region. The ratios are calculated by dividing the housing starts by quarter for each unit type by the total housing starts for buildings with 2 or more units.
+
+\begin{equation}
+  r_{Q,n} = \frac{S_{Q,n}}{S_{Q,t}}
+  (\#eq:ratio-structures-units)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(r_{Q,n} \) = Ratio of structures with number of units, *n*, to total number of units by quarter, *Q* <br> \newline
+  \(S_{Q,n} \) = Housing starts, by quarter, *Q*, and number of units, *n*, from distributed calcuation in Step 1 for the 2-unit or 3-4 unit categories or directly from the *New Privately Owned Housing Units by Purpose and Design* data for the 5 units or more category, in thousand housing starts <br> \newline
+  \(S_{Q,t} \) = Housing starts, by quarter, *Q*, for total number of buildings with 2 or more units, *t* (excludes 1-unit category), in thousand housing starts <br> \newline
+  </div>
+
+The ratio is then used to distribute the *New Privately Owned Housing Units Started by Purpose and Design* regional data for all unit types to the 2, 3-4, or 5 or more-unit categories within each Census region – Northeast, Midwest, South, and West. 
+
+\begin{equation}
+  A_{Q,n,rgn} = r_{Q,n} \times (RS_{t,rgn} - RS_{1,rgn})
+  (\#eq:housing-units-by-quarter)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(A_{Q,n,rgn} \) = Number of housing units in quarter *Q*, by number of units, *n*, and region of the country, *rgn*, in thousand units <br> \newline
+  \(r_{Q,n} \) = Ratio of structures with number of units, *n*, to total number of units by quarter, *Q* <br> \newline
+  \(RS_{t,rgn} \) = Total regional starts from the *New Privately Owned Housing Units Started by Purpose and Design* data, in thousand housing starts <br> \newline
+  \(RS_{1,rgn} \) = Regional starts of structures with 1 unit, from the *New Privately Owned Housing Units Started by Purpose and Design* data, in thousand housing starts <br> \newline
+</div>
+
+Data from the Census report *New Privately Owned Housing Units Authorized Unadjusted Units* [[ref 3](#ResConDust-reference)] is used to calculate a conversion factor to determine the ratio of structures to units in the 5 or more-unit category. The conversion factor is calculated by dividing the total number of units in structures with 5 or more units by region [[ref 2](#ResConDust-reference)] by the total number of buildings with 5 or more units by region [[ref 3](#ResConDust-reference)]. 
+
+\begin{equation}
+  CF_{5,rgn} = \frac{U_{5,rgn}}{B_{5,regn}}
+  (\#eq:ratio-5-units)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(CF_{5,rgn} \) = Ratio of 5 units or more to the number of buildings with 5 units or more by region, *rgn* <br> \newline
+  \(U_{5,rgn} \) = Total number of 5 or more units by region, *rgn* <br> \newline
+  \(B_{5,rgn} \) = Total number of buildings with 5 or more units by region, *rgn* <br> \newline
+</div>
+
+Structures started by category are then calculated at a regional level by summing the number of housing unit starts across all four quarters and dividing by the number of units in each building type. For the 3-4-unit type, the number of units per building is 3.5. The value is multiplied by 1,000 because the Census data are in units of thousand building starts.
+
+For buildings with 1, 2, or 3-4 units:
+
+\begin{equation}
+  B_{n,rgn} = \frac{(\sum^{Q4}_{Q1}A_{Q,n,rgn}) \times 1,000}{n}
+  (\#eq:bldgs-by-unit-number)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(B_{n,rgn} \) = Number of building starts by the unit number category, *n*, and by region, *rgn* <br> \newline
+  \(A_{Q,n,rgn} \) = Number of housing units started in quarter *Q*, by number of units, *n*, and region, *rgn* <br> \newline
+  \(n \) = Number of units per building <br> \newline
+</div>
+
+For buildings with 5 units:
+
+\begin{equation}
+  B_{n,rgn} = \frac{(\sum^{Q4}_{Q1}A_{Q,n,rgn}) \times 1,000}{CF_{5}}
+  (\#eq:bldgs-by-unit-number-5)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(B_{n,rgn} \) = Number of building starts by the unit number category, *n*, and by region, *rgn* <br> \newline
+  \(A_{Q,n,rgn} \) = Number of housing units started in quarter *Q*, by number of units, *n*, and region, *rgn* <br> \newline
+  \(CF_{5} \) = Ratio of 5 units or more to the number of buildings with 5 units or more <br> \newline
+</div>
+
+Annual county-level building permit data were obtained from the US Census Bureau [[ref 4](#ResConDust-reference)]. The County Level Residential Building Permit dataset has data to allocate regional housing starts to the county level. This results in county-level housing starts by number of units. 
+
+The number of building permits for each unit number category by region is calculated by summing the county-level Census data to the Census region level.
+
+\begin{equation}
+  BP_{n,rgn} = \sum^{N}_{n=1}BP_{n,c}
+  (\#eq:permits-by-county)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(BP_{n,rgn} \) = Number of building permits by the unit number category, *n*, and by region, *rgn* <br> \newline
+  \(BP_{n,c} \) = Number of building permits by the unit number category, *n*, and by county, *c* <br> \newline
+</div>
+
+The ratio of the number of building permits by county to the total number of building permits by region in which the county is located, for each unit number category, is then calculated. 
+
+\begin{equation}
+  R_{BP,c} = \frac{BP_{n,c}}{BP_{n,rgn}}
+  (\#eq:permit-county-ratio)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(R_{BP,c} \) = Ratio of building permits, *BP*, to total regional building permits in county *c* <br> \newline
+  \(BP_{n,c} \) = Number of building permits by the unit number category, *n*, and by county, *c* <br> \newline
+  \(BP_{n,rgn} \) = Number of building permits by the unit number category, *n*, and by region, *rgn* <br> \newline
+</div>
+
+The final number of building starts for each unit type category is then calculated at the county-level by multiplying the number of structures started at the regional level and the building permit ratio.
+
+\begin{equation}
+  B_{n,c} = B_{n,rgn} \times R_{BP,c}
+  (\#eq:bldg-starts-county-by-unit)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(B_{n,c} \) = Number of building starts by the unit number category, *n*, and by county, *c* <br> \newline
+  \(B_{n,rgn} \) = Number of building starts by the unit number category, *n*, and by region, *rgn* <br> \newline
+  \(R_{BP,c} \) = Ratio of building permits, *BP*, to total regional building permits in county *c* <br> \newline
+</div>
+
+*Determine Amount of Soil Removed for Basements*
+
+To calculate basement soil removal, the *Characteristics of New Single-Family Houses Completed, Foundation table* [[ref 5](#ResConDust-reference)] is used to estimate the percentage of 1-unit structures that have a basement at the regional level. The data indicate whether the structure has a full/partial basement, slab or other type, or crawl space. However, only structures with full/partial basements are used in this calculation.
+
+\begin{equation}
+  BM_{rgn} = \frac{BM_{fp,rgn}}{BM_{t,rgn}}
+  (\#eq:basement-fraction)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(BM_{rgn} \) = Fraction of basements for buildings in the region, *rgn* <br> \newline
+  \(BM_{fp,rgn} \) = Number of full or partial basements, *fp*, by region, *rgn* <br> \newline
+  \(BM_{t,rgn} \) = Total number of houses regardless of basement type (full/partial, slab/other, crawl space), by region, *rgn* <br> \newline
+</div>
+
+To estimate the number of building starts with and without basements in each county, the county level estimate of the number of 1-unit starts (from equation 9) is multiplied by the percent of 1-unit houses in the region that have a basement. 
+
+\begin{equation}
+  B_{c,BM} = B_{n,c} \times BM_{rgn}
+  (\#eq:basements-by-county)
+\end{equation}
+
+\begin{equation}
+  B_{c,nBM} = B_{n,c} \times (1-BM_{rgn})
+  (\#eq:no-basements-by-county)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(B_{c,BM} \) = Number of building starts by county, *c*, with a basement, *BM* <br> \newline
+  \(B_{c,nBM} \) = Number of building starts by county, *c*, without a basement, *nBM* <br> \newline
+  \(B_{n,c} \) = Number of building starts by the unit number category, *n*, and county, *c* <br> \newline
+  \(BM_{rgn} \) = Fraction of basements for buildings in the region <br> \newline
+</div>
+
+Basement volume is calculated by assuming a house with a 2000 square foot footprint has a basement dug to a depth of 8 feet (making 16,000 ft3 per basement). An additional 10 percent is added for peripheral dirt bringing the total to 17,600 ft3 (651.85 yd3) per basement. 
+
+*Determine Amount of Soil Disturbed by Unit Type*
+
+The number of acres of soil disturbed by the construction of residential buildings is calculated for apartment buildings, buildings with 2 units, and buildings with 1 unit. Table \@ref(tab:soil-removed) below shows the assumptions used for the surface area disturbed for each unit type. Buildings with unit types of 3-4 and 5 or more are grouped together as apartments in this step.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-20/soil-removed-by-unit-type.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r soil-removed, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Surface soil removed per unit type.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+For apartment buildings (sum of 3-4 and 5 or more units) and buildings with 2 units:
+
+\begin{equation}
+  S_{n,c} = B_{n,c} \times a_{n}
+  (\#eq:soil-disturbed-multiunit)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(S_{n,c} \) = Surface soil disturbed by building construction by county, *c*, and unit type category, *n*, in acres <br> \newline
+  \(B_{n,c} \) = Number of building starts by the unit number category, *n*, and county, *c* <br> \newline
+  \(a_{n} \) = Acres of surface soil disturbed by each unit type category, *n*, from Table \@ref(tab:soil-removed) <br> \newline
+</div>
+
+For buildings with 1 unit, with or without a basement:
+
+\begin{equation}
+  S_{n,c} = B_{c,BM} \times a_{n}
+  (\#eq:soil-disturbed-one-unit)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(S_{n,c} \) = Surface soil disturbed by building construction by county, *c*, and unit type category, *n*, in acres <br> \newline
+  \(B_{c,BM} \) = Number of buildings in county *c*, with or without a basement, *BM* <br> \newline
+  \(a_{n} \) = Acres of surface soil disturbed by each unit type category, *n*, from Table \@ref(tab:soil-removed) <br> \newline
+</div>
+
+### Allocation Procedure
+
+Annual county building permit data were obtained from the US Census Bureau [[ref 4](#ResConDust-reference)]. The County Level Residential Building Permit dataset is used to allocate regional housing starts to the county level.
+
+### Emission Factors
+
+Initial PM10 emissions from construction of single family, 2-unit, and apartments structures, provided in Table \@ref(tab:constr-res-EFs), are calculated using the emissions factors [[ref 5](#ResConDust-reference)]. These emissions factors describe average “unit operations,” such as “loading and unloading of earth and aggregate materials, land clearing and general vehicle traffic” [[ref 6](#ResConDust-reference)]. They therefore take into account the entire duration of construction, and not simply the duration of active excavation. The duration of construction activity for houses is assumed to be 6 months and the duration of construction for apartments is assumed to be 12 months.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-20/res-construction-dust-EFs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r constr-res-EFs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Emissions factors for residential construction dust.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+To account for the soil moisture level, the PM10 emissions are weighted using the 30-year average precipitation-evaporation (PE) values from Thornthwaite’s PE Index. Average precipitation evaporation values for each state are estimated based on PE values for specific climatic divisions within a state. The average PE value for the test sites from which the PM10 emissions factor was developed is 24 [[ref 6](#ResConDust-reference)].
+
+To account for the silt content, the PM10-PRI emissions are weighted using average silt content for each county. EPA used the National Cooperative Soil Survey Microsoft Access Soil Characterization Database to develop county-level, average silt content values for surface soil [[ref 7](#ResConDust-reference)]. The U.S. Department of Agriculture and the National Cooperative Soil Survey define silt content of surface soil as the percentage of particles (mass basis) of diameter smaller than 50 micrometers (µm) found in the surface soil [[ref 8](#ResConDust-reference)]. Note that this definition is different than the U.S. Environmental Protection Agency’s definition [[ref 9](#ResConDust-reference)] that includes all particles (mass basis) of diameter smaller than 75 micrometers. This database contains the most commonly requested data from the National Cooperative Soil Survey Laboratories including data from the Kellogg Soil Survey Laboratory and cooperating universities. The average silt content for the test sites from which the PM10 emissions factor was developed is 9 percent [[ref 6](#ResConDust-reference)].
+
+\begin{equation}
+  AF_{PM10,c} = \frac{24}{PE_{s}} \times \frac{s_{c}}{0.09}
+  (\#eq:PM10-adj-factor)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(AF_{PM10,c} \) = PM10-PRI adjustment factor for county *c* <br> \newline
+  \(PE \) = precipitation-evaporation value for State *s* <br> \newline
+  \(s \) = Percent dry silt content for county *c* <br> \newline
+</div>
+
+This adjustment factor is used to adjust the PM10-PRI emissions factor for each unit type category – apartment, 2-unit, 1-unit with basement, and 1-unit without basement.
+
+\begin{equation}
+  EF_{PM10,n,c} = AF_{PM10} \times D_{n} \times EF_{orig}
+  (\#eq:adjusted-PM10-EF)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(EF_{PM10,n,c} \) = Adjusted PM10-PRI emissions factor for county *c* and unit type category *n*, in tons/acre <br> \newline
+  \(AF_{PM10,c} \) = PM10-PRI adjustment factor for county *c* <br> \newline
+  \(D_{n} \) = Duration of construction by unit type category, *n*, in months <br> \newline
+  \(EF_{orig} \) = Original unadjusted PM10-PRI emission factor, in tons/acre <br> \newline
+</div>
+
+### Controls
+
+There are no controls assumed for this category.
+
+### Emissions
+
+The PM10-PRI emissions are calculated by taking the sum of the surface soil disturbed by county and unit type category and multiplying it by the corresponding adjusted PM10-PRI emissions factor. Once PM10-PRI adjustments have been made, PM25-PRI emissions are estimated by applying a particle size multiplier of 0.10 to PM10-PRI emissions [[ref 8](#ResConDust-reference)]. Primary PM emissions are equal to filterable emissions since there are no condensible emissions from residential construction.
+
+The PM10-PRI emissions are calculated at the county-level by multiplying the surface soil disturbed from construction for each unit type by the corresponding emissions factor for that unit type, and then summed across unit types.
+
+\begin{equation} 
+  E_{PM10,c} =  \sum^{N}_{n=1} S_{n,c} \times EF_{PM10,n,c}
+  (\#eq:constr-res-PM10-emissions)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{PM10,c} \) = Annual PM10-PRI emissions in county *c*, in tons <br> \newline
+  \(S_{n,c} \) = Surface soil disturbed by building construction by county, *c*, and unit type category, *n*, in acres <br> \newline
+  \(EF_{PM10,n,c} \) = Adjusted PM10-PRI emissions factor for county *c* and unit type category *n*, in tons/acre <br> \newline 
+</div>
+
+The PM25-PRI emissions are calculated based on the assumption that they are 10 percent of the PM10-PRI emissions.
+
+\begin{equation} 
+  E_{PM2.5,c} =  E_{PM10,c} \times 0.1
+  (\#eq:constr-res-PM25-emissions)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{PM2.5,c} \) = Annual PM25-PRI emissions in county *c*, in tons <br> \newline
+  \( E_{PM10,c} \) = Annual PM10-PRI emissions in county *c*, in tons <br> \newline
+  \( 0.1 \) = Particle size multiplier <br> \newline
+</div>
+
+### Sample Calculations
+
+Table \@ref(tab:constr-res-sample-calculations) shows sample calculations for PM10-PRI and PM25-PRI emissions from residential construction for a 2-unit structure. The first 3 equations use the first quarter (Q1) for 2-unit structures as an example. However, these calculations would need to be repeated to calculate values for all 4 quarters for all 3-unit sizes. Note that structures with 5 or more units and structures with 1 unit with or without a basement have additional steps not shown in the sample calculations here. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county. 
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1:17),
+  Equation = c("$S_{Q,n} = \\frac{U_{n}}{U_{t}} \\times S_{Q,2-4}$",
+               "$r_{Q,n} = \\frac{S_{Q,n}}{S_{Q,t}}$",
+               "$A_{Q,n,rgn} = r_{Q,n} \\times (RS_{t,rgn} - RS_{1,rgn})$",
+               "$CF_{5,rgn} = \\frac{U_{5,rgn}}{B_{5,regn}}$",
+               "$B_{n,rgn} = \\frac{(\\sum^{Q4}_{Q1} A_{Q,n,rgn}) \\times 1,000}{n}$",
+               "$B_{n,rgn} = \\frac{(\\sum^{Q4}_{Q1} A_{Q,n,rgn}) \\times 1,000}{CF_{5}}$",
+               "$BP_{n,rgn} = \\sum^{N}_{n=1} BP_{n,c})$",
+               "$R_{BP,c} = \\frac{BP_{n,c}}{BP_{n,rgn}}$",
+               "$B_{n,c} = B_{n,rgn} \\times R_{BP,c}$",
+               "$BM_{rgn} = \\frac{BM_{fp,rgn}}{BM_{t,rgn}}$",
+               "$B_{c,BM} = B_{n,c} \\times BM_{rgn}$",
+               "$S_{n,c} = B_{n,c} \\times a_{n}$",
+               "$S_{n,c} = B_{c,BM} \\times a_{n}$",
+               "$AF_{PM10,c} = \\frac{24}{PE_{s}} \\times \\frac{s_{c}}{0.09}$",
+               "$EF_{PM10,n,c} = AF_{PM10} \\times D_{n} \\times EF_{orig}$",
+               "$E_{PM10,c} =  \\sum^{N}_{n=1} S_{n,c} \\times EF_{PM10,n,c}$",
+               "$E_{PM2.5,c} =  E_{PM10,c} \\times 0.1$"),
+  Values = c("$\\frac{14}{38} \\times \\text{2 2-to-4 unit housing starts in Q1}$",
+             "$\\frac{\\text{0.74 two-unit housing starts}}{\\text{72 two or more unit housing starts}}$",
+             "0.01 $\\times$ (23 total Q1 housing starts in NE - 9 one-unit housing starts in NE)",
+             "$\\text{N/A}$",
+             "$\\frac{\\text{0.772 two-unit structures} \\times 1,000}{\\text{2 units per building}}$",
+             "$\\text{N/A}$",
+             "$\\sum \\text{Northeast two-unit building permits}$",
+             "$\\frac{\\text{49 county building permits}}{\\text{1,545 Northeast building permits}}$",
+             "$386 \\times 0.03172$",
+             "$\\text{N/A}$",
+             "$\\text{N/A}$",
+             "$12.25 \\times 0.33 acres per structure$",
+             "$\\text{N/A}$",
+             "$\\frac{24}{\\text{119.7 PE Value}} \\times \\frac{\\text{27.07 silt content}}{0.09}$",
+             "$0.603 \\times \\text{6 months} \\times {0.032 tons per acre}$",
+             "$\\text{4.08 acres} \\times \\text{0.1158 tons per acre}$",
+             "$\\text{47 tons} \\times 0.1$"),  
+  Result = c("0.74 thousand housing starts for 2-unit structures in Q1, nationally",
+             "0.01 ratio of buildings with 2 units to all 2 or more-unit housing starts for Q1, nationally ",
+             "0.14 thousand housing starts for 2-unit structures for Q1 in the Northeast",
+             "Equation is for 5 or more-unit buildings; example is for 2-unit buildings",
+             "386 2-unit structures constructed in the Northeast ",
+             "Equation is for 5 or more-unit buildings; example is for 2-unit buildings",
+             "1,545 2-unit structure building permits in the Northeast",
+             "0.03172 ratio of county-level building permits to regional-level building permits",
+             "12.25 total 2-unit structure building starts",
+             "Equation is for 1-unit buildings; example is for 2-unit buildings",
+             "Equation is for 1-unit buildings; example is for 2-unit buildings",
+             "4.08 acres surface soil disturbed by 2-unit structures",
+             "Equation is for 1-unit buildings; example is for 2-unit buildings",
+             "0.603 PM10-PRI adjustment factor for 2-unit structures ",
+             "0.1158 tons/acre PM10-PRI emissions factor for 2-unit structures",
+             "0.47 tons PM10-PRI emissions for 2-unit structures",
+             "0.047 tons PM25-PRI emissions for 2-unit structures")
+)
+```
+
+```{r constr-res-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 12) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{5cm}")
+)
+```
+
+### Improvements/Changes in the 2023 NEI
+
+There have been no significant changes to this category.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exist to calculate emissions for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the US Virgin Islands. The total emissions in tons for these two Florida counties are divided by their respective populations creating a tons per capita emissions factor. For each Puerto Rico and US Virgin Island County, the tons per capita emissions factor is multiplied by the county population (from the same year as the inventory’s activity data) which served as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”. 
+
+## References {#ResConDust-reference}
+
+1.	U.S. Census Bureau, [New Privately Owned Housing Units Started by Purpose and Design in 2023.](https://www.census.gov/construction/nrc/pdf/quarterly_starts_completions.pdf)
+2.	U.S. Census Bureau, 2001. Housing Starts, Table 1. New Privately-Owned Housing Units Started.
+3.	U.S. Census Bureau, [New Privately-Owned Housing Units Authorized – Unadjusted Units for Regions, Divisions, and States, Annual 2021.](https://www.census.gov/construction/bps/stateannual.html)
+4.	U.S. Census Bureau, [Annual Housing Units Authorized by Building Permits. ASCII files by State, MSA, County or Place, co2023a.](https://www2.census.gov/econ/bps/County/)
+5.	U.S. Census Bureau, Characteristics of New Housing. [Characteristics of New Single-Family Houses Completed, Annual 2023, Foundation Table.](https://www.census.gov/construction/chars/index.html)
+6.	Midwest Research Institute. 1996. Improvement of Specific Emission Factors (BACM Project No. 1). Prepared for South Coast Air Quality Management District. 
+7.	U.S. Department of Agriculture, National Cooperative Soil Survey, [NCSS Microsoft Access Soil Characterization Database.](https://ncsslabdatamart.sc.egov.usda.gov/)
+8.	Cowherd, C. J. Donaldson, R. Hegarty, and D. Ono. 2006. [Proposed Revisions to Fine Fraction Ratios Used for AP-42 Fugitive Dust Emission Factors.](https://gaftp.epa.gov/AIR/nei/ei_conference/EI15/session14/cowherd.pdf ) 15th International Emission Inventory Conference, New Orleans, LA. 
+9.	Midwest Research Institute. 1999. [Estimating Particulate Matter Emissions from Construction Operations.](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=9100KK1W.TXT) Prepared for Emission Factor and Inventory Group, Office of Air Quality Planning and Standards US EPA. 

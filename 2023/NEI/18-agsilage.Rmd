@@ -1,0 +1,185 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Agricultural Silage {#agsilage}
+
+## Sector Descriptions and Overview 
+
+Agricultural silage is fermented cattle feed made from chopped forage like corn or sorghum. Corn silage is a high energy forage that is readily consumed by cattle, and it is a major component of dairy and beef cattle diets in the US. VOCs are formed during silage fermentation and can volatilize into the atmosphere. VOC emissions occur during storage, mixing and feeding processes. During storage, emissions occur when a silage stack, bunker silo, or silage bag is opened, and silage is removed. During mixing, emissions occur from the exposed surface of a mixing wagon when the silage is mixed with other feed components. During feeding, emissions occur from the exposed silage in a feed bunk or feed lane. The only pollutants that are inventoried for this sector are VOC and VOC HAPs. Table \@ref(tab:agsilage-sccs) shows the SCCs assigned to various ag silage processes; SCC level 1, 2, and 3 descriptions are “Miscellaneous; Agricultural Crop Usage; Agricultural Silage” for all SCCs.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-18/AgSilage1_SCCs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r agsilage-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Source Classification Codes used in the agricultural silage sector.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+## EPA-developed estimates
+
+The calculations for estimating the emissions from agricultural silage are straight-forward. It involves multiplying the livestock counts by emissions factors for VOC.
+
+### Activity Data {#agsilage-activity-data}
+
+The activity data for this source category are based on dairy and beef cattle livestock counts (average annual number of standing head) and population information by state and county used to develop U.S. EPA’s Greenhouse Gas Inventory [[ref 1](#agsilage-references)]. This data set is derived from multiple data sets from the United States Department of Agriculture (USDA), particularly the National Agricultural Statistics Service (NASS) survey and census [[ref 2](#agsilage-references)]. The USDA NASS survey dataset, which represents latest available, 2023 national livestock data, is used to obtain the livestock counts for as many counties as possible across the United States.  For a full description of the GHG livestock population estimation methodology, refer to the above referenced citation for the EPA’s GHG inventory document.
+
+Generally, counties not specifically included in the NASS survey data set (e.g., due to business confidentially reasons) were gap-filled based on the difference in the reported state total animal counts and the sum of all county-level reported animal counts. State-level data on animal counts from the GHG inventory were distributed to counties based on the proportion of animal counts in those counties from the NASS census.
+
+Here is an in-line equation that is kept for illustrative purposes:
+
+\begin{equation} 
+  P_{c} = P_{s} \times r_{c}
+  (\#eq:county-distribution)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( P_{c} \) = Estimated population of dairy or beef cattle in county *c* <br> \newline
+  \( P_{s} \) = NASS survey reported state-level population of dairy or beef cattle in state *s* <br> \newline
+  \( r_{c} \) = Ratio of county- to state-level animal counts from the NASS census for dairy or beef cattle in county *c*  <br> \newline
+  
+</div>
+
+### Allocation Procedure {#agsilage-allocation-procedure}
+
+The USDA survey reports the livestock counts at the county level for many counties, so no allocation is necessary. The procedure for gap-filling missing county-level data using state-level data is described in Section \@ref(agsilage-activity-data). One assumption is that agricultural silage is stored on all dairy farms.
+
+### Emission Factors
+
+The emission factors (EFs) developed for ag silage are expressed in units of kg VOC per animal per year and are the product of three estimated quantities:
+  
+\begin{equation} 
+  EF = VOC_{prod} \times \text{Fractional Loss} \times \text{Feeding Rate}
+  (\#eq:silageEF)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF \) = Emission factor for annual VOC emissions (kg) per animal <br> \newline
+  \( VOC_{prod} \) = VOC production within silage (kg VOC produced [or available] / kg silage dry matter) <br> \newline
+  \( \text{Fractional Loss} \) = Fractional loss of VOC by volatilization (kg VOC volatilized / kg VOC produced) <br> \newline
+  \( \text{Feeding Rate} \) = Silage feeding rate to cattle (kg silage dry matter fed per animal per year) <br> \newline
+</div>
+
+Emission factors are calculated for three stages: silage storage, feed mixing, and feeding. Estimates are made for beef and dairy cattle, which are assumed to differ only in silage feeding rates. In total, 6 EFs are calculated for the entire US, and are meant to capture average conditions. This approach does not capture differences due to local climate or management.
+
+Silage VOC production is based on the extensive compilation of VOC measurements presented in a review paper (Hafner et al., 2013) [[ref 3](#agsilage-references)]. Fractional loss of VOC is calculated by chemical group (acids, alcohols, esters, and aldehydes) using the mass transfer model described by Hafner et al. (2012) [[ref 4](#agsilage-references)]. This model includes parameters for transport through silage and loss from an exposed surface, with parameter values based on wind tunnel (Montes et al., 2010 [[ref 5](#agsilage-references)]; Hafner et al., 2010 [[ref 6](#agsilage-references)]) and mass balance emission measurements made using silage representative of storage or feeding conditions (Hafner et al., 2012) [[ref 4](#agsilage-references)]. The inputs for the mass transfer model are average values that are assumed to be constant for dairy and beef cattle for all US locations. All silage produced in the US is assumed to be fed to dairy or beef cattle. 
+
+Silage feeding rates were estimated from NASS statistics for total silage production and estimated cattle populations discussed in Section \@ref(agsilage-allocation-procedure). Total national silage production was for corn, haylage, alfalfa, and sorghum silage production, and is reported in tons. Reported mass was assumed to be in fresh mass, and dry mass was calculated by assuming a dry matter (DM) content of 34%. Based on the Integrated Farm System Model simulation results described in recent national assessments of dairy and beef cattle (Rotz et al., 2019 [[ref 7](#agsilage-references)], 2021 [[ref 8](#agsilage-references)]), it was assumed that dairy cattle consume 75% of US silage and beef cattle 25% (C. Al Rotz, USDA-ARS, personal communication). Based on this approach, effective average silage feeding rates were about 2,025 kg DM per year for dairy cows and 155 kg DM per year for beef cows (5.5 and 0.4 kg DM per d, respectively).
+
+Note that county-level emission factors are a composite based on the county-level distribution of dairy cattle and beef cattle counts. 
+
+
+### VOC Speciation
+
+VOC speciation is needed to define the HAPs for this sector, as well as to provide speciated VOC information for air quality models.  VOC speciation is determined as the product of VOC production and the total fractional VOC loss for all three stages, determined individually for each compound. As discussed in Hafner et al. (2013) [[ref 3](#agsilage-references)], the relative importance of individual compounds depends on their production as well as emission conditions. It should be noted that ethanol is the dominant component of the VOC. If used, this profile will be renormalized so that it represents 100% of the VOC mass.
+
+### Controls
+
+There are no controls assumed for this category. However, there are management practices (such as chemical additives that inhibit yeast and controlling silage density and feed area) known to reduce VOC emissions from agricultural silage and SLTs should consider whether the dairy farms in their areas implement any of these practices [[ref 9](#agsilage-references)].
+
+### Emissions
+
+To estimate VOC emissions from silage, the animal-specific emissions factor is multiplied by the county-specific livestock count and then summed for all relevant livestock types.
+ 
+\begin{equation} 
+  E_{c,dairy} =  EF_{dairy} \times P_{c,dairy} \times \text{0.0011}\frac{ton}{kg}
+  (\#eq:emissions-dairy)
+\end{equation}
+ 
+\begin{equation} 
+  E_{c,beef} =  EF_{beef} \times P_{c,beef} \times \text{0.0011}\frac{ton}{kg}
+  (\#eq:emissions-beef)
+\end{equation}
+ 
+\begin{equation} 
+  E_{c} =  E_{c,dairy} + E_{c,beef}
+  (\#eq:emissions-total)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{c,dairy} \) = Annual dairy emissions in county *c*, in tons per year <br> \newline
+  \( EF_{dairy} \) = Dairy emissions factor, in kg per cow <br> \newline
+  \( P_{c,dairy} \) = Population of dairy cattle in county *c* <br> \newline
+  \( E_{c,beef} \) = Annual beef emissions in county *c*, in tons per year <br> \newline
+  \( EF_{beef} \) = Beef emissions factor, in kg per cow <br> \newline
+  \( P_{c,beef} \) = Population of beef cattle in county *c* <br> \newline
+  \( E_{c} \) = Annual agricultural silage emissions in county *c*, in tons per year <br> \newline  
+</div>
+
+### Point Source Subtraction
+
+There are no point source-specific SCCs for agricultural silage; therefore, point source subtraction is not performed for this category. If your state has reported emissions from agricultural silage as a point source in the past, it should be calculated as a nonpoint source now.
+
+### Sample Calculations
+
+Table \@ref(tab:agsilage-sample-calculations)  lists sample calculations to determine VOC emissions from agricultural silage storage. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c("1", "1", "3", "4", "5"),
+  Equation = c("$P_{a,c} = P_{a,c} \\times r_{a,c}$",
+               "$P_{a,c} = P_{a,c} \\times r_{a,c}$",
+               "$E_{c,dairy} =  EF_{dairy} \\times P_{c,dairy} \\times \\text{0.0011}\\frac{ton}{kg}$",
+               "$E_{c,beef} =  EF_{beef} \\times P_{c,beef} \\times \\text{0.0011}\\frac{ton}{kg}$",
+               "$E_{c} = E_{c,dairy} + E_{c,beef}$"),
+  Values = c("N/A",
+             "N/A",
+             "$5.998\\frac{\\frac{kg}{cow}}{yr} \\times \\text{2,616 dairy cattle} \\times 0.0011\\frac{ton}{kg}$",
+             "$0.4581\\frac{\\frac{kg}{cow}}{yr} \\times \\text{27,098 beef cattle} \\times 0.0011\\frac{ton}{kg}$",
+             "$\\text{17.26 tons from dairy + 13.65 tons from beef}$"),
+  Result = c("Dairy cattle population is available for this county and does not need to be calculated using NASS Census ratios",
+             "Beef cattle population is available for this county and does not need to be calculated using NASS Census ratios",
+             "17.26 tons VOC emissions from dairy agricultural silage storage",
+             "13.65 tons VOC emissions from beef agricultural silage storage",
+             "30.91 tons VOC emissions from agricultural silage storage")
+)
+```
+```{r agsilage-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 9) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{1cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+### Improvements/Changes in the 2023 NEI
+
+There have been no significant changes to this category since the 2020 NEI.
+
+### Puerto Rico and U.S. Virgin Islands
+Since insufficient data exists to calculate emissions for the counties in Puerto Rico and the U.S. Virgin Islands, we based emissions for those domains on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the U.S. Virgin Islands. The total emissions in pounds for these two Florida counties are divided by their respective populations creating a pound per capita emission factor. For each Puerto Rico and U.S. Virgin Island county, the pound per capita emission factor is multiplied by the county population (from the same year as the inventory’s activity data) which serves as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”.
+
+## References {#agsilage-references}
+
+1. U.S. EPA, 2025. [Draft Inventory of U.S. Greenhouse Gas Emissions and Sinks: 1990-2023](https://www.regulations.gov/document/EPA-HQ-OAR-2024-0591-0003), Chapter 5, Agriculture. EPA-HQ-OAR-2024-0591-0003. 
+2.	United States Department of Agriculture National Agricultural Statistics Service Quick Stats. https://quickstats.nass.usda.gov/
+3.	Hafner, S.D., Howard, C., Muck, R.E., Franco, R.B., Montes, F., Green, P.G., Mitloehner, F., Trabue, S.L., Rotz, C.A., 2013. Emission of volatile organic compounds from silage: Compounds, sources, and implications. Atmospheric Environment 77, 827–839. https://doi.org/10.1016/j.atmosenv.2013.04.076
+4.	Hafner, S.D., Montes, F., Rotz, C.A., 2012. A mass transfer model for VOC emission from silage. Atmospheric Environment 54, 134–140. https://doi.org/10.1016/j.atmosenv.2012.03.005
+5.	Montes, F., Hafner, S.D., Rotz, C.A., Mitloehner, F.M., 2010. Temperature and air velocity effects on ethanol emission from corn silage with the characteristics of an exposed silo face. Atmospheric Environment 44, 1987–1995. https://doi.org/10.1016/j.atmosenv.2010.02.037
+6.	Hafner, S.D., Montes, F., Rotz, C.A., Mitloehner, F.M., 2010. Ethanol emission from loose corn silage and exposed silage particles. Atmospheric Environment 44, 4172–4180. https://doi.org/10.1016/j.atmosenv.2010.07.029 
+7.	Rotz, C.A., Asem-Hiablie, S., Place, S., Thoma, G., 2019. Environmental footprints of beef cattle production in the United States. Agricultural Systems 169, 1–13. https://doi.org/10.1016/j.agsy.2018.11.005 
+8.	Rotz, A., Stout, R., Leytem, A., Feyereisen, G., Waldrip, H., Thoma, G., Holly, M., Bjorneberg, D., Baker, J., Vadas, P., Kleinman, P., 2021. Environmental assessment of United States dairy farms. Journal of Cleaner Production 315, 128153. https://doi.org/10.1016/j.jclepro.2021.128153 
+9.	Hafner, S.D., Bühler, M., Feilberg, A., Franco, R.B., Howard, C., Montes, F., Muck, R.E., Rotz, C.A., Weiß, K. 2018. “Volatile organic compounds and silage: sources, emission, and mitigation.” XVIII International Silage Conference (Bonn, Germany). https://www.researchgate.net/profile/Sasha-Hafner/publication/329428288_Volatile_organic_compounds_and_silage_sources_emission_and_mitigation/links/5c083aac299bf139c741ba7d/Volatile-organic-compounds-and-silage-sources-emission-and-mitigation.pdf 

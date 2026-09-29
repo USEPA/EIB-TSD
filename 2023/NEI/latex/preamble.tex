@@ -1,0 +1,45 @@
+% Fonts, math, tables, graphics (most are safe even if template also loads them)
+\usepackage{fontspec}   % optional; template loads fontspec via unicode-math
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{tocloft}
+
+\newcommand{\pandocbounded}[1]{#1}
+
+% --- Accessibility/tagging ---
+\usepackage{tagpdf}
+\tagpdfsetup{
+  activate,
+  interwordspace=true,
+  tabsorder=structure,
+  uncompress
+}
+
+% Artifact the on-page TOC/LOF/LOT to avoid Lbl/LBody errors
+\AddToHook{cmd/tableofcontents/before}{\tagmcbegin{artifact}}
+\AddToHook{cmd/tableofcontents/after}{\tagmcend}
+\AddToHook{cmd/listoffigures/before}{\tagmcbegin{artifact}}
+\AddToHook{cmd/listoffigures/after}{\tagmcend}
+\AddToHook{cmd/listoftables/before}{\tagmcbegin{artifact}}
+\AddToHook{cmd/listoftables/after}{\tagmcend}
+
+% --- Your layout tweaks ---
+\renewcommand{\cftfigaftersnum}{\hspace{1em}} 
+\renewcommand{\cfttabaftersnum}{\hspace{1em}}
+\setlength{\cftfignumwidth}{4em} 
+\setlength{\cfttabnumwidth}{4em}
+
+\pagestyle{plain}                  % center page numbers
+\setmainfont{Calibri}              % requires Calibri installed; remove if building on non-Windows systems
+\renewcommand{\chaptername}{Section}
+
+\usepackage[
+  top=0.8in,
+  bottom=0.8in,
+  left=0.75in,
+  right=0.75in
+]{geometry}

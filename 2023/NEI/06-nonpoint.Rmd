@@ -1,0 +1,678 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Nonpoint Overview {#nonpoint}
+
+This section includes an overview of all sources that are in the nonpoint data category, including biogenics, fires, including wildfires, prescribed burning, and agricultural field burning. These sources are reported at the county level, though some sources such as shipping lanes and ports are more-finely resolved to the county/shape identifier (ID) (polygon) level. Stationary sources that are inventoried at facilities and stacks (coordinates) are discussed in the Point section of this TSD. This section discusses the process by which all sources in the Nonpoint inventory are gathered for the 2023 NEI; methodology documentation into each component of the nonpoint data category (e.g., residential wood combustion, road dust, etc…) is discussed in separate sections that follow. Some “nonroad” mobile sources such as trains and commercial marine vessels reside and are discussed here in the nonpoint data category, not in the Nonroad Equipment section of this TSD.
+
+## Nonpoint source approaches 
+
+Nonpoint source data are provided by state, local, and tribal (S/L/T) agencies, and for certain sectors and/or pollutants, they are supplemented with data from the EPA. This section describes the various sources of data and the selection priority for each of the datasets to use for building the National Emissions Inventory (NEI) when multiple data sources are available for the same emissions source.
+
+## Sources of data overview and selection hierarchies
+
+Table \@ref(tab:selection-hierarchy) describes the datasets comprising most of the nonpoint inventory, and the hierarchy for combining these datasets in construction of the NEI. While the bulk of these datasets are for stationary sources of emissions, some of these datasets contain mobile sources so that emissions from ports, shipping lanes, rail lines, and in-flight aircraft (lead emissions only) could be included as nonpoint sources. The following table includes the rationale for why each dataset was assigned its position in the hierarchy. We excluded certain pollutants from stationary sources in the 2023 NEI: greenhouse gases for stationary sources and pollutants in the pollutant groups “dioxins/furans” and “radionuclides”^[Dioxins/furans include all pollutants with pollutant category name of: Dioxins/Furans as 2,3,7,8-TCDD TEQs, or Dioxins/Furans as 2,3,7,8-TCDD TEQs – WHO2005. Radionuclides have the pollutant category name of “radionuclides” The specific compounds and codes are in the pollutant code tables in EIS.]. The EPA has not evaluated the completeness or accuracy of the S/L/T agency dioxin and furan values nor radionuclides and does not have plans to supplement these reported emissions with other data sources to compile a complete estimate for dioxin and furans nor radionuclides as part of the NEI.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-6/selection-hierarchy.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r selection-hierarchy, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Data sources and selection hierarchy used for most nonpoint sources.',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 11) %>%
+  column_spec(1, width = "4cm") %>%
+  column_spec(2, width = "8cm") %>%
+  column_spec(3, width = "2cm")
+```
+
+The EPA developed all datasets listed above except for the “Responsible Agency Selection,” which contains only S/L/T agency data. We used various methods and databases to compile the EPA generated datasets, which are further described in subsequent subsections. The primary purpose of the EPA datasets is to add or “gap fill” pollutants or sources not provided by S/L/T agencies, to resolve inconsistencies in S/L/T agency-reported pollutant submissions for PM and to speciate S/L/T agency reported total chromium into hexavalent and trivalent forms. The hierarchy or “order” provided in Table \@ref(tab:selection-hierarchy) defines which data are preferentially used when multiple datasets could provide emissions for the same pollutant and emissions process. The dataset with the lowest order on the list is preferentially used over other datasets. 
+
+In addition to the order of the datasets, the hierarchy was also influenced by the EIS feature of data tagging. Any data that were tagged by EPA in any of the datasets were not used. S/L/T agency data were tagged for three reasons: 1) S/L/Ts requested that their data not be used, 2) EPA found unexpected pollutants for a source, and 3) sources were submitted that are not widely reported or significant. Due to continued improvements in the new nonpoint survey, there was very little need to tag EPA nonpoint data for 2023. If S/L/T agencies report zero emissions, then backfilling with other datasets will not occur. There are two ways that S/L/T agencies can prevent inappropriately backfilled emissions from being included in the NEI: 1) S/L/T agencies can submit zeros for any pollutant they do not want filled in (the EPA data will otherwise fill in for all pollutants that are on the nonpoint expected pollutant list), 2) S/L/T agencies can complete the nonpoint survey and specify “No…” to prevent any EPA estimates from backfilling where S/L/Ts did not submit data, or 3) the EPA can add tags to backfill datasets that prevent the tagged pollutants from being included in the NEI. The first option is most straightforward, and EPA’s preferred method, and takes care of any possible augmentation from the numerous other datasets in the selection hierarchy. The second option was developed as a quick tool for S/L/Ts to essentially prevent the need to “tag out” EPA data yet achieve the same goal. 
+
+### Nonpoint Survey updates for the 2023 NEI
+
+The nonpoint survey, first developed for the 2014 NEI, streamlined for the 2017 NEI, underwent minimal changes for the 2020 and 2023NEI. The purpose of the nonpoint survey is to increase the accuracy and transparency in how the nonpoint inventory is built using EPA and S/L/T agency data. The nonpoint inventory includes all nonpoint source categories that EPA generates estimates except for wildland fires, commercial marine vessels, and rail line estimates. 
+
+Because each agency has their own universe of sources and inventory development approaches, each agency reports nonpoint estimates a little differently. The nonpoint survey gathers information specifically for each SLT regarding which source categories are covered by point, nonpoint, or both, and about where point source reconciliation needs to be done to nonpoint activity. 
+
+For the 2023 NEI, the nonpoint survey was updated to include new source categories (e.g., Motor Vehicle and Structure Fires Tool, other non-agricultural sources of ammonia) and new or revised SCCs (e.g., campfires, residential wood combustion). Continued from 2020 NEI is a checkbox for SLTs “Did Your Agency Provide an Input Template for this Category?”, and a tagging function for EPA inventory developers to change the Nonpoint Survey response back to the default “Yes – Supplement my data with EPA estimates”.
+
+The nonpoint survey has an “Accept All Emissions Estimates” button on the home page for S/L/Ts that did not submit emissions for any nonpoint sector. Note, acceptable S/L/T activity inputs provided to EPA were absorbed into EPA tools and therefore became “EPA” estimates. For S/L/Ts that wanted to prevent some EPA data from backfilling, there were options to edit the default responses for each SCC or accept EPA estimates for entire sectors. For each SCC that EPA generates nonpoint emissions, the optional reasons to select “No” are: 1) I do not have this Source, 2) This source is included in my Point Source contributions, 3) My agency uses different SCCs, and 4) My inventory is complete; it does not need to be supplemented. An additional option to select “Yes -Supplement Only for Missing Pollutants at my reported Counties or Tribe” is provided to allow only missing (expected) pollutants to be added for locations where emissions were submitted for at least one pollutant. More information on the nonpoint survey is available in ["Section 7.2.6 of the 2023 NEI Plan"](https://www.epa.gov/system/files/documents/2023-05/2023_NEI_Plan_draft_May2023.pdf). A detailed 2023 NEI nonpoint summary “2023NEI_Nonpoint_Survey_detail_22may2026.xlsx” covering all reporting agencies has been uploaded to the ["2023 NEI Supplemental data FTP"](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/) site.
+
+### Wagon Wheel
+
+A central database, called the “["Wagon Wheel"](https://gaftp.epa.gov/air/nei/2020/doc/supporting_data/nonpoint/Wagon Wheel 2020 v7 Final - SLT Inputs.zip)”, first developed for the 2017 NEI, and updated for the 2023 NEI, houses all inputs and calculates emissions for many nonpoint source categories. Prior to the 2017 NEI, EPA shared different tools to S/L/Ts, many with the same inputs; this process was very inefficient and prone to human error as many tools shared similar inputs and different versions of these tools were often used by S/L/Ts vs the “final” versions ultimately regarded as “EPA” for the NEI. The Wagon Wheel links activity input tables to the appropriate sector/module such that refreshing one dataset ensures the next tool iteration captures it for all appropriate sectors. Most Wagon Wheel sources have input templates for optional controls; those sources that do not have other options for “controlling” emissions (e.g., reducing the number of cords wood burned per campsite). The full list of nonpoint source categories/tools included in the Wagon Wheel is provided in Table \@ref(tab:WW-categories).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-6/WW-categories.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r WW-categories, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Data sources and selection hierarchy used for most nonpoint sources.',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 11) %>%
+  column_spec(1, width = "8cm") %>%
+  column_spec(2, width = "3cm") %>%
+  column_spec(3, width = "3cm")
+```
+
+#### Wagon Wheel updates for the 2023 NEI
+
+For the 2023 NEI, the Wagon Wheel had minimal changes, including how default and S/L Input Template data were shared. High-level Wagon Wheel updates include:
+
+•	As shown in Table \@ref(tab:WW-categories), all sources now allow S/Ls to submit controls to be applied at the state and county level by SCC and by pollutant for ICI fuel combustion, residential non-wood heating, and POTWs.  <br> \newline
+•	The addition of several emissions estimates including new estimates for structure and motor vehicle fires, incorporation of agricultural livestock waste, as well as updated methodology and underlaying EPA default activity data used in Wagon Wheel.  <br> \newline
+•	Input Template distribution to and from EPA was streamlined using the EIS Gateway available to S/L inventory developers, contractors, and EPA NEI team members. Input templates were available for download in the EIS Gateway or could be edited manually from within the Gateway. When bulk downloads and edits were completed by SLTs, they were able to reupload to EIS via a convenient upload feature that provided some basic QA of the files. 
+
+It is important to stress that the relative changes in emissions between NEI cycles are often more a result of if/how S/Ls choose to submit activity data, accept EPA estimates, or submit direct emissions. A summary of Wagon Wheel tool updates for each tool category between the 2020 NEI and the final version (4.2) used for the 2023 NEI are provided in Table \@ref(tab:WW-updates). 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-6/WW-updates.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r WW-updates, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Summary of Wagon Wheel tool updates in the 2023 NEI.',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 10) %>%
+  column_spec(1, width = "3cm") %>%
+  column_spec(2, width = "9cm")
+```
+
+A complete list of activity data used in the 2023 NEI, including the sources of all data and Wagon Wheel release dates, is provided in the workbook “NEI 2023 Activity Data Tracker.xlsx” on the ["2023 Supplemental data FTP site"](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/).
+
+### Input Templates
+
+EPA strongly encouraged S/L/Ts to provide only inputs to the Wagon Wheel because, often late in the inventory development cycle, EPA finds a need for a tool update (e.g., error, or new, improved information) and so if S/L/Ts submitted emissions (rather than inputs) using an old version of the tool, then their submitted data could be out of date or incorrect.
+
+EPA provided blank input templates for all Wagon Wheel source categories. These blank templates included all default activity data, and as these default activity data were updated, the input templates and the Wagon Wheel were updated to incorporate it. S/L/Ts then provided their completed input templates back to EPA where their updated data, after rudimentary quality assurance, were used to supersede the default data in the template and ultimately the Wagon Wheel. In this process, all S/L/T-submitted input activity data became “EPA” data. Input activity data also included information on controls and emission factors where provided.
+
+With one key exception, S/L/Ts could opt out of submitting input templates as EPA methods did not need S/L/T inputs to compute reasonable nonpoint estimates. EPA used S/L/T-submitted point emissions as default for nonpoint reconciliation for solvents, stage 2 gasoline distribution, and publicly owned treatment works (POTWs); and little to no overlap with the point inventory would be expected for most other nonpoint source categories in the Wagon Wheel. However, for Industrial and Commercial/Institutional (ICI) nonpoint fuel combustion, we relied on S/L/T-submitted throughput (fuel consumption) data, ideally from their Point inventories. As discussed in Section 25, EPA provided four different options for submitting throughput for the ICI tool. Only three state reporting agencies and two territories did not submit ICI emissions, an input template, or a nonpoint survey indicating there were no nonpoint ICI emissions.
+
+Agencies were strongly encouraged to populate source (Agency Source Description), source year (Agency Source Year), notes (Agency Source Note) for any activity data they provide. EPA’s DEFAULT_VALUE (and associated DEFAULT_SOURCE, DEFAULT_SOURCE_YEAR and DEFAULT_NOTE) were used in the Wagon Wheel where S/L input data are not provided.
+
+A complete list of all S/L/T-submitted Wagon Wheel input activity data is provided in Table \@ref(tab:SLT-InputTemplate-Submissions).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-6/SLT-InputTemplate-Submissions.xlsx")
+
+# Rotate only the LaTeX (PDF) header text for columns 2:21
+hdr <- names(df)
+if (knitr::is_latex_output()) {
+  rot <- function(x) paste0("\\rotatebox{90}{\\strut ", x, "}")
+  to <- min(21, length(hdr))
+  if (to >= 2) names(df)[2:to] <- rot(hdr[2:to])
+}
+```
+
+```{r SLT-InputTemplate-Submissions, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+tbl <- kableExtra::kbl(df, booktabs = TRUE, longtable = TRUE,
+  caption = "S/L/T Input Templates submitted for the 2023 NEI.",
+  na = "", escape   = !knitr::is_latex_output()  # allow \rotatebox in LaTeX only
+) %>%
+  kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 10) %>%
+  column_spec(1, width = "3cm") %>%
+  column_spec(2:21, width = "0.6cm")
+
+if (knitr::is_html_output()) {
+  tbl <- tbl |>
+    scroll_box(width = "100%", height = "600px",
+      box_css = "border: 0; overflow-x: auto; overflow-y: auto;")}
+
+if (knitr::is_latex_output()) {tbl <- kableExtra::landscape(tbl)}
+tbl
+```
+*Input templates needed for point inventory reconciliation
+
+A complete list of the specific S/L-submitted Input Templates for each EPA tool estimate category is provided in the workbook “2023NEI_Nonpoint_Input_Template_Changes_22may2026.xlsx” on the ["2023 Supplemental data FTP site"](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/).
+
+The following subsections list the EIS input template activity data variables that are available for each Wagon Wheel tool/module. In addition to the tool-specific variables, “Central Database” and “County Business Pattern” templates that impact several tools are also available:
+
+•	Central Database - Animal Population (number): Animal populations for each animal type <br> \newline
+•	Central Database - Coal Distribution Ratios (number <=1): Ratio of anthracite and bituminous to total bituminous/sub-bituminous coal <br> \newline
+•	Central Database - County Silt Content (percentage): County-specific silt percentage  <br> \newline
+•	Central Database - Population (number): county population <br> \newline
+•	Central Database - SEDS (number): sector/fuel total fuel consumption  <br> \newline
+•	Central Database - Sulfur and Ash Content (fraction): oil sulfur content, coal sulfur, and coal ash content <br> \newline
+•	County Business Patterns – County Employment (number): County-level employment by broad NAICS  <br> \newline
+•	County Business Patterns – Employment by SCC (number): County-level employment by nonpoint SCC <br> \newline
+•	County Business Patterns – State Employment (number): State-level employment by broad NAICS <br> \newline
+
+#### Structure and Motor Vehicle Fires
+
+Three EIS Input Templates were created to allow S/L data submitters to provide more local information on county incidents, fuel loading, and emission factors. Relevant variables for each of these three input templates are provided here; each fire type (Structure Fires, Motor Vehicle Fires) has its own template.
+
+•	County Incidents (number): For each fire type, county-level number of fire incidents (INCIDENTS) <br> \newline
+•	Average fuel load (tons): For each fire type, county-level fuel load (FUEL_LOAD) <br> \newline
+•	Emission factors (lbs/ton): For each fire type, agency-level emission factor (EMISSION_FACTOR) <br> \newline
+
+#### Campfires
+
+Two EIS Input Templates are created to allow S/L data submitters to provide more local information on the camp sites in the county and the cords of wood used per campsite per year. 
+
+If the S/L have data on the cords of wood used in campfires per county, they can provide values for the number of sites and the cords per site that when multiplied together, give the cords of wood that match the cords of wood per county. Relevant variables for each the two input templates are provided here.
+
+•	Number of Campsites (number): County-level number of campsites  <br> \newline
+•	Cords per campsite per year (cords): County-level number of cords per campsite per year  <br> \newline
+
+#### Other NH3
+
+Five EIS Input Templates are available to allow S/L data submitters to provide more local county-level information. Relevant variables for each of these input templates are provided here.
+
+•	Other NH3 - Cats: Fraction of homes with cats <br> \newline
+•	Other NH3 - Deer: Deer population <br> \newline
+•	Other NH3 - Diapers: Population between 0 and 4 years of age <br> \newline
+•	Other NH3 - Dogs: Fraction of homes with dogs <br> \newline
+•	Other NH3 - Smokers: Smoker fraction of population <br> \newline
+
+#### Ag Silage
+
+There is one input template available to S/L to submit county-level animal populations for the nine available animal types for use in the calculation of emissions for agricultural silage sector. Additionally, there is one input template for county-level control factors in this sector. Relevant variables for each of the nine animal populations in the input template are provided here.
+
+•	Agricultural Silage - Control Factor: FACTOR <br> \newline
+•	Central Database - Animal Populations: DAIRY <br> \newline
+•	Central Database - Animal Populations: LAYERS <br> \newline
+•	Central Database - Animal Populations: SWINE <br> \newline
+•	Central Database - Animal Populations: TURKEYS <br> \newline
+•	Central Database - Animal Populations: BEEF <br> \newline
+•	Central Database - Animal Populations: GOATS <br> \newline
+•	Central Database - Animal Populations: HORSES_PONIES <br> \newline
+•	Central Database - Animal Populations: SHEEP_LAMBS <br> \newline
+•	Central Database - Animal Populations: BROILERS <br> \newline
+
+Those S/L-submitted activity data are quality assured and used over EPA estimates as appropriate. 
+
+#### Ag Livestock Waste
+
+There is one input template available to S/L to submit county-level animal populations for the nine available animal types for use in the calculation of emissions for agricultural livestock waste sector. Relevant variables for each of the nine animal populations in the input template are provided here.
+
+•	Central Database - Animal Populations: DAIRY <br> \newline
+•	Central Database - Animal Populations: LAYERS <br> \newline
+•	Central Database - Animal Populations: SWINE <br> \newline
+•	Central Database - Animal Populations: TURKEYS <br> \newline
+•	Central Database - Animal Populations: BEEF <br> \newline
+•	Central Database - Animal Populations: GOATS <br> \newline
+•	Central Database - Animal Populations: HORSES_PONIES <br> \newline
+•	Central Database - Animal Populations: SHEEP_LAMBS <br> \newline
+•	Central Database - Animal Populations: BROILERS <br> \newline
+
+#### Ag Tilling
+
+Nine input templates are available to S/L to submit county and or state-level information for fields used in the calculation of emissions for agricultural tilling sector. Additionally, there is one input template for county-level control factors in this sector. State-level data provided in input templates are used to gap-fill missing county-level data. Data provided in the number of tilling passes templates is used to calculate the county-specific PM10 and PM25 emissions factors for agricultural tilling. Relevant variables for each of the ten input templates are provided here.
+
+•	Agricultural Tilling - Control Factor: FACTOR <br> \newline
+•	Agricultural Tilling - Cover Fallow Pasture-State: CROPLAND_ACRES, CROPLAND_SUMMER, PASTURELAND <br> \newline
+•	Agricultural Tilling - Cover Fallow Pasture-County: CROPLAND_ACRES, CROPLAND_SUMMER, PASTURELAND <br> \newline
+•	Agricultural Tilling - Field Crops-County: ALFAFA, BARLEY, CANOLA, CORN, COTTON, HAY, OATS, PEANUTS, PEAS, RICE, RYE, SORGHUM, SOYBEANS, SUGARBEETS, SUGARCANE, SUNFLOWER, TOBACCO, WHEAT_DURHAM, WHEAT_SPRING, WHEAT_WINTER  <br> \newline
+•	Agricultural Tilling - Field Crops-State: ALFAFA, BARLEY, CANOLA, CORN, COTTON, HAY, OATS, PEANUTS, PEAS, RICE, RYE, SORGHUM, SOYBEANS, SUGARBEETS, SUGARCANE, SUNFLOWER, TOBACCO, WHEAT_DURHAM, WHEAT_SPRING, WHEAT_WINTER <br> \newline
+•	Agricultural Tilling - Potato-County: POTATOES <br> \newline
+•	Agricultural Tilling - Potato-State: POTATOES <br> \newline
+•	Agricultural Tilling - Tilling Data-County: CONS_TILL, CONV_TILL, NO_TILL <br> \newline
+•	Agricultural Tilling - Tilling Data-State: CONS_TILL, CONV_TILL, NO_TILL <br> \newline
+•	Agricultural Tilling - Tilling Passes: BARLEY_CONS, BARLEY_CONV, BARLEY_NO_TILL, BEANS_CONS, BEANS_CONV, BEANS_NO_TILL, CANOLA_CONS, CANOLA_CONV, CANOLA_NO_TILL, CORN_CONS, CORN_CONV, CORN_NO_TILL, COTTON_CONS, COTTON_CONV, COTTON_NO_TILL, COVER_CONS, COVER_CONV, COVER_NO_TILL, FALLOW_CONS, FALLOW_CONV, FALLOW_NO_TILL, FORAGE_CONS, FORAGE_CONV, FORAGE_NO_TILL, HAY_CONS, HAY_CONV, HAY_NO_TILL, OATS_CONS, OATS_CONV, OATS_NO_TILL, PASTURE_CONS, PASTURE_CONV, PASTURE_NO_TILL, PEANUTS_CONS, PEANUTS_CONV, PEANUTS_NO_TILL, PEAS_CONS, PEAS_CONV, PEAS_NO_TILL, PECAN_CONS, PECAN_CONV, PECAN_NO_TILL, POTATOES_CONS, POTATOES_CONV, POTATOES_NO_TILL, RICE_CONS, RICE_CONV, RICE_NO_TILL, RYE_CONS, RYE_CONV, RYE_NO_TILL, SORGHUM_CONS, SORGHUM_CONV, SORGHUM_NO_TILL, SOYBEANS_CONS, SOYBEANS_CONV, SOYBEANS_NO_TILL, SUGARBEETS_CONS, SUGARBEETS_CONV, SUGARBEETS_NO_TILL, SUGARCANE_CONS, SUGARCANE_CONV, SUGARCANE_NO_TILL, SUNFLOWER_CONS, SUNFLOWER_CONV, SUNFLOWER_NO_TILL, TOBACCO_CONS, TOBACCO_CONV, TOBACCO_NO_TILL, WHEAT_FALL_CONS, WHEAT_FALL_CONV, WHEAT_FALL_NO_TILL, WHEAT_SPRING_CONS, WHEAT_SPRING_CONV, WHEAT_SPRING_NO_TILL <br> \newline
+
+#### Asphalt
+
+Four input templates are available for updating county and/or state-level data related to vehicular miles traveled, paved road miles, asphalt roofing usage in tons, asphalt paving in short tons, used in the Asphalt Tool. Additionally, there is one input template for control factors in this sector.
+
+•	Asphalt – Control Factor: FACTOR <br> \newline
+•	Asphalt – County VMT: RINT (Rural Interstate), RLOC (Rural Local), RMJC (Rural Major Collector), RMNA (Rural Minor Arterial), MRNC (Rural Minor Collector), ROFX (Rural Other Freeways and Expressways), ROPA, UINT, ULOC, UMJC, UMNA, UMNC, UOFX, UOPA <br> \newline
+•	Asphalt – Paved Road Miles: PAV_RINT, PAV_RLOC, PAV_RMJC, PAV_RMNA, PAV_RMNC, PAV_ROFX, PAV_ROPA, PAV_UINT, PAV_ULOC, PAV_UMJC, PAV_UMNA, PAV_UMNC, PAV_UOFX, PAV_UOPA, TOT_RINT, TOT_RLOC, TOT_RMJC, TOT_RMNA, TOT_RMNC, TOT_ROFX, TOT_ROPA, TOT_UINT, TOT_ULOC, TOT_UMJC, TOT_UMNA, TOT_UMNC, TOT_UOFX, TOT_UOPA <br> \newline
+•	Asphalt – Asphalt Roofing: ASPHALT_ROOF_USAGE <br> \newline
+•	Asphalt – State Asphalt Use: ASPHALT_HOT, ASPHALT_WARM, CUTBACK, EMULSIFIED <br> \newline
+
+#### Aviation Gasoline
+
+One input template is available for updating the county-level number of landing and take-offs (LTOs) used in the Aviation Gasoline Tool. Additionally, there is one input template for control factors in this sector.
+
+•	Aviation Gasoline – County Control Factor: FACTOR <br> \newline
+•	Aviation Gasoline – County LTOs: LTO <br> \newline
+
+#### Composting
+
+For updating data in the compost tool, input templates are available for state-level amounts of food waste and state-level amounts of yard waste composted. Data is recorded in units of tons. Additionally, there is one input template for county-level control factors in this sector.
+
+•	Compost – County Control Factor: FACTOR <br> \newline
+•	Compost – State-level Food Waste: FOOD-WASTE <br> \newline
+•	Compost – State-level Yard Waste: YARD-WASTE <br> \newline
+
+#### Construction Dust and Open Burning
+
+There are many options for updating activity data in the construction dust and open burning tool. In total, there are nine available input templates, including two input templates for adjusting factors used to indicate if burn bans are in effect, as well as the amount of forested acres in a county. Activity data values that can be updated in the input templates include county-level numbers of units and/or buildings, state-level annual road construction (in US dollars), precipitation-evaporation values (PE), land clearing debris, and fuel loading factors based on acres of land cover type. 
+
+•	Construction Dust and Open Burning - Bldgs w 5 or more units: UNITS5 <br> \newline
+•	Construction Dust and Open Burning - Burn Ban Effectiveness: RES_BB_ADJUSTMENT, LCD_BB_ADJUSTMENT <br> \newline
+•	Construction Dust and Open Burning - County Building Permits: BLDG_PERMITS1, BLDG_PERMITS2, BLDG_PERMITS3, BLDG_PERMITS5, UNITS_PERMITS1, UNITS_PERMITS2, UNITS_PERMITS3, UNITS_PERMITS5 <br> \newline
+•	Construction Dust and Open Burning - County Control Factor: FACTOR <br> \newline
+•	Construction Dust and Open Burning - County PE values: PE <br> \newline
+•	Construction Dust and Open Burning - County-Level LCD Burned: LCD_BURNED <br> \newline
+•	Construction Dust and Open Burning - Land Cover: GRASSES, HARDWOODS, OTHER, SOFTWOODS <br> \newline
+•	Construction Dust and Open Burning - Road Constr Spending: RURAL_COLLECTOR, RURAL_INTERSTATE, RURAL_OTH_ARTERIALS, URBAND_COLLECTOR, URBAN_INTERSTATE, URBAN_OTH_ARTERIALS <br> \newline
+•	Construction Dust and Open Burning - Yard Waste Adjustment: ADJ_FACTOR <br> \newline
+
+#### Cooking
+
+Input templates for this sector allow for county-level updates to the number of restaurants by type, as well as a control factor to indicate county-level reductions in cooking emissions to be applied in the cooking tool.
+
+•	Cooking – Control Factor: FACTOR <br> \newline
+•	Cooking – County-level Restaurants: RESTAURANTS <br> \newline
+
+#### Cremation
+
+Input templates available for the cremation tool allow for updates to the county-level population by age group or county-level deaths by age groups. Additionally, S/L may apply a county-level control factor or update the cremation rates for individual counties.
+
+•	Cremation – Control Factor: FACTOR <br> \newline
+•	Cremation – County-level Deaths: POPULATION <br> \newline
+•	Cremation – County-level Deaths: DEATHS <br> \newline
+•	Cremation – Cremation Rate: CREMATION <br> \newline
+
+#### Dust from Hooves
+
+Only a county-level control factor input template is available specifically for the Dust from Hooves category. However, the Central Database – Animal Population input templates are also used in the Dust from Hooves Tool.
+
+•	Dust from Hooves – Control Factor: FACTOR <br> \newline
+
+#### ICI
+
+The ICI tool includes options for SLT agencies to submit pollutant-, SCC-, and county- or state-specific control factors if needed. These control factors are a number between 0 and 1 that is multiplied by the emissions for that pollutant, SCC, and county. The four ICI – Option templates are used for Point Source subtraction for this sector.
+
+•	ICI - Control Factor – County: FACTOR <br> \newline
+•	ICI - Control Factor – State: FACTOR <br> \newline
+•	ICI - Boiler - Engine Split: BOILER_COM, BOILER_IND, ENGINES_COM, ENGINES_IND <br> \newline
+•	ICI - Distillate Stationary Source Assumptions: NO1DIST_INDUSTRIAL, NO2FUELOIL_IND, NO2LOWS_INDUSTRIAL, NO4DIST_IND, NO1DIST_IND_MOBILE, NO2FUELOIL_IND_MOB, NO2LOWS_IND_MOBILE, NO4DIST_IND_MOB, NO1DIST_COMMERCIAL, NO2FUELOIL_COM, NO2LOWS_COMMERCIAL, NO4DIST_COM, NO1DIST_COM_MOBILE, NO2FUELOIL_COM_MOB, NO2LOWS_COM_MOBILE, NO4DIST_COM_MOB, DIESEL_FARM, DIESEL_FARM_MOBILE, OTHERDIST_FARM, OTHERDIST_FARM_MOB, TOTALDIST_OFFHWY, TOTALDIST_OFFHWY_MOB, TOTALDIST_OILCO, TOTALDIST_OILCO_MOB <br> \newline
+•	ICI - Distillate Sales Data: SALES <br> \newline
+•	ICI - LPG Stationary Source Assumptions: PCT_MOBILE_COM, PCT_MOBILE_IND, PCT_STATIONARY_COM, PCT_STATIONARY_IND <br> \newline
+•	ICI - Nonfuel Use: COAL, DISTILLATE, KEROSENE, LPG, NATURAL_GAS, RESIDUAL_OIL <br> \newline
+•	ICI - Option A: FUEL_CONSUME_XXXX <br> \newline
+•	ICI - Option B: FUEL_CONSUME_XXXX <br> \newline
+•	ICI - Option C: FUEL_CONSUME_XXXX <br> \newline
+•	ICI - Option D: FUEL_CONSUME_XXXX <br> \newline
+
+#### Landfills
+
+Landfill input templates allow S/L to specify the total annual tons of waste in landfills, as well as indicate a control factor to reduce county-level emissions when controls are in use.
+
+•	Landfills - Control Factor: FACTOR <br> \newline
+•	Landfills – County-level waste from landfill: WASTE_DISPOSE <br> \newline
+
+#### Mining and Quarrying
+
+S/L have the option of providing activity day for Coal production and metal or mineral production used in the Mining and Quarrying tool. Additionally, there is one input template for control factors in this sector.
+
+•	Mining and Quarrying - Control Factor: FACTOR <br> \newline
+•	Mining and Quarrying – County Coal Production: COAL <br> \newline
+•	Mining and Quarrying – Metal Non Metal Production: METAL, MINERAL <br> \newline
+
+#### Other Mercury
+
+Activity data for the Other Mercury Tool can be submitted using input templates related to number of switches available, mercury recovered from switches, number of recyclers of mercury, as well as the number of switches recovered. A control factor input template is also available to S/L for this sector.
+
+•	Other Mercury - Control Factor: FACTOR <br> \newline
+•	Other Mercury – Switches Available: SWITCHES <br> \newline
+•	Other Mercury – Switches Recovered: HG_RECOVER, RECYCLERS, SWITCHES_RECOVER <br> \newline
+
+#### Publicly Owned Treatment Works (POTWS)
+
+The POTWS Tool has four input templates available covering control factors, point source subtraction and activity data from S/L for county wastewater flow rate in million gallons per year.
+
+•	POTWs – Ctrl Factor by County and Pollu: FACTOR <br> \newline
+•	POTWs – Pt Src Activity – Opt A: FLOW_RATE <br> \newline
+•	POTWs – Pt Src Activity – Opt B: EMISSIONS <br> \newline
+•	POTWs – SLT Submitted Flow Rate: FLOW_RATE <br> \newline
+
+#### Residential Heating
+
+The Residential Heating tool uses the number of occupied homes in each county that use a specific fuel type as their primary source of heating. The Heating Fuel Estimates input template allows S/L to update those numbers by fuel type at the county level. Additionally, a control factor can be assigned by county or state using the two control factor input templates.
+
+•	Residential Heating - County Control Factor: FACTOR <br> \newline
+•	Residential Heating - State Control Factor: FACTOR <br> \newline
+•	Residential Heating - Heating Fuel Estimates: HOME_COAL, HOME_OIL, HOME_LPG, HOME_GAS <br> \newline
+
+#### Road Dust
+
+There are six input templates that can be used by S/L for updates to EPA estimates in the Road Dust tool.  These include a control factor, as well as meteorological adjustment factors used to account for the effect of rain and road moisture on dust emissions from paved and unpaved roads. Additionally, vehicle miles traveled, surface material moisture content, and surface material silt content can be updated with S/L values via input templates.
+
+•	Road Dust - County Control Factor: FACTOR <br> \newline
+•	Road Dust – Met Adjustment Factor: PAVED_FACTOR <br> \newline
+•	Road Dust – Met Adjustment Factor: UNPAVED_FACTOR <br> \newline
+•	Road Dust - Paved and Unpaved VMT by County: PAVED_VMT, UNPAVED_VMT <br> \newline
+•	Road Dust - Surface Material Moisture Content: MATERIAL_MOIST <br> \newline
+•	Road Dust - Surface Material Silt Content: MATERIAL_SILT <br> \newline
+
+#### Residential Wood Combustion (RWC)
+
+For the RWC tool, control factors can be assigned to the county or state-level. For activity data inputs, S/L can submit input templates to adjust appliance fractions for each respective appliance type in each county; change burn rates for cords or tons/appliances, depending on the appliance in each county; update the county-level amount of wood, in tons burned annually; adjust assumptions about profiles of types central heaters and stoves to distribute the total number calculated using the appliance fractions into specific SCCs; update the total number of occupied housing units in each county; and adjust assumptions about wood density (tons/cord).
+
+•	RWC - Control Factor – County: FACTOR <br> \newline
+•	RWC - Control Factor - State: FACTOR <br> \newline
+•	RWC - Appliance Fractions: FIREPLACE_FRACT, WOODSTOVES_FRACT, FIRE_INSERT_FRACT, CENT_HEATER, OUTDOOR_REC_EQUIP, PELL_STOVE _FRACT, WAX _LOG AP_FRACT <br> \newline
+•	RWC - Burn Rates: FIREPLACE_BUR_RATE, OODSTOVES_BUR_RATE, FIRE_INSERT_RATES, CENT_HEATER_RATES, OUTDOOR_EQUIP_BURN, PELL_STOVE _RATES, WAX _LOG, BU_RATES <br> \newline
+•	RWC - County-Level Wood Burned: WOOD_BURNED <br> \newline
+•	RWC - Distribution - Central Heaters: PELLET_BOILER, PELLET_FURNACE, IN_CORDWOOD_BOILER, IN_CORDWOOD_FURNACE, OUT_CORDWOOD_BOILER <br> \newline
+•	RWC - Distribution - Stove & Inserts: UNCERT_DIST, CERT_DIST <br> \newline
+•	RWC - Housing Units: HOMES <br> \newline
+•	RWC - Wood Density Factors: DENSITY <br> \newline
+
+#### Solvents
+
+Four input templates can be used by S/L for the Solvents tool. One is a county-level control factor template. The other templates allow for adjustments to county-level vehicular lane miles traveled on paved roads, point source emissions for subtraction, and state-level controls for specific solvent SCCs.
+
+•	Solvents - Control Factor: FACTOR <br> \newline
+•	Solvents - Lane Miles: LANE_MILES <br> \newline
+•	Solvents - Point Source Emissions: SOURCE_EMISS <br> \newline
+•	Solvents - States with Controls: ARCHITECTURAL_COATINGS_NEW, INDUSTRIAL_MAINTENANCE_NEW, CONSUMER_SOLVENTS_NEW <br> \newline
+
+#### Stage 1 Gasoline Distribution
+
+There are nine input templates that can be used by S/L in the Stage 1 Gasoline Distribution tool, including one template for county-level control factors. This sector uses point source subtraction via input templates to avoid double counting emissions in the point and nonpoint data categories. Other opportunities for S/L to make changes to EPA estimated emissions in this tool are through the templates for benzene emissions factors, county-level bulk plant throughput data, various county-level parameters, county-level fuel delivery technology methods, county-level loading loss of liquid, Reid vapor pressure (RVP) county-level data for fuels, and gas consumption by county for onroad and nonroad uses.
+
+•	Stage I Gasoline Distribution - Benzene Speciation: FACTOR <br> \newline
+•	Stage I Gasoline Distribution - County Bulk Plant Throughput: BULK_THROU <br> \newline
+•	Stage I Gasoline Distribution - County Control Factor: FACTOR <br> \newline
+•	Stage I Gasoline Distribution - County Parameters: SLOPE, TEMPERATURE, RANKINE, EFFICIENCY <br> \newline
+•	Stage I Gasoline Distribution - Filling Technology: SPLASH_PCT, SUBMERGED_PCT, BALANCE_PCT <br> \newline
+•	Stage I Gasoline Distribution - Loading Loss: LOADING_LOSS <br> \newline
+•	Stage I Gasoline Distribution - Nonroad Gas Consumption: RVP, NR_FUEL_CONSUME <br> \newline
+•	Stage I Gasoline Distribution - Onroad Gas Consumption: ON_FUEL_CONSUME <br> \newline
+•	Stage I Gasoline Distribution - Point Source Emissions: EMISSIONS <br> \newline
+
+###	SLT-submitted emissions
+
+A complete list of S/L/T agencies that submitted 2023 nonpoint emissions for source categories that EPA also estimates are provided in Table \@ref(tab:SLT-NP-submittals). It is important to note that this does not provide a single indication on whether some/all S/L/T data or some EPA data are included in the 2023 nonpoint NEI selection for these agencies and categories. Factors that could result S/L/T data not being in the NEI, or EPA data appearing in the NEI for these agencies/categories include:
+
+•	Completeness of S/L/T data: complete geographic and expected pollutant coverage  <br> \newline
+•	Outlier values resulting in tagging out of S/L/T data <br> \newline
+•	Nonpoint Survey responses set to (Yes) allow EPA data to supplement any missing S/L/T data <br> \newline
+•	Decision to use only EPA data for a particular source category (e.g., Biogenics) <br> \newline
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-6/SLT-NP-submittals.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r SLT-NP-submittals, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'S/L/T nonpoint emission submittals for each category that EPA estimates.',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 11) %>%
+  column_spec(1, width = "4cm") %>%
+  column_spec(2, width = "2cm") %>%
+  column_spec(3, width = "2cm") %>%
+  column_spec(4, width = "5cm") %>%
+  column_spec(5, width = "2cm")
+```
+
+### Data selection rules: cross-dataset tagging
+
+We compiled the 2023 nonpoint inventory using much of the same EIS automated data selection rules first implemented for the 2017 NEI: Nonpoint Survey Rule, Pollutant Grouping Rule, and the Option Group/Option Set Rule. In addition, the PM speciation rule has since been automated to run as part of the NEI selection, rather than a separate EIS processing step (and input/output data). When applied, these rules greatly minimized the need to “tag” out data that would otherwise be needed to prevent double counting of emissions across pollutant groups, SCCs, and from different data submittal sources.
+
+#### Nonpoint Survey rule
+
+The 2023 nonpoint survey responses were directly applied to the nonpoint selection in the EIS. All S/L/Ts that completed the nonpoint surveys (green status button on the home screen for the nonpoint survey), had their responses directly applied in the NEI selection. For each “EPA Tool Estimate Category”, nonpoint survey responses were applied if the “Category Complete?” column was saved and submitted as “Yes”. By default, all nonpoint survey responses were defaulted to “Yes -Supplement my data with EPA estimates. This simply means that if S/L/T data was not submitted, and EPA data exists (for that process/pollutant), then EPA data will be selected for the NEI with a caveat to the 2 rules discussed in the next two sections. S/L/Ts were strongly encouraged to leave the SCCs as default (yes) if they were submitting nonpoint inputs, because S/L/T inputs were absorbed into EPA tools and became “EPA” data, the Nonpoint Survey includes a checkbox for each tool category “Did Your Agency Provide an Input Template for this Category?” to help with quality assurance, particularly for tool categories that are limited to a single SCC. 
+
+A detailed 2023 NEI nonpoint summary “2023NEI_Nonpoint_Survey_detail_22may2026.xlsx” covering all reporting agencies has been uploaded to the ["2023 NEI Supplemental data FTP site"](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/).
+
+#### Pollutant grouping rule
+
+In previous NEI cycles, we tagged out data to prevent double counting of pollutants across datasets that overlap one another. Starting with the 2017 NEI and continued for the 2023 NEI, a software solution that occurs during the blending process was developed so that overlapping pollutants would be excluded from the selection. Business rules were developed to select data with overlapping pollutants across datasets, to allow different datasets included in a selection to be blended together in a way that avoids double counting due to overlapping pollutants. Because there are several HAPs that belong to pollutant groups or represent a pollutant group themselves, these rules are needed to prevent both a group and individual pollutant in that group from being used for the same process or facility. The implementation of these rules is automated in the EIS. These rules are applied at the process level (location and SCC) for nonpoint sources and prevent lower-hierarchy dataset pollutants/pollutant groups from possible double-counts. For example, if an S/L/T reports “Xylenes (Mixed Isomers), then any EPA (lower hierarchy) -generated individual (or mixed) isomers will not make it into the NEI. Rules for the following pollutant groups were applied: xylenes, cresols, polychlorinated biphenyls (PCBs), glycol ethers, chromium, nickel, and PAHs. A complete discussion of the cross dataset tagging proposed rules, applied to the 2023 NEI nonpoint inventory selection are available in ["Appendix 5"](https://www.epa.gov/sites/production/files/2018-08/documents/appendix_5_cross_dataset_tagging_proposed_rules_v6.pdf) of the ["2017 NEI Plan"](https://www.epa.gov/air-emissions-inventories/2017-national-emissions-inventory-nei-plan). One change to these “Proposed” rules that we implemented for the 2017 and continued for the 2023 NEI is that we allow individual xylene isomers to be reported with Xylenes (mixed isomers) within the same dataset.
+
+####	Option Group/Option Set rule
+
+We applied the EIS Option Group/Option Set (OGOS) feature for the first time in the 2017 nonpoint NEI and continued with the same application for the 2023 NEI. In the Source Classification Code table, we can define SCCs that have a hierarchical nature. That is, there may be a “general” group, as well as more specific SCCs within the same group. These relationships are defined by the “Option Group / Option Set” (OGOS) fields in the SCC table. When EPA and SLT datasets are placed in an NEI selection, there is the potential for double counting of data sources (emissions) across these data sources. For example, the EPA may report emissions to a “general” SCC while SLTs report data to detailed SCCs. Without OGOS evaluation, both sets of data would be included in the NEI selection. The current OGOS rules employed in the Selection assumes that if a SLT submits data, they are summitting data for the entire group and no additional data sets are to be used to “back-fill” any SCCs within the same option set. The desired function is for the selection to back-fill any SCCs within the same option set. Refer to “["Appendix 6 - Option Group Option Set Enhancement EIS Requirements.pdf"](https://www.epa.gov/sites/production/files/2018-05/documents/appendix_6_-_option_group_option_set_enhancement_eis_requirements.pdf)” on the ["2017 National Emissions Inventory Plan website"](https://www.epa.gov/air-emissions-inventories/2017-national-emissions-inventory-nei-plan) for a comprehensive discussion on the OGOS business rules used in EIS for the 2023 nonpoint NEI. A complete list of OGOS assignments can be obtained by downloading the complete SCC table (Bulk Download Options) from the ["SCC search site"](https://sor-scc-api.epa.gov/sccwebservices/sccsearch/), and filtering on columns where Option Group is populated.
+
+## Nonpoint PM augmentation
+
+QA procedures eliminated much of the functionality needs from the PM Augmentation Tool that was used in NEIs prior to 2020. For the nonpoint data category, the results from EIS PM Augmentation serve to merely supplement PM components (PM-CON, PM25-FIL, PM25-PRI, PM10-FIL, and PM10-PRI) where expected and where SLTs did not submit. PM Augmentation zeroes out any computed PM component less than zero that could result from arithmetic operation of SLT and PM augmented species; for example, computed PM-CON from SLT-submitted PM10-PRI minus PM10-FIL that exceeds SLT-submitted PM25-PRI (which would result in computed PM25-FIL being less than zero). 
+
+## Nonpoint HAP Augmentation
+For nonpoint sources, we derived HAP augmentation ratios from the emission factors used to develop the EPA nonpoint source estimates. Most EPA nonpoint HAP emission estimates are computed in EPA nonpoint database “tools” (e.g., previously discussed Wagon Wheel, oil and gas tool). Starting with the 2020 NEI, we removed HAP VOCs from the Wagon Wheel tool to reduce the resources required to package and process the Wagon Wheel data, and ensure that both SLT and EPA data would utilize EIS HAP Augmentation factors for computing VOC HAPs, streamlining quality assurance if/when emission factors for VOC or VOC HAPs changed.
+
+EPA also generates HAPs with CAPs in stand-alone databases such as those used for agricultural burning and livestock waste. Because we used the same emission factors for these augmentation ratios, the ratios of HAP to CAPs for augmented S/L/T agency data are the same as the HAP to CAP ratios for the EPA-only data. For access by non-EIS users, the zip file called “HAPAugmentation_2023NEI_17apr2026”, on the ["2023 NEI Supplemental data FTP site"](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/), provides the emission ratios that the EPA used for augmenting nonpoint data. The nonpoint HAP augmentation factors were updated as compared to what was used for the 2020 NEI, particularly for residential wood combustion, oil and gas, and new sources such as structure and motor vehicle fires. The EPA staff responsible for the nonpoint sectors use their discretion for how to augment HAP emissions and work with the S/L/T agencies to reflect as complete and accurate set of pollutants as possible for the many source types. In general, if a S/L/T agency submitted a partial list of the HAPs that would be augmented for a given category, then we allowed the missing HAPs to be gap-filled with the HAP augmentation data. These missing HAPs are determined by comparing the Expected Pollutant List for Nonpoint SCCs with those that S/L/T agencies submitted. However, this approach has a risk of potentially violating VOC mass balance, whereby the sum of the VOC HAPs exceeds the VOC total. Thus, special cases occur when such problems are identified. In the limited cases where this occurred, we applied the business rules defined in Section 3.4.2 in the ["2023 NEI Plan"](https://www.epa.gov/system/files/documents/2023-05/2023_NEI_Plan_draft_May2023.pdf) to tag out S/L/T data causing this violation; in this case, S/L/T-submitted HAP-VOCs were replaced with HAP augmentation (generally based on S/L/T-submitted VOC) -based HAP-VOC estimates.
+
+## EPA nonpoint data
+
+For the 2023 NEI, the EPA developed emission estimates for many nonpoint sectors in collaboration with a consortium of inventory developers from various state agencies regional planning organizations called the Nonpoint Method Advisory (NOMAD) Committee. Initiated for the 2014 NEI cycle, the broad NOMAD committee meets approximately monthly to discuss the overall progress on the various sectors for which tools and/or estimates are being developed or refined. During the 2023 NEI development process, NOMAD collaboration meetings focused on overall Wagon Wheel and associated input template development schedules, and a deeper dive into specific source categories that were undergoing methodology or significant activity data changes, such as campfires, other ammonia, residential wood combustion, cooking, road dust, agricultural NH3 livestock and fertilizer application, and industrial and commercial/institutional fuel combustion.  Separate oil and gas subcommittee meetings also tracked the development of the oil and gas production and exploration tools.
+
+These meetings covered methodologies, emission factors, and SCCs, allowing the EPA to prepare the “default” emission estimates/methodologies and/or input template formats for S/L/T agencies using the group’s final approaches. With the 2023 NEI, we continue to prioritize gathering of S/L/T input activity data, rather than emission submittals, which makes for a more transparent quality assurance process as we have readily available tracking of the inputs as well as resulting outputs (emissions). With S/L/Ts using the Wagon Wheel or submitting inputs, we can ensure that the methodology used to estimate the final emissions for all Wagon Wheel sectors is consistent. 
+
+During the 2023 NEI inventory development cycle, S/L/T agencies, using the nonpoint survey, could accept the NOMAD/EPA estimates to supplement/fulfill their nonpoint emissions reporting requirements. The EPA encouraged S/L/T agencies that did not use the EPA’s estimates or tools to improve upon these “default” methodologies and submit input data directly.
+
+Table \@ref(tab:EPA-NP-sections) lists all EPA-developed emission estimates, technical support documentation (TSD) section number, and an indication of whether the Wagon Wheel (WW) or Oil and Gas Production and Exploration (OG) tools (v1.2) are available on the 2023 NEI Supplemental Nonpoint data FTP site. Table \@ref(tab:EPA-NP-sections) also flags EPA estimation categories where reconciliation with the Point inventory is recommended; that is, nonpoint estimates utilize activity data encompassing the entire source category (point and nonpoint total), and the tools and/or point emissions or activity data are needed from user inputs to compute the nonpoint data category component. All EPA methodologies are discussed in the remaining nonpoint sectors that follow; however, some tables (primarily emission factors) were too large to include in this TSD, and for WW source categories, we direct the reader to the “NEI_2023_Wagon_Wheel_EFs_FINAL.xlsx” on the 2023 NEI Documentation site for more information on emission factors. The SCCs associated with the EPA nonpoint data categories are provided in each of these sections and can also be found on the EPA SCC Search website.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-6/EPA-NP-sections.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r EPA-NP-sections, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'EPA Nonpoint TSD Sections with indication of possible Point inventory subtraction.',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 11) %>%
+  column_spec(1, width = "4cm") %>%
+  column_spec(2, width = "2cm") %>%
+  column_spec(3, width = "2cm") %>%
+  column_spec(4, width = "5cm") %>%
+  column_spec(5, width = "2cm")
+```
+
+## Nonpoint Quality Assurance
+
+For the nonpoint data category, the dedicated quality assurance (QA) team focused on six key aspects of QA for nonpoint data submissions listed in Table \@ref(tab:NP-QA-issues).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-6/NP-QA-issues.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r NP-QA-issues, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Key Nonpoint QA issues, causes, and steps taken to address issues.',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 11) %>%
+  column_spec(1, width = "4cm") %>%
+  column_spec(2, width = "5cm") %>%
+  column_spec(3, width = "5cm")
+```
+
+The following subsections discuss how these QA checks were analyzed and identified issues were resolved prior to finalizing the final nonpoint selection for the 2023 NEI.
+
+###	The Iterative QA Report
+
+Introduced for the 2020 NEI cycle, iterative QA reports, performed on S/L/T-submitted emissions, were not sent out during the 2023 development process due to staffing constraints.  Instead, we ran periodic EIS reports on S/L/T-submitted emissions and contacted submitters as we identified possible quality assurance issues such as unexpected or missing pollutants and outliers. EPA hopes to resume these reports for the 2026 NEI.
+
+###	Expected Pollutants List
+
+To determine whether S/L/T submissions were correct, EPA maintains a list of accurate expected pollutants list, or EPL. The NEI Team updated the existing list of EPA SCCs and EPA non-estimated SCCs that are often submitted by SLTs, and the corresponding pollutants that EPA expects to be emitted from each process. The purpose of the list is twofold: first, to guide the SLTs in providing their submissions for the NEI, and second, to cull out any pollutants that do not belong in the NEI. The expected pollutants list helps everyone to understand what each SCC is supposed to represent, as far as the suite of pollutants, and ultimately leads to a more consistent and cohesive NEI.
+
+New for 2023, this list was added to the Emissions QA Threshold Values Table in the EIS Gateway for access by S/L/Ts. The nonpoint EPL used for 2023 NEI “NonPointSCCs_ExpectedPollutantsList_2023NEI.csv” is available on the ["2023 NEI Supplemental Nonpoint data FTP site"](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/nonpoint/). Note that this EPL includes pollutants that EPA does not have the emission factors or methodology to estimate itself. If the “EPA Estimate Category” field is populated, it means there is an existing EPA tool for this SCC, and the EPA tool name is given.
+
+###	Completeness Reports
+
+A preview of completeness was sent to the S/L/Ts ahead of time, with time for them to correct mistakes and incomplete submissions. In early May 2025 we sent a final report to Air Directors on EPA letterhead. We do not include an example of the report as several S/Ls engaged with EPA after the reports were sent to resolve QA issues prior to finalizing the 2023 nonpoint NEI selection. Additionally, we provided a draft review via the NEI SharePoint site in mid-March 2026 with maps, reports, survey information, and tag out reports alerting S/L/Ts to a final opportunity to review the 2023 NEI while still in draft form.
+
+For agencies that did not submit a complete Nonpoint Survey, we locked in the default response “Yes – Supplement my data with EPA estimates” to ensure EPA data would backfill any potential gaps in data submitted by the agency.
+
+###	EPA-estimated emissions QA
+
+EPA requires all data inventory developers, including contractors, to be responsible for reviewing any emissions data they provide, as well as keeping track of and reviewing the Input Templates that they upload into the Wagon Wheel.
+
+Upon providing EPA-generated estimates, each contractor provided a spreadsheet of QA checks they performed on the data, as well as keeping a tally of and reviewing the Input Templates that were uploaded into the Wagon Wheel. We provide a QA Contractor Checklist “QA checklist for contractors.docx”, available on the ["2020 NEI Supplemental Nonpoint data FTP site"](https://gaftp.epa.gov/Air/nei/2023/doc/supporting_data/nonpoint/) that outlines all of the QA a contractor must perform when providing emissions data to EPA via a tool.
+
+###	Input Template Review
+
+Input template review is the responsibility of the contractor and was performed on a rolling basis (i.e., as they were submitted to the EIS Gateway). While Input Templates weren’t incorporated formally until after the submission window closed, getting back to the S/Ls in a timely fashion ensured that mistakes were caught early in the process. Some error checking was implemented via feedback reports in EIS upon upload by S/Ls. More in-depth review was performed by the contractor once templates were downloaded from EIS for input in the Wagon Wheel tool.
+
+###	Reviewing S/L/T data after the EIS submittal window has closed
+
+After the EIS nonpoint data category submittal window closed, we checked the S/L/T-submitted emissions data for four main categories.
+
+1. Completeness
+
+    a. Tag out unexpected pollutants. We’ve already given them a heads up during the window opening with the iterative QA reports.
+
+    b. Tag out incomplete HAPs. We also tagged out process records if CAPS were incomplete; for example, missing NH3 from agricultural livestock waste.
+
+2. Old data/methods
+
+    a. The Wagon Wheel emissions comment field includes the version of the tool; we tagged out data for sources where old tools used noted and activity data had known updates in the latest version of the tool. We also reviewed and tagged out data significantly different from EPA estimates or previous S/L/T submittals where the comment field indicated “engineering judgement” and no other supporting documentation was provided.
+
+3. Check Nonpoint Survey Responses
+
+    a. If a S/L chose “No -do not supplement” but their submittal had missing CAPs. There should not be missing CAPs, and this would have also been caught as incomplete on Completeness Reports.
+
+    b. Any tagged out S/L emissions data required a “YES” on their Nonpoint Survey; sometimes we had to tag out a S/L Nonpoint Survey response (from “No”) to ensure the NEI would capture EPA estimates when S/L data were tagged out.
+
+    c. We asked states to update the Nonpoint Survey answer themselves if not time-limited; otherwise, EPA tagged out their survey responses in these cases.
+
+4. Percent change from previous NEIs
+
+    a. This does not work for new or changed SCCs, or for some county changes (e.g., changes for Connecticut in 2023)
+
+    b. Evaluated the minimum, maximum, and mean values from the last 3 NEIs (2014, 2017, 2020) – compared to the 2023 submitted value. We looked more deeply at 2023 values outside the min/max/20% from mean
+
+    c. Graphed 2020 vs 2023 for the values that got flagged.
+
+Each NEI Nonpoint “sector lead” reviewed QA team findings and reported back for team discussion on follow up and reconciliation.
+
+###	Data Tagging Summary
+
+####	S/L/T emissions tagging
+
+We tagged out 2023 SLT nonpoint emissions for various reasons, including but not limited to the following observations:
+
+•	Submittal of VOC HAPs that in sum, exceed submitted VOC <br> \newline
+•	Submittal of HAP metals that in sum, exceed submitted PM25-PRI <br> \newline
+•	VOC HAPs submitted with no corresponding VOC, or HAP metals submitted with no corresponding PM (exception for non-combustion mercury sources) <br> \newline
+•	Apparent submittal of filterable PM as primary PM component. <br> \newline
+•	Apparent unit of measure issue when comparing to EPA values, or ratio of HAP to associated CAP and EIS HAP Augmentation multiplication factors; for example, benzene being < 0.01% of evaporative VOC  <br> \newline
+•	Double count with point inventory submittal; for example, similar emissions submitted for point and nonpoint railyards <br> \newline
+•	SLT request with or without EPA solicitation of an identified QA issue <br> \newline
+•	Submittal to wrong SCCs <br> \newline
+•	Unexpected pollutants such as metals in commercial cooking, livestock waste, VOC in road dust, mercury in composting, etc. <br> \newline
+•	GHGs submitted for stationary nonpoint sources <br> \newline
+•	All S/L/T-submitted biogenic emissions; we prefer to use the consistent and complete dataset from the BEIS model. <br> \newline
+
+In most cases not involving mass balance (e.g., VOC HAPs > VOC), unexpected pollutants, or obvious errors, we collaborated with SLTs on the observed issue and a recommended course of action. In most cases, SLTs agreed with these recommendations and tags were created. A complete list of all tags applied to the 2023 SLT nonpoint emissions submittals is available in the workbook “2023NEI_SLT_Nonpoint_emissions_Tags_21may2026.xlsx” on the ["2023 NEI Supporting Data and Summaries"](https://www.epa.gov/air-emissions-inventories/2023-nei-supporting-data-and-summaries) site.
+
+####	S/L Input Template review and Nonpoint Survey tagging
+
+We compared SLT Input Template activity data submittals with EPA default activity and reached out to agencies where we saw significant outliers. In most cases, SLTs were able to resolve the conflict and provide either updated activity data or removed their template to accept EPA default data.
+
+In addition to tagging of emissions, we also tagged Nonpoint Survey responses -reverting the Nonpoint Survey to “Yes -Supplement my data with EPA data”- for select source categories at several S/Ls. The reasons for tagging these Nonpoint Survey sources are provided in Table \@ref(tab:SLT-NPsurvey-Responses) but they often correspond to identified issues with SLT-submitted emissions. In cases where SLTs submitted emissions, they often selected “No” in the Nonpoint Survey, so we sometimes needed to also tag out the Nonpoint Survey to allow EPA estimates to supplement their now nonexistent (tagged out) emissions. 
+
+There were also several scenarios where a S/L agency submitted an Input Template but also selected “No” in the Nonpoint Survey (nor submitted emissions). S/L Input template activity data submittals are loaded into the EPA Wagon Wheel tool, and the estimates generated are therefore considered “EPA”. This was the primary reason for updating the Nonpoint Survey to include a checkbox for SLTs to indicate whether they submitted an Input Template for the category. Regardless of that check box status, if we discovered an S/L input template and a Nonpoint Survey response of “No’, we reconciled this inconsistency in QA by tagging out the Nonpoint Survey response to allow the S/L activity data-based estimates to make it into the NEI.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-6/SLT-NPsurvey-Responses.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r SLT-NPsurvey-Responses, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'S/L Nonpoint Survey responses tagged with rationale provided.',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 11) %>%
+  column_spec(1, width = "4cm") %>%
+  column_spec(2, width = "5cm") %>%
+  column_spec(3, width = "5cm")
+```
+
+###	Final Review of EPA-generated tool data
+
+1.	Completeness – confirm everything made it into EIS
+
+    a. Review contractor QA checklists
+    
+    b. Compare to expected list of EPA Tool SCCs (pulled from Nonpoint Survey and tools into the Expected Pollutants List)
+
+    c. Compare tool pollutant outputs to Expected Pollutants List (run through iterative QA)
+
+    d. Inform contractor of any missing SCCs or pollutants
+
+2.	Check input template submission compared to Nonpoint Survey “Y/N” checkbox
+
+    a. Review from Contractor QA Checklist
+    
+    b. Nonpoint Survey detailed report comparison to list of input templates
+
+###	Final Nonpoint Selection review
+
+A final review of the nonpoint data category includes:
+
+1.	Confirming tagged out data did not make it into the NEI selection
+
+    a. Confirmed “Exclude tagged values” set to “yes” in EIS selection
+    
+    b. Run EIS tagging report to confirm all submitted tagged records are included
+    
+2.	Pollutant Completeness
+
+    a. Check against Expected Pollutants List
+    
+    b. Find explanation for causes of any missing data
+    
+    c. Have rationale for any remaining “unexpected” pollutants
+
+3.	SCC/Sector Completeness
+
+    a. Not every county should have a value for every SCC/Sector, but ensure there is an explanation
+    
+    b. Compare to previous (2020) NEI, look for:
+    
+         i.	Whether S/L/T submitted in past vs current NEI: is it SLT vs SLT, EPA vs SLT for example
+         
+         ii.	County or SCC changes since last NEI
+
+4.	Non-EPA SCCs in NEI
+
+    a. What SCCs are S/L/Ts reporting that are not in EPA tools/estimates? We tagged some of these out if they were not reported anywhere else (e.g., human perspiration, motor vehicle fires) to avoid some inconsistencies across states.
+    
+    b. Is there any potential overlap with SCCs not included in the Option Group/Option Set assignments (possible double-counting issue)?
+    
+    c. Does OGOS unintentionally drop S/L/T emissions?
+
+5.	Accuracy
+
+    a. Final magnitude check comparing relative rankings at sector and state level to previous NEI. Did the relative ranking change significantly for a given state/sector?
+    
+    b. Review where there are zero emissions for entire agency/SCC
+
+6.	HAPs
+
+    a. Compare to expected pollutants list
+    
+    b. Ensure backfilled via augmentation
+    
+    c. Check HAP-VOC vs VOC and correct/tag if necessary.
+
+7.	Ensure all data exclusion rules properly reflected
+
+    a. Nonpoint Survey: SLT data supersedes EPA data where appropriate
+    
+    d. Pollutant Groupings: each county/SCC should only have one group level between different datasets
+    
+    c. OGOS: review selection SCCs to confirm correct application
+
+8.	PM speciation mass balance: sum of PM species equals PM2.5 

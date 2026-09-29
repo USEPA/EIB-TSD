@@ -1,0 +1,149 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Introduction {#intro}
+
+The Environmental Protection Agency (EPA) has released the complete 2023 National Emissions Inventory (NEI). The 2023 NEI is available on the web at the ["2023 NEI Data page"](https://www.epa.gov/air-emissions-inventories/2023-national-emissions-inventory-nei-documentation). This is the first and final planned public release of the 2023 NEI.
+
+## What data are included in the 2023 NEI release?
+
+The NEI is a national compilation of air emission estimates of criteria air pollutants (CAPs), the precursors of CAPs, and hazardous air pollutants (HAPs). The hazardous air pollutants that are included in the NEI are based on Section 112(b) of the Clean Air Act. State, local and tribal (S/L/T) air agencies submit emission estimates to EPA and the Agency adds information from EPA emissions programs, such as the emission trading program, Toxics Release Inventory (TRI), and data collected during rule development or compliance testing. The NEI includes estimates of emissions from stationary sources (large and small industries, commercial, institutional and consumer), mobile sources, fires and biogenic emissions. EPA uses the NEI in rule development, non-attainment area designations, and as an input to various reports and assessments. This document discusses all components of the NEI and, where useful, highlights differences between the 2023 NEI and the most-recent publicly available full NEI release, the 2020 NEI. The NEI program develops emissions datasets, blends data from these multiple sources, and performs data processing steps that further enhance, quality assure and augment the compiled data. 
+
+EPA compiles the emissions data in the NEI at different levels of granularity, depending on the data category. For point sources (in general, large facilities), emissions inventories include emissions at a process level within a facility. EPA collects point source emissions data from S/L/T air agencies and adds data from the other EPA emissions programs including the Toxics Release Inventory, the Acid Rain Program, and the Greenhouse Gas Reporting Program. For nonpoint sources (typically smaller, yet pervasive sources) and mobile sources (both onroad and nonroad), the NEI includes emissions data as county totals. For commercial marine vessel sources, the NEI includes emissions data at the sub-county, polygon shape-level. For wildfires and prescribed burning, EPA estimates and provides emissions data as day-specific, coordinate-specific events for both smoldering and flaming components; however, the NEI includes these emissions as county totals.
+
+The NEI includes the pollutants associated with the National Ambient Air Quality Standards (NAAQS), known as CAPs, HAPs associated with EPA’s Air Toxics Program, and, starting with the 2020 NEI, per- and polyfluoroalkyl (PFAS) compounds. The CAPs have ambient concentration limits or are precursors for pollutants with such limits from the NAAQS program. The CAPs and precursors are lead (Pb), carbon monoxide (CO), nitrogen oxides (NOx), volatile organic compounds (VOCs), sulfur dioxide (SO2), particulate matter 10 microns or less (PM10), particulate matter 2.5 microns or less (PM2.5), and ammonia (NH3). The HAP pollutants include the 187 remaining HAP pollutants from the original 188 listed in Section 112(b) of the 1990 Clean Air Act Amendments. There are many different types of HAPs. For example, some are acid gases such as hydrochloric acid (HCl); others are heavy metals such as mercury (Hg), nickel and cadmium; and others are organic compounds such as benzene, formaldehyde, and acetaldehyde.
+
+## What is included in this documentation?
+
+This technical support document (TSD) provides a reference for the release of the 2023 NEI in September 2026.
+
+The primary purpose of this document is to explain the sources of information included in the NEI. This includes showing the sources of data and types of emissions sources that are included in each source category and then providing more information about the EPA-created components of the data. After the introductory material included in this section, Section 2 provides an overview of the contents of the NEI and some high-level summary comparisons to the 2020 NEI, as well as a summary on the mercury emissions. Section 3 provides documentation on the point sources. Sections 4 and 5 provide documentation for the nonroad mobile and onroad mobile data categories, respectively. Sections 6 and beyond discuss the nonpoint data category, including Fires (wild, prescribed, and agricultural field burning), and EPA methods for computing many nonpoint source categories. Examples of key nonpoint categories with EPA methods include: biogenics, oil and gas production, residential wood combustion, nonpoint industrial and commercial/institutional fuel combustion, solvents utilization, commercial cooking, open burning, agricultural livestock waste and fertilizer application, and fugitive dust sources.
+
+### Greenhouse gases reported in the NEI
+
+The 2023 NEI does not include estimates of greenhouse gas (GHG) emissions; however, several components of the 2023 NEI such as landfills and oil and gas processes utilize the ["Greenhouse Gas Reporting Program"](https://www.epa.gov/ghgreporting) for activity data from which emissions for CAP and HAP are estimated. GHGs that S/L/Ts included in their 2023 submittals are stored in the Emissions Inventory System (EIS) but are not included as pollutants in the 2023 NEI release.
+
+## Where can I obtain the 2023 NEI data?
+
+The 2023 NEI data are available publicly in several different ways described below. Data are available to the reporting agencies and EPA staff via the Emission Inventory System (EIS).
+
+### Emission Inventory System Gateway
+
+The EIS Gateway is available to all EPA staff, EIS data submitters (i.e., the S/L/T air agency staff), Regional Planning Organization staff that support state, local and tribal agencies, and contractors working for the EPA on emissions-related work. The EIS users can create reports to obtain raw input datasets for the 2023 NEI and to create summary files from these datasets as well as older versions of the NEI such as 2020, 2017, 2014, 2011, and 2008. The 2023 NEI dataset in the EIS is called “2023NEI”. For point sources, facility-, unit- or process-level reports provide the latest NEI emissions for the year selected, but the facility inventory will reflect the most current information submitted by S/L/Ts about the latest facility attributes (e.g., name, owner, and lists of units, processes, and release points). For example, if an Agency ID has been changed since the time EPA generated the 2023 NEI point source reports for the public website (April 15, 2026), then that new Agency ID will be in the Facility Inventory or a Facility Configuration report in the EIS but not in the public reports nor the Facility Emissions Summary reports run on the “2023NEI” dataset in the EIS. 
+
+### NEI main webpage
+
+Next, data from the EIS are exported for public release on the ["2023 NEI webpage"](https://www.epa.gov/air-emissions-inventories/2023-national-emissions-inventory-nei-documentation). The 2023 NEI Data page includes the publicly-available version of the 2023 NEI. The 2023 NEI webpage includes the 2023 NEI plan and schedules, all publicly-available supporting materials by inventory data category (e.g., point, nonroad mobile, onroad mobile, and nonpoint), and this TSD.
+
+Two types of point data summaries are available on the 2023 NEI Data page, facility summaries and process-level summaries. The source classification codes (SCC) data files section of the webpage provides the process level summaries for all data categories. These detailed CSV files (provided in zip files) contain emissions at the process level. Due to their size, they are broken out into EPA regions. Facility level by pollutant summaries are also available. These CSV files must be “linked” (as opposed to imported) to open them with Microsoft® Access®. County and tribe-level summaries for events are also provided.
+
+With the final 2023 NEI release in September 2026, the 2023 NEI Data page also includes a query tool that allows for summaries by EIS Sector or the more traditional Tier 1 summary level (for CAPs only) used in the ["Air Pollutant Emissions Trends Data"](https://www.epa.gov/air-emissions-inventories/air-pollutant-emissions-trends-data) reports. Summaries from the 2023 NEI Data site include national-, state-, and county-level emissions for CAPs and HAPs. You can also choose which states, EIS Sectors, Tiers, and pollutants to include in custom-generated reports to download Comma Separated Value (CSV) files to import into Microsoft® Excel®, Access®, or other spreadsheet or database tools. Biogenic emissions and tribal data (but not tribal onroad mobile emissions) are also available from this tool. Tribal summaries are also posted under the “Additional Summary Data” section of this page.
+
+Starting with the 2020 NEI, for the 2023 NEI, we have also developed an Online Data Retrieval to allow users to filter and download custom lists of facilities and county total emissions data for other data categories. This tool is also available on the ["2023 NEI webpage"](https://www.epa.gov/air-emissions-inventories/2023-national-emissions-inventory-nei-documentation).
+
+### Modeling files
+
+The modeling files, provided on the ["Air Emissions Modeling website"](https://www.epa.gov/air-emissions-modeling), are provided in formats that can be read by the ["Sparse Matrix Operator Kernel Emissions"](https://www.cmascenter.org/smoke/) (SMOKE). These files are also CSV formats that can be read by other systems, such as databases. The modeling files provide the process-level emissions apportioned to release points, and the release parameters for the release points. Release parameters include stack height, stack exit diameter, exit temperature, exit velocity and flow rate. The EPA may make changes to the NEI modeling files prior to use. The 2023 modeling platform has not yet been developed but will be based on the 2023 NEI once it is. Any changes between the NEI and modeling platform data would be described in an accompanying TSD for the 2023 Emissions Modeling Platform, which would also be posted at the above website.
+
+The SMOKE flat files for the 2023 NEI are posted on the ["2023 NEI Flat Files FTP site"](https://gaftp.epa.gov/Air/nei/2023/flat_files/). 
+
+## Why is the NEI created?
+
+The NEI is created to provide the EPA, federal, state, local and tribal decision makers, and the national and international public with the best and most complete estimates of CAP and HAP emissions. While the EPA is not directly obligated to create the NEI, the Clean Air Act authorizes the EPA Administrator to implement data collection efforts needed to properly administer the NAAQS program. Therefore, the Office of State Air Partnerships (OSAP) maintains the NEI program in support of the NAAQS. Furthermore, the Clean Air Act requires States to submit emissions to the EPA as part of their State Implementation Plans (SIPs) that describe how they will attain the NAAQS. The NEI is used as a starting point for many SIP inventory development efforts and for states to obtain emissions from other states needed for their modeled attainment demonstrations.
+
+While the NAAQS program is the basis on which the EPA collects CAP emissions from the S/L/T air agencies, it does not require collection of HAP emissions. For this reason, the HAP reporting requirements are voluntary. Nevertheless, the HAP emissions are an essential part of the NEI program. These emissions estimates allow EPA to assess progress in meeting HAP reduction goals described in the Clean Air Act amendments of 1990. These reductions seek to reduce the negative impacts to people of HAP emissions in the environment, and the NEI allows the EPA to assess how much emissions have been reduced since 1990.
+
+## How is the NEI created?
+
+The ["Air Emissions Reporting Rule"](https://www.epa.gov/air-emissions-inventories/air-emissions-reporting-requirements-aerr) (AERR) is the regulation that requires state and local agencies to submit CAP emissions, and the Emissions Inventory System is the data system used to collect, QA, and compile those submittals as well as EPA augmentation data. Most S/L/T air agencies also provide voluntary submissions of HAP emissions. The 2008 NEI was the first inventory compiled using the AERR, rather than its predecessor, the Consolidated Emissions Reporting Rule (CERR). The 2023 NEI is the sixth AERR-based inventory, and improvements in the 2023 NEI process reflect lessons learned by the S/L/T air agencies and EPA from prior NEI efforts. The AERR requires agencies to report all sources of emissions, except fires and biogenic sources. Reporting of open fire sources, such as wildfires, is encouraged, but not required. Sources are divided into large groups called “data categories”: stationary sources are “point” or “nonpoint” (county totals) and mobile sources are either onroad (cars and trucks driven on roads) or nonroad (off-road vehicles, recreational marine vessels, and nonroad equipment such as lawn and garden equipment). One nuance about the NEI data categories: while locomotives and commercial marine vessels are nonroad mobile sources and are developed, in format, as part of the nonpoint data category; near and ground-level aircraft estimates are also nonroad sources but are compiled at discrete airport locations and therefore reside in the point data category.
+
+The AERR has emissions thresholds above which States must report stationary emissions as “point” sources, with the remainder of the stationary emissions reported as “nonpoint” sources.
+
+The AERR changed the way these reporting thresholds work, as compared to the CERR, by changing these thresholds to “potential to emit” thresholds rather than actual emissions thresholds. While the criteria for which sources to report is now based on potential emissions, in both the CERR and the AERR, the reported emissions are actual emissions. The AERR requires emissions reporting for point sources every year, with additional requirements every third year in the form of lower point source emissions thresholds, and 2023 is one of these third-year inventories.
+
+Table \@ref(tab:point-thres) provides the potential-to-emit reporting thresholds that applied for the 2023 NEI cycle. “Type B” is the terminology in the rule that represents the lower emissions thresholds required for point sources in the triennial years. The reporting thresholds are sources with the potential to emit 100 tons/year or more for most criteria pollutants, except for CO (1000 tons/year), and, updated starting with the 2014 inventory, Pb (0.5 tons/year, actual emissions). As shown in the table, special requirements apply to nonattainment area (NAA) sources, where even lower thresholds apply. The relevant ozone (O3), CO, and PM10 nonattainment areas that applied during the year that the S/L/T agencies submitted their data for the 2023 NEI are available on the ["Nonattainment Areas for Criteria Pollutants (Green Book) web site"](https://www.epa.gov/green-book). Note that while the AERR establishes the minimum requirements for State and local air agencies to report their stationary sources as discrete point sources, many agencies have gone beyond those minimums for many years past, i.e., they report many smaller-emitting sources as discrete point sources.
+
+```{r, include=FALSE}
+df <- tribble(
+  ~Pollutant,             ~`Type B Sources`,   ~`Thresholds within Nonattainment Areas`,
+  "(1) SO2",              "≥100",              "≥100",
+  "(1) SO2",              "    ",              "\\hspace{1em}PM2.5 (serious) ≥70",
+
+  "(2) VOC",              "≥100",              "O3 (moderate) ≥ 100",
+  "(2) VOC",              "    ",              "\\hspace{1em}O3 (serious) ≥ 50",
+  "(2) VOC",              "    ",              "\\hspace{1em}O3 (severe) ≥ 25",
+  "(2) VOC",              "    ",              "\\hspace{1em}O3 (extreme) ≥ 10",
+  "(2) VOC",              "    ",              "\\hspace{1em}PM2.5 (serious) ≥70",
+
+  "(3) NOx",              "≥100",              "≥100",
+  "(3) NOx",              "    ",              "\\hspace{1em}O3 (serious) ≥ 50",
+  "(3) NOx",              "    ",              "\\hspace{1em}O3 (severe) ≥ 25",
+  "(3) NOx",              "    ",              "\\hspace{1em}O3 (extreme) ≥ 10",
+  "(3) NOx",              "    ",              "\\hspace{1em}PM2.5 (serious) ≥70",
+
+  "(4) CO",               "≥1000",             "O3 (all areas) ≥ 100",
+  "(4) CO",               "     ",             "\\hspace{1em}CO (all areas) ≥ 100",
+
+  "(5) Lead",             "≥0.5 (actual)",     "≥0.5 (actual)",
+
+  "(6) Primary PM10",     "≥100",              "≥100",
+  "(6) Primary PM10",     "    ",              "\\hspace{1em}PM10 (serious) ≥70",
+
+  "(7) Primary PM2.5",    "≥100",              "≥100",
+  "(7) Primary PM2.5",    "    ",              "\\hspace{1em}PM2.5 (serious) ≥70",
+
+  "(8) NH3",              "≥100",              "≥100",
+  "(8) NH3",              "    ",              "\\hspace{1em}PM2.5 (serious) ≥70"
+)
+```
+
+```{r point-thres, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  longtable = TRUE, escape = FALSE,
+  caption = "Point source reporting thresholds, as potential to emit, for CAPs in the AERR. Note that the potential to emit is shown in tons per year, as defined in 40 CFR part 70, with the exception of lead.",
+    col.names = c("Pollutant", "Type B Source Threshold", "Thresholds within NAAs"),
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position")) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{3cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    collapse_rows(columns = 1:2, valign = "top")
+```
+
+Based on the AERR requirements, S/L/T air agencies submit emissions or model inputs of point, nonpoint, onroad mobile, nonroad mobile, and fires emissions sources. Except for California, reporting agencies were required to submit model inputs for onroad and nonroad mobile sources instead of emissions. For the 2023 NEI, all these emissions and inputs were required to be submitted to the EPA per the AERR by December 31, 2024 (with an extension given through January 15, 2025). Once the initial NEI reporting period closed, the EPA provided feedback on data quality such as suspected outliers and missing data by comparing to previously established emissions ranges and past inventories. In addition, the EPA augmented the S/L/T data using various sources of data and augmentation procedures. This documentation provides a detailed account of EPA’s quality assurance and augmentation methods. 
+
+## Who are the target audiences for the 2023 NEI?
+
+The comprehensive nature of the NEI allows for many uses and, therefore, its target audiences include EPA staff and policy makers, the U.S. public, other federal and S/L/T decision makers, and other countries. Table \@ref(tab:nei-major-uses) lists the major current uses of the NEI and the plans for use of the 2023 NEI in those efforts. These uses include those by the EPA in support of the NAAQS, Air Toxics, and other programs as well as uses by other federal and regional agencies and for international needs. In addition to this list, the NEI is used to respond to Congressional inquiries, provide data that supports university research, and allow environmental groups to understand sources of air pollution.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-1/nei-major-uses.xlsx")
+```
+
+```{r nei-major-uses, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = "Examples of major current uses of the NEI",
+) %>%
+  kableExtra::kable_styling(position = "center",
+    latex_options = "repeat_header", font_size = 10) %>%
+  kableExtra::column_spec(1, latex_column_spec = "p{4cm}") %>%
+  kableExtra::column_spec(2, latex_column_spec = "p{9cm}")
+```
+
+## What are appropriate uses of the 2023 NEI and what are the caveats about the data?
+
+The NEI provides a readily available comprehensive inventory of both CAP and HAP emissions to meet a variety of user needs. Although the accuracy of individual emissions estimates will vary from facility-to-facility or county-to-county, the NEI largely meets the needs of these users in the aggregate. Some NEI users may wish to evaluate and revise the emission estimates for specific pollutants from specific source types for either the entire U.S. or for smaller geographical areas to meet their needs. Regulatory uses of the NEI by the EPA, such as for interstate transport, always include a public review and comment period.
+
+One of the primary goals of the NEI is to provide the best assessment of current emissions levels using the data, tools and methods currently available. For significant emissions sectors of key pollutants, the available data, tools and methods typically evolve over time in response to identified deficiencies and the need to understand the costs and benefits of proposed emissions reductions. As these method improvements have been made, there have not been consistent efforts to revise previous NEI year estimates to use the same methods as the current year. Therefore, care must be taken when reviewing different NEI year publications as a time series with the goal of determining the trend or difference in emissions from year to year. An example of a method change is the introduction of the use of the ["Motor Vehicle Emissions Simulator (MOVES) model"](https://www.epa.gov/moves) for the onroad data category in the 2011 NEI. Previous NEI years such as the 2008 NEI had used the ["Mobile Source Emission Factor Model, version 6 (MOBILE6)"](https://www.epa.gov/moves/description-and-history-mobile-highway-vehicle-emission-factor-model) and earlier NEIs used earlier versions of the MOBILE model for this data category. The 2020 NEI also used an older version of MOVES (MOVES3) that has been updated multiple times prior to the current 2023 NEI (MOVES5). 
+
+Users should take caution in using the emissions data for filterable and condensable components of particulate matter (PM10-FIL, PM2.5-FIL and PM-CON), which is not complete and should not be used at any aggregated level. These data are provided for users who wish to better understand the components of the primary PM species, where they are available, in the disaggregated, process-specific emissions reports. Discussed in more detail in the following Overview section (2), where not reported by S/L/T agencies, the EPA augments these components. However, not all sources are covered by this routine, and in mobile source and fire models, only the primary particulate species are estimated. Thus, users interested in PM emissions should use the primary species of particulate matter (PM10-PRI and PM25-PRI), described in this document simply as PM10 and PM2.5.

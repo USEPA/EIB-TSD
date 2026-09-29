@@ -1,0 +1,78 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Locomotives {#locomotives}
+
+This section documents (rail) emissions in the nonpoint data category. Refer to Section 1 for information on rail yard emissions in the point data category.
+
+## Sector Descriptions and Overview 
+
+The locomotive sector includes railroad locomotives powered by diesel-electric engines. A diesel-electric locomotive uses 2-stroke or 4-stroke diesel engines and an alternator or a generator to produce the electricity required to power its traction motors. The locomotive source category is further divided up into categories: Class I line haul, Class II/III line haul, Passenger, Commuter, and Yard. Table \@ref(tab:locomotive-sccs) below indicates locomotive SCCs and whether they are included in EPA estimated emissions. If not in EPA estimates, then all emissions from that SCC that appear in the inventory are from S/L/T agencies.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-10/locomotive-sccs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r locomotive-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Locomotive SCCs, descriptions, and EPA estimation status',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 11) %>%
+  column_spec(1, width = "3cm") %>%
+  column_spec(2, width = "4cm") %>%
+  column_spec(3, width = "3cm") %>%
+  column_spec(4, width = "3cm")
+```
+
+## Sources of data
+
+The locomotives sector includes data from SLT agency-provided emissions data, and an EPA dataset of locomotive emissions. EPA-estimated emissions from select locomotive SCCs as indicated in Table above. The agencies listed in Table \@ref(tab:submitting-slts) also submitted emissions to locomotive SCCs.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-10/submitting-SLTs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r submitting-slts, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Submitting SLT agencies with number of pollutants reported for each SCC',
+) %>%
+kable_styling(position = "center", latex_options = c("hold_position", "repeat_header"), font_size = 9) %>%
+  column_spec(1, width = "2cm") %>%
+  column_spec(2, width = "3cm") %>%
+  column_spec(3, width = "1.5cm") %>%
+  column_spec(4, width = "1.5cm") %>%
+  column_spec(5, width = "1.5cm") %>%
+  column_spec(6, width = "1.5cm") %>%
+  column_spec(7, width = "1.5cm") %>%
+  column_spec(8, width = "1.5cm")
+```
+
+## EPA-developed estimates
+
+EPA’s 2023 Class I rail emissions were developed using confidential line-haul activity data, in millions of gross ton (MGT) route miles per link, from the Federal Railroad Administration (FRA) for 2022 (the latest available at the time of development). 2023 rail fuel consumption index values were used to allocate each Class 1 railroad’s fuel use to links based on MGT. The Association of American Railroads (AAR) provided EPA with locomotive fleet mix information for 2023 for emission factor application. EPA then developed county-level emission summaries.
+
+For Class II and III rail lines, location data is available online as part of Bureau of Transportation Statistics’ National Transportation Atlas Database (NTAD). Detailed documentation methodology for this work is available in the [2023_NEI_Rail_Feb_2_2026.pdf](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/Rail/2023_NEI_Rail_Feb_2_2026.pdf) on the [2023 Supporting data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/).
+
+### Hazardous Air Pollutant Emissions Estimates
+
+HAP emissions were estimated by applying speciation profiles to the VOC or PM estimates. These “HAP fractions” were updated for the 2017 NEI. These profiles are posted in a [workbook](https://gaftp.epa.gov/Air/nei/2017/doc/supporting_data/nonpoint/2017Rail_HAP_AugmentationProfileAssignmentFactors_20200128.xlsx) on the [2017 Supplemental data FTP site](https://gaftp.epa.gov/Air/nei/2017/doc/supporting_data/nonpoint/).
+
+### Qualtity assurance
+
+EPA and agency-submitted values were compared to find instances where point and nonpoint rail yard SCCs may duplicate. This occurs when agencies submitted nonpoint in the same counties where EPA had point yards. In this case, where rail yard point locations existed within the county, SLT county-level emissions were reassigned to yards to avoid double counting point and county emissions estimates.
+
+###	Improvements/Changes in the 2023 NEI
+
+There were no NEI methodology changes for locomotives from 2020 to 2023.

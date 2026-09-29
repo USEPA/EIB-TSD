@@ -1,0 +1,1176 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Nonpoint Non-Combustion Mercury {#mercury}
+
+## Sector Descriptions and Overview 
+
+This category includes the following mercury emission categories: Landfills (working face), Switches and Relays, Fluorescent Lamp Breakage, Dental Amalgam, General Laboratory Activities, Thermostats, Thermometers, Fluorescent Lamp Recycling, and Batteries. Human and animal cremation estimates include CAPs as well as mercury and are discussed in section 31 of the TSD.
+
+These sources include a mix of EPA-generated and SLT-submitted emissions for the SCCs listed in Table \@ref(tab:HgSCCs). Additional descriptions of the individual types of activities are provided in the source-specific sub-sections below.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-15/mercurySCCs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r HgSCCs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'SCCs and descriptions comprising the nonpoint non-combustion Hg sources in the NEI',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position")) %>%
+  column_spec(1, width = "3cm") %>%
+  column_spec(2, width = "2cm") %>%
+  column_spec(3, width = "3cm") %>%
+  column_spec(4, width = "5cm")
+```
+
+## EPA-developed estimates
+
+**Landfills (working face)**
+
+The EPA estimated mercury emissions for landfill working face emissions. While the amount of mercury in products placed in landfills has tended to decrease in recent years, there is still a significant amount of mercury in place at landfills across the country. There are three main pathways for mercury emissions at landfills: (1) emissions from landfill gas (LFG) systems, including flare and vented systems; (2) emissions from the working face of landfills where new waste is placed; and (3) emissions from the closed, covered portions of landfills [[ref 1](#mercury-references)]. Emissions from LFG systems are considered point sources and are already included in the NEI as submissions from S/L/T agencies or from the point source dataset that gap fills these landfill emissions. Lindberg et al. (2005) [[ref 1](#mercury-references)] found that emissions from the closed, covered portions of landfills are negligible and are similar to background soil emission rates. Therefore, this methodology focuses on emissions from the working face of landfills.
+
+The calculations for estimating the emissions from landfills involve first estimating the amount of waste each landfill receives in a year. The total amount of waste in place for each landfill in a county is available from the US EPA’s Landfill Methane Outreach Program (LMOP) database [[ref 8](#mercury-references)]. The total amount of waste in place for each landfill is divided by the number of years a landfill is operational to estimate the amount of waste a landfill receives each year. The amount of waste that a landfill receives each year is multiplied by an average emissions factor to calculate the total mercury emissions from landfills for each county.
+
+**Switches and Relays**
+
+
+Switches and relays make up the largest potential source of mercury from products that intentionally contain mercury. Mercury is an excellent electrical conductor and is liquid at room temperature, making it useful in a variety of products, including switches used to indicate motion or tilt, as the mercury will flow when the switch is in a certain position, completing the circuit.
+
+While mercury switches in cars were phased out as of the 2002 model year, there are still millions of cars on the road that contain them. The switches and relays in these cars are potential emissions sources when the cars are recycled at the end of their useful lives, which involves crushing and shredding of the car. The shredded material is then sent to an arc furnace to recycle the steel. To avoid double counting point source emissions from arc furnaces, this source category only includes an estimate of nonpoint emissions from crushing/shredding operations.
+
+The calculations for estimating mercury emissions from switches and relays involve first estimating the number of switches unrecovered by the state by taking the difference between the total estimated number of switches available and the total switches recovered in each state. The number of unrecovered switches is then apportioned to each county based on the number of car recycling facilities from the US Census County Business Patterns data for NAICS 423930. The total amount of switches unrecovered by county is multiplied by the emissions factor for mercury to estimate mercury emissions from switches and relays.
+
+**Fluorescent Lamp Breakage/Recycling**
+
+Fluorescent lights are a potentially significant source of mercury emissions. Although each lamp contains only a small amount of mercury, which has been decreasing in recent years, the increased demand for fluorescent lamps could lead to increases in mercury emissions. Increased demand for fluorescent lamps, particularly compact fluorescents, is driven partly by the phase out of many types of incandescent bulbs from the Energy Independence and Security Act of 2007 (PL 110-140 § 321).
+
+In addition to emissions of mercury from the breakage of fluorescent light bulbs (SCC 2861000000), there is a small amount of emissions from recycling fluorescent bulbs (SCC 2861000010).
+
+The calculations for estimating the emissions from fluorescent lamp breakage and recycling involve first estimating the average life, in hours, of various fluorescent lamp types. Data from a Freedonia Group Industry Study on the U.S. lamp market is used to estimate the total number of lamps that are discarded or recycled. The number of bulbs recycled is calculated using a recycling rate percentage. This number is then subtracted from all bulbs discarded or recycled to determine the number of bulbs discarded. The activity data are allocated to the county-level based on the share of the population present in each county. An emissions factor is calculated using the amount of mercury available in each fluorescent bulb type. The total amount of fluorescent bulbs recycled or discarded is multiplied by the emissions factor for mercury to estimate mercury emissions from fluorescent lamp breakage and recycling.
+
+**Dental Amalgam**
+
+Dental amalgam is used to fill cavities in teeth, and it is composed of approximately 45 percent mercury [[ref 2](#mercury-references)]; however, the use of dental amalgam is declining due to the increased popularity of composite fillings for teeth [[ref 3](#mercury-references)]. Nevertheless, there is still a small amount of mercury emissions from dental amalgam in restored teeth. There are two potential sources of mercury emissions from dental amalgam: emissions from the preparation of amalgam in dental offices, and emissions directly from restored teeth.
+
+The calculations for estimating the emissions from dental amalgam include estimating emissions from both dental fillings and dental office preparation. The number of fillings by age group (for dental fillings) and the total mercury sold in dental amalgam (for dental office preparation) are allocated to the county-level based on the share of the population present in each county. The dental filling data by age group are multiplied by the percent of mercury present in dental fillings to determine the amount of mercury from dental fillings. The total amount of mercury from dental fillings and from dental office preparation are multiplied by emissions factors for mercury and summed together to estimate the total mercury emissions from dental amalgam.
+
+**General Laboratory Activities**
+
+General laboratory activities refer to the use of elemental mercury and mercury compounds in standard laboratory procedures, including testing and quality control activities and for use as reagents. Mercury emissions from laboratory activities occur during breakage or use of products containing mercury or mercury compounds. Until the 2023 cycle of the NEI, the estimate of mercury emissions from general laboratory activities has been assumed to be the same as estimates from the 2008 NEI.
+
+The calculations for estimating the emissions from general laboratory activities involve first estimating the total amount of mercury and mercury compounds used in laboratory activities in the United States. The amount of mercury and mercury compounds used in laboratory activities are allocated to the county-level based on the share of the population present in each county. The amount of mercury and mercury compounds used in laboratory activities are multiplied by the emissions factor for mercury to estimate mercury emissions from general laboratory activities.
+
+**Thermostats/Thermometers**
+
+Mercury has been used in thermostats to switch on or off a heater or air conditioner based on the temperature of a room. Most of the historic production of mercury thermostats came from three corporations: Honeywell, White-Rogers, and General Electric. In 1998 these corporations formed the Thermostat Recycling Corporation (TRC), a voluntary program that attempts to collect and recycle mercury thermostats as they come out of service [[ref 6](#mercury-references)].
+
+Mercury thermometers have all but been phased out in the United States, with the USEPA and National Institute of Standards and Technology (NIST) working to phase out mercury thermometers in industrial and laboratory settings. NIST issued notice in 2011 that it would no longer calibrate mercury-in-glass thermometers for traceability purposes. EPA issued a rule in 2012 that provides flexibility to use alternatives to mercury thermometers when complying with certain regulations pertaining to petroleum refining, power generation, and PCB waste disposal. Furthermore, thirteen states have laws that limit the manufacture, sale, and/or distribution of mercury-containing fever thermometers [[ref 7](#mercury-references)]. Nevertheless, given the historical prevalence of mercury thermometers, it is likely that a significant amount of mercury remains in thermometers in homes in the United States
+
+The calculations for estimating the emissions from thermostats and thermometers involve first estimating the total number of thermostats disposed and the amount of mercury in thermometers available for release. The number of thermostats disposed and the amount of mercury in thermometers available for release are allocated to the county-level based on the share of the population present in each county. The total number of thermostats disposed and the amount of mercury in thermometers available for release are multiplied by the emissions factor for mercury and summed together to estimate mercury emissions from thermostats and thermometers.
+
+### Activity Data
+
+**Landfills (working face)**
+
+The U.S. EPA’s Landfill Methane Outreach Program (LMOP) maintains a database of the landfills in the United States with information on the total amount of waste in place, as well as the opening and closing years of the landfill and the county where the landfill is located [[ref 8](#mercury-references)]. The average number of tons of waste each landfill receives is estimated by dividing the total waste in place by the number of years the landfill has been operating. Only landfills that were open in the NEI year are included in the analysis.
+
+\begin{equation} 
+  OP_{l} =  2023 - O_{l}
+  (\#eq:landfillopyrs)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( OP_{l} \) = Total number of years of operation for each landfill *l* <br> \newline
+  \( O_{l} \) = Year landfill *l* opened <br> \newline
+</div>
+
+The average number of tons of waste each landfill receives is estimated by dividing the total waste in place by the number of years the landfill has been operating.
+
+\begin{equation} 
+  W_{l} =  \frac{WP_{l}}{OP_{l}}
+  (\#eq:landfillwastereceived)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( W_{l} \) = Average tons of waste that landfill *l* receives per year <br> \newline
+  \( WP_{l} \) = Total waste in place in landfill *l*, in tons <br> \newline
+  \( OP_{l} \) = Total number of years of operation for landfill *l* <br> \newline
+</div>
+
+Some counties have multiple landfills, so waste within the county are summed in these instances.
+
+\begin{equation} 
+  W_{c} =  \sum\nolimits^{n}_{l=1}W_{l}
+  (\#eq:cntylandfillwaste)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( W_{c} \) = Average tons of waste from *n* landfills in county *c* <br> \newline
+  \( W_{l} \) = Average tons of waste that landfill *l* receives per year <br> \newline
+</div>
+
+**Switches and Relays**
+
+The End of Life Vehicle Solutions Corporation (ELVS) provides information on the estimated number of switches available for recovery in each state and the amount of switches actually recovered [[ref 9](#mercury-references), [ref 10](#mercury-references)]. The state level number of switches unrecovered is calculated by taking the difference between the total estimated number of switches available and the total switches recovered in each state.
+
+\begin{equation} 
+  UnS_{s} =  TotS_{s} - RecS_{s}
+  (\#eq:Stunrecoveredswitch)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( UnS_{s} \) = Total switches unrecovered by state *s* <br> \newline
+  \( TotS_{s} \) = Total switches available in state *s* <br> \newline
+  \( RecS_{s} \) = Total switches recovered by state *s* <br> \newline
+</div>
+
+**Fluorescent Lamp Breakage/Recycling**
+
+Data from a Freedonia Group Industry Study on the U.S. lamp market were used to estimate the number of mercury containing lamps, including compact fluorescents (CFLs), linear, and high impact discharge (HID) lamps, that were discarded or recycled [[ref 11](#mercury-references)]. Bulb sales for 2002, 2007, 2012 and projections for 2023 were obtained from Freedonia; sales for all other years were calculated by extrapolating data. Average rated life (hours) of lamp types is used to calculate lifetimes (years), assuming that CFLs are on for 4 hours per day and all other fluorescents and HIDs are on for 8 hours per day [[ref 12](#mercury-references), [ref 13](#mercury-references)]. The lifetime data are used to estimate the year in which bulbs that are discarded or recycled in the NEI year would have been purchased.
+
+\begin{equation} 
+  TotB =  \sum\nolimits_{b}PB_{b} 
+  (\#eq:FBdiscardrecycle)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( TotB \) = Total number of bulbs discarded and recycled, in million units <br> \newline
+  \( PB_{b} \) = Total number of bulb type *b* purchased <br> \newline
+</div>
+
+According to a 2010 study by Silveira and Chang, the recycling rate for mercury containing lamps in the U.S. is 23 percent [[ref 14](#mercury-references)]. 
+
+For fluorescent bulbs recycled:
+
+\begin{equation} 
+  RecB = TotB \times RR 
+  (\#eq:FBtotalrecycled)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( RecB \) = Total number of bulbs recycled, in million units <br> \newline
+  \( TotB \) = Total number of bulbs discarded and recycled, in million units <br> \newline
+  \( RR \) = Recycling rate for mercury containing lamps in the US <br> \newline
+</div>
+
+For fluorescent bulbs discarded:
+
+\begin{equation} 
+  DiscB = TotB - RecB
+  (\#eq:FBtotaldiscard)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( DiscB \) = Total number of bulbs discarded, in million units <br> \newline
+  \( TotB \) = Total number of bulbs discarded and recycled, in million units <br> \newline
+  \( RecB \) = Total number of bulbs recycled, in million units <br> \newline
+</div>
+
+**Dental Amalgam**
+
+According to a Northeast Waste Management Officials' Association's (NEWMOA) IMERC factsheet (2018) [[ref 15](#mercury-references)], the amount of mercury in dental amalgam was estimated to be 15.97 tons (31,940 lbs.) in 2013.
+
+The amount of mercury emissions from restored teeth is estimated using data from the National Institutes of Health’s National Institute of Dental and Craniofacial Research, which provides estimates of the average number of filled teeth per person, from the CDC National Health and Nutrition Examination Survey (NHANES), in nine different age brackets: 2-5 years, 6-11 years, 12-15 years, 16-19 years, 20-34 years, 35-49 years, 50-64 years, 65-74 years, and 75 and up [[ref 16](#mercury-references)]. The filling data for the age groups 6-11 years, 12-15 years, and 16-19 years are averaged together as are the filling data for the age groups 65-74 years and 75 and up to match the U.S. Census age category, 5-19 and 65 and up. Table \@ref(tab:HgTeeth) lists the average number of filled teeth per person by age group.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-15/mercuryTeethFillings.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r HgTeeth, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Average number of filled teeth per person and percentage of fillings containing mercury by age group',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position")) %>%
+  column_spec(1, width = "3cm") %>%
+  column_spec(2, width = "4cm") %>%
+  column_spec(3, width = "4cm")
+```
+
+According to the American Dental Association (ADA 1998) more than 75 percent of restorations before the 1970s used amalgam, which declined to 50 percent by 1991 [[ref 17](#mercury-references)]. Using these numbers, it is assumed that 40.8 percent of the filled teeth for 20-34 age group contain amalgam, 50 percent of filled teeth in the 35-49 age group, 62.5 percent of filled teeth in the 50-64 age group, and 75 percent of filled teeth for people over 65. The BAAQMD memorandum is used to estimate that 31.6 percent of filled teeth in the 1-19 age group contain amalgam. The Food and Drug Administration has discouraged the use of dental amalgam in children under 6 [[ref 18](#mercury-references)]. While EPA does not have data on the percent of fillings containing dental amalgam for the 0-4 age group, it is assumed that the percentage of fillings containing mercury in this age group is approximately half that of the overall under 20 age group.
+
+**Thermostats/Thermometers**
+
+A 2002 EPA report estimated that 2-3 million thermostats came out of service in 1994 [[ref 19](#mercury-references)]. A 2013 report from a consortium of environmental groups, which assumed that the estimate from the 2002 EPA report remained viable, estimated that the TRC collects at most 8 percent of the retired thermostats each year [[ref 20](#mercury-references)]. A literature search revealed no new data that could be used to estimate the number of thermostats coming out of service. Therefore, using this estimate, there are approximately 2.3 million thermostats that are not recycled each year.
+
+\begin{equation} 
+  DispTs = RemTs \times (1 - 0.08)
+  (\#eq:Thermostatdisposed)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( DispTs \) = Total thermostats disposed <br> \newline
+  \( RemTs \) = Total thermostats removed from service <br> \newline
+</div>
+
+Data from a NEWMOA’s IMERC factsheet suggests that there were 546 lbs. of mercury used in thermometers in 2013 [[ref 21](#mercury-references)]. Using past NEWMOA IMERC thermometer data, we forecasted the values for mercury in 2014-2017. Due to a lack of additional data on the amount of mercury used in thermometers, the calculations described below for 2017 were pulled forward for 2023. 
+
+The US EPA assumes that the average lifespan of a glass thermometer is 5 years, and that 5 percent of glass thermometers are broken each year [[ref 19](#mercury-references)]. Therefore, using the pounds of mercury available in thermometers each year there would be an estimated 2,345 pounds of mercury remaining in thermometers in 2017 (accounting for the breakage rate each year). The following equation calculates the total amount of mercury remaining in thermometers for each year during the lifespan of the thermometer. To calculate the value at the 5-year lifespan mark, equation \@ref(eq:YrlyHgthermometers) needs to be used to calculate the value for years 2 through 5, with each year building upon the previous year (i.e., the calculation needs to be conducted for all years to find the final year 5 data).
+
+\begin{equation} 
+  HgTm_{n} = (HgTm_{n-1} \times 95 \text{percent}) + HgTmSold_{n}
+  (\#eq:YrlyHgthermometers)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( HgTm_{n} \) = Amount of mercury remaining in thermometers in year *n*, in pounds <br> \newline
+  \( HgTm_{n-1} \) = Amount of mercury remaining in thermometers in the year prior to year *n*, in pounds <br> \newline
+  \( HgTmSold_{n} \) = Amount of mercury in thermometers in year 1, in pounds <br> \newline
+  \( n \) = Year <br> \newline
+</div>
+
+King et al. (2008) [[ref 23](#mercury-references)] estimate that during the period 2000-2006 there were 350 lbs. of mercury from thermometers collected in recycling programs.
+
+Subtracting the amount of mercury removed due to thermometers being collected in recycling programs from the total amount of mercury remaining in thermometers in 2017 estimates the total amount of mercury in thermometer available for release, in tons. Therefore, there were 1,995 lbs. (0.99 tons) of mercury available for release in 2017. As discussed above, due to a lack of updated data on mercury use in thermometers, the amount of mercury calculated for 2017 was pulled forward for 2023.
+
+\begin{equation} 
+  HgTRl = (HgTm_{5} - HgTRm) \times \frac{1\text{ ton}}{2000\text{ lbs.}}
+  (\#eq:Hgthermometersrelease)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( HgTRl \) = Amount of mercury in thermometers available for release, in tons <br> \newline
+  \( HgTm_{5} \) = Amount of mercury remaining in thermometers in year 5, the lifespan of a thermometer, in pounds <br> \newline
+  \( HgTRm \) = Amount of mercury removed in thermometer collections, in pounds <br> \newline
+</div>
+
+**General Laboratory Activities**
+
+EPA’s Inventory of Mercury Supply, Use, and Trade in the United States 2023 Report estimates that 3 lbs. of elemental mercury and 1,955 lbs. of mercury compounds were used in formulated products in 2021 [[ref 22](#mercury-references)]. All of the elemental mercury used in formulated products was used as certified reference material for testing and quality control purposes, and 85 percent of the mercury compounds were used as reagents. Thus, it is assumed that 1,664.75 lbs of mercury were used for general laboratory activities. 
+
+### Allocation procedure {#mercury_allocation}
+
+**Landfills (working face)**
+
+The EPA LMOP database provides data at the county level; therefore, no allocation procedure is needed for this source.
+
+**Switches and Relays**
+
+The number of unrecovered switches is apportioned to each county based on the number of car recycling facilities. The number of car recycling facilities is estimated using establishment data for recyclable material merchant wholesalers (NAICS 423930) from the U.S. Census Bureau’s 2023 County Business Patterns (CBP) [[ref 24](#mercury-references)].
+
+The number of car recycling facilities by county from the US Census County Business Patterns data is first summed to the state level.
+
+\begin{equation} 
+  F_{s} = \sum\nolimits_{c}{F_{c}}
+  (\#eq:STcarrecyclefacilities)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( F_{s} \) = Total car recycling facilities in state *s* <br> \newline
+  \( F_{c} \) = Total car recycling facilities in county *c* <br> \newline
+</div>
+
+The share of state car recycling facilities by county is calculated by taking the total number of car recycling facilities in a given county by the total number of car recycling facilities in the state. 
+
+\begin{equation} 
+  FracF_{c }= \frac{F_{c}}{F_{s}}
+  (\#eq:FractionSTcarrecyclefacilities)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FracF_{c} \) = Total fraction of state car recycling facilities in county *c*  <br> \newline
+  \( F_{c} \) = Total car recycling facilities in county *c* <br> \newline
+  \( F_{s} \) = Total car recycling facilities in state *s* <br> \newline
+</div>
+
+The share of unrecovered switches by county is calculated using the state number of unrecovered switches and the total share of state car recycling facilities by county, calculated above. 
+
+\begin{equation} 
+  UnS_{c} = UnS_{s} \times FracF_{c}
+  (\#eq:Cntyswitchesunrecover)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( UnS_{c} \) = Total switches unrecovered in county *c* <br> \newline
+  \( UnS_{s} \) = 	Total switches unrecovered in state *s* <br> \newline
+  \( FracF_{c} \) = Total fraction of state car recycling facilities in county *c*  <br> \newline
+</div>
+
+**Fluorescent Lamp Breakage/Recycling**
+
+The national-level mercury emissions from fluorescent lamp breakage are allocated to each county based on population.
+
+\begin{equation} 
+  FracP_{c} = \frac{P_{c}}{P_{US}}
+  (\#eq:FLBpopfraction)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FracP_{c} \) = Fraction of total US population in county *c* <br> \newline
+  \( P_{c} \) = 	Population in county *c* <br> \newline
+  \( P_{US} \) = Population in the US  <br> \newline
+</div>
+
+The fraction of total US population in a county is multiplied by the national data for fluorescent bulbs recycled or discarded to calculate the number of fluorescent bulbs recycled or discarded at the county-level. 
+
+For fluorescent bulbs discarded:
+
+\begin{equation} 
+  DiscB_{c} = FracP_{c} \times DiscB
+  (\#eq:FLBdiscardedbulbs)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( DiscB_{c} \) = Total number of bulbs discarded in county *c*, in million units <br> \newline
+  \( FracP_{c} \) = 	Fraction of total US population in county *c* <br> \newline
+  \( DiscB \) = Total number of bulbs discarded in the US, in million units  <br> \newline
+</div>
+
+For fluorescent bulbs recycled:
+
+\begin{equation} 
+  RecB_{c} = FracP_{c} \times RecB
+  (\#eq:FLBrecycledbulbs)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( RecB_{c} \) = Total number of bulbs recycled in county *c*, in million units <br> \newline
+  \( FracP_{c} \) = 	Fraction of total US population in county *c* <br> \newline
+  \( RecB \) = Total number of bulbs recycled in the US, in million units  <br> \newline
+</div>
+
+**Dental Amalgam**
+
+The amount of mercury from dental office preparations, based on the amount of mercury in dental amalgam from NEWMOA’s IMERC factsheet [[ref 15](#mercury-references)], are allocated to the county level based on population.
+
+\begin{equation} 
+  FracP_{c} = \frac{P_{c}}{P_{US}}
+  (\#eq:DApopfraction)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FracP_{c} \) = Fraction of total US population in county *c* <br> \newline
+  \( P_{c} \) = 	Population in county *c* <br> \newline
+  \( P_{US} \) = Population in the US  <br> \newline
+</div>
+
+The county-level population fraction is multiplied by the amount of mercury sold for dental amalgam to calculate the total mercury from dental office preparations by county.
+
+\begin{equation} 
+  HgO_{c}  =FracP_{c} \times HgDA
+  (\#eq:Hgdentalofficeprep)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( HgO_{c} \) = 	Total mercury from dental office preparations in county *c*, in pounds <br> \newline
+  \( FracP_{c} \) = Fraction of total US population in county *c* <br> \newline
+  \( HgDA \) = Total mercury sold for dental amalgam in the US, in pounds  <br> \newline
+</div>
+
+The emissions from filled teeth are allocated to each county by multiplying the county population by the proportion of the national population in each age group, the average number of filled teeth per person, and the fraction of fillings containing mercury (Table \@ref(tab:HgCensusGroup); fraction = percentage/100). The age groups listed in Table \@ref(tab:HgCensusGroup), hereafter referred to as filling groups, are different than official US census bureau age groups; therefore, national fractions of each US census bureau age group were calculated, summed, and multiplied by county level population to estimate the county level population for each filling group. Table \@ref(tab:HgCensusGroup) shows how the US Census age groups correspond to each filling group.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-15/mercuryCensusAgeGroups.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r HgCensusGroup, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'US Census age groups and filling groups',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position"))
+```
+
+First, the share of total population each US Census age group represents to the entire US population is calculated.
+
+\begin{equation} 
+  FracP_{a} = \frac{P_{a}}{P_{US}}
+  (\#eq:DApopfractionAgeGroup)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FracP_{a} \) = Fraction of the total US population in Census Bureau age group *a*  <br> \newline
+  \( P_{a} \) = 	Total population in Census Bureau age group *a*  <br> \newline
+  \( P_{US} \) = Population in the US  <br> \newline
+</div>
+  
+The fraction of the population for each US Census age group is then summed to match the filling groups. 
+
+\begin{equation} 
+  FracP_{fg} = \sum\nolimits_{a}{FracP{a}}
+  (\#eq:DApopfractionFillGroup)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FracP_{fg} \) = 	Fraction of the total US population in filling group *fg*  <br> \newline
+  \( FracP_{a} \) = 	Fraction of the total US population in census bureau age group *a*, where age group a falls within filling group *fg*  <br> \newline
+</div>
+
+The fraction of population for each filling group is multiplied by the county-level population data to get the total population for each filling group. 
+
+\begin{equation} 
+  P_{fg,c} = FracP_{fg} \times P_{c}
+  (\#eq:DATotpopFillGroup)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( P_{fg,c} \) = Total population in filling group *fg* in county *c*  <br> \newline
+  \( FracP_{fg} \) = Fraction of the total US population in filling group *fg*  <br> \newline
+  \( P_{c} \) = Total population in county *c*  <br> \newline
+</div>
+
+The filling group county-level population is multiplied by the average number of fillings per person in each filling group to determine the total number of fillings in each filling group in each county. 
+
+\begin{equation} 
+  F_{fg,c} = P_{fg,c} \times F_{fg}
+  (\#eq:DATotcntyFillingsbyFillGroup)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( F_{fg,c} \) = Total fillings in filling group *fg* in county *c*  <br> \newline
+  \( P_{fg,c} \) = Total population in filling group *fg* in county *c*  <br> \newline
+  \( F_{fg} \) = Average number of fillings per person in filling group *fg* <br> \newline
+</div>
+
+The total fillings in each filling group is then multiplied by the fraction of fillings that contain mercury in each filling group to determine the total number of fillings by filling group in each county.
+
+\begin{equation} 
+  HgF_{fg,c} = F_{fg,c} \times FracHgF_{fg}
+  (\#eq:DATotHgFillingsbyFillGroup)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( HgF_{fg,c} \) = Total fillings containing mercury in filling group *fg* in county *c*  <br> \newline
+  \( F_{fg,c} \) = Total fillings in filling group *fg* in county *c*  <br> \newline
+  \( FracHgF_{fg} \) = Fraction of fillings containing mercury in filling group *fg* <br> \newline
+</div>
+
+**Thermostats/Thermometers**
+
+The national-level mercury emissions from thermostats and thermometers are allocated to the county level based on population.
+
+\begin{equation} 
+  FracP_{c} = \frac{P_{c}}{P_{US}}
+  (\#eq:Thermpopfraction)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FracP_{c} \) = Fraction of total US population in county *c*  <br> \newline
+  \( P_{c} \) = 	Total population in county *c*   <br> \newline
+  \( P_{US} \) = Population in the US  <br> \newline
+</div>
+
+The fraction of the US population in the county is multiplied by the national data for thermostats and thermometers to calculate the number of thermostats disposed and the amount of mercury in thermometers available for release at the county-level.
+
+For thermostats:
+
+\begin{equation} 
+  DispTs_{c} = FracP_{c} \times DispTs
+  (\#eq:Thermostatsdisposed)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( DispTs_{c} \) = Total thermostats disposed of in county *c*  <br> \newline
+  \( FracP_{c} \) = Fraction of total US population in county *c*  <br> \newline
+  \( DispTs \) = Total thermostats disposed of in the US  <br> \newline
+</div>
+
+For thermometers:
+
+\begin{equation} 
+  HgTm_{c}  =FracP_{c} \times HgTmRl
+  (\#eq:Thermometersavailrelease)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( HgTm_{c} \) = Amount of mercury in thermometers available for release in county *c*, in pounds  <br> \newline
+  \( FracP_{c} \) = Fraction of total US population in county *c*  <br> \newline
+  \( HgTmRl \) = Amount of mercury in thermometers available for release in the US, in tons  <br> \newline
+</div>
+
+**General Laboratory Activities**
+
+The amount of mercury in the United States used in general laboratory activities is apportioned to each county based on the number of employees in industries to which mercury was distributed. The number of employees is estimated using data for analytical laboratory instrument manufacturing (NAICS 334516), testing laboratories (NAICS 541380), and medical laboratories (NAICS 621511) from the U.S. Census Bureau’s 2016 CBP[[ref 24](#mercury-references)]. 
+
+The number employees by county from the US Census County Business Patterns data is first summed to the national level.
+
+\begin{equation} 
+  F_{US} = \sum\nolimits_{c}F_{c}
+  (\#eq:GLabTotemployees)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( F_{US} \) = Total laboratory employees in the US  <br> \newline
+  \( F_{c} \) = Total laboratory employees in county *c*  <br> \newline
+</div>
+
+The share of national laboratory employees by county is calculated by taking the total number of employees in a given county by the total number of employees in the US. 
+
+\begin{equation} 
+  FracF_{c} = \frac{F_{c}}{F_{US}}
+  (\#eq:GLabcntylabemployfraction)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FracF_{c} \) = Total fraction of national laboratory employees in county *c*   <br> \newline
+  \( F_{c} \) = Total laboratory employees in county *c*  <br> \newline
+  \( F_{US} \) = Total laboratory employees in the US  <br> \newline
+</div>
+
+The share of mercury used in laboratory activities by county is calculated using the national amount of mercury used and the total share of laboratory employees by county, calculated above. 
+
+\begin{equation} 
+  Hg_{c} = Hg_{US} \times FracF_{c}
+  (\#eq:GLabHgLabActivities)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( Hg_{c} \) = Total mercury used in laboratory activities in county *c*  <br> \newline
+  \( Hg_{US} \) = Total mercury used in laboratory activities in the US  <br> \newline
+  \( FracF_{c} \) = Total fraction of national laboratory employees in county *c*   <br> \newline
+</div>
+
+### Emission Factors
+
+**Landfills (working face)**
+
+The emissions factor for mercury from landfills was developed using an average of mercury emissions factors for the working face of landfills from two different studies [[ref 1](#mercury-references), [ref 25](#mercury-references)]. Lindberg et al. (2005) [[ref 1](#mercury-references)] measured mercury emissions from the working face of four landfills in Florida and determined an average emissions factor of 2.5 mg/ton of waste, or 5.51 × 10$^{-6}$ lbs./ton of waste placed in a landfill annually. Babineau et al. (2016) [[ref 25](#mercury-references)] determined that the average mercury content of municipal solid waste (MSW) in Minnesota is 0.00175 lbs./ton. It is assumed that 0.1 percent of mercury from MSW in landfills is volatized to the air, so the emissions factor from Babineau et al. [[ref 25](#mercury-references)] is estimated to be 1.75 × 10$^{-6}$ lbs./ton of waste. 
+
+**Switches and Relays**
+
+The response to comments for the 2007 EPA Significant New Use Rule on Mercury Switches (72 Fed. Reg. 56903), suggests that the weighted average amount of mercury in switches is 1.2 grams (0.0026 lbs.) [[ref 26](#mercury-references)]. A report by Griffith et al. (2001) [[ref 27](#mercury-references)] shows that 60 percent of mercury in switches is released at the shredding operation, while 40 percent is sent to arc furnaces for smelting. Therefore, the emissions factor for switches is 60 percent of the emissions factor reported in the 2007 EPA Significant New Use Rule on Mercury Switches response to comment document. 
+
+**Fluorescent Lamp Breakage/Recycling**
+
+The average amount of mercury in a CFL has been studied extensively, with the amount of mercury in each CFL commonly reported as 1.27–4.0 mg (2.63 mg average, Table \@ref(tab:HgCFLs)). Linear fluorescent bulbs contain more mercury than CFLs, with a range of 8.3 to 12 mg per bulb (10.15 average, Table \@ref(tab:HgFluorescent)). Data from the USGS suggests that there is an average of 17 mg of mercury per HID bulb [[ref 28](#mercury-references)].
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-15/mercuryCFLs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r HgCFLs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Mercury used in CFLs (mg/bulb) as determined by three different studies',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position"))
+```
+\*Adjusted from 4.5 mg to 4 mg due to increased market penetration of Energy Star CFLs with a lower Hg content.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-15/mercuryFluorescent.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r HgFluorescent, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Mercury used in linear fluorescent bulbs (mg/bulb) as determined by two different studies',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position"))
+```
+
+Cain et. al (2007) [[ref 34](#mercury-references)] provides the most comprehensive materials flow analysis of mercury intentionally used in products. Their analysis estimates that 10 percent of all mercury used in fluorescent light bulbs is eventually released to the atmosphere after production and before disposal, with the majority being released during transport to the disposal facility.
+
+The emissions factor for CFL, linear, and HID bulbs are calculated by multiplying the average amount of mercury per bulb discussed above by 10 percent.
+
+\begin{equation} 
+  EF_{b,p} = Hg_{b} \times 0.10
+  (\#eq:BulbEFs)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{b,p} \) = Emissions factor by bulb *b* for pollutant *p*, in mg/bulb  <br> \newline
+  \( Hg_{b} \) = Average mercury content per bulb *b*, in mg <br> \newline
+</div>
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-15/mercuryBulbEFs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r HgBulbEFs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Mercury emissions factors for CFLs, linear fluorescents and HIDs',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+A weighted average of all three emissions factors is calculated to estimate total emissions from all fluorescent lamp breakage. The first step estimates the fraction each bulb represents of the total amount of bulbs discarded and recycled. 
+
+\begin{equation} 
+  FracTotB_{b} = \frac{PB_{b}}{TotB}
+  (\#eq:BulbEFFrac)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( FracTotB_{b} \) = Fraction of bulb type *b* discarded and recycled   <br> \newline
+  \( PB_{b} \) = Total number of bulb type *b* discarded and recycled, in million bulbs <br> \newline
+  \( TotB \) = Total number of bulbs discarded and recycled in the US, in million bulbs <br> \newline
+</div>
+
+A weighted emissions factor for fluorescent lamp breakage is then calculated by multiplying the fraction the bulb type represents of the total number of bulbs by the bulb type-specific emissions factor.
+
+\begin{equation} 
+  EF_{br,p} = (\sum\nolimits_{b}EF_{b,p} \times FracTotB_{b}) \times (2.2 \times 10^{-6} \frac{lbs.}{mg})
+  (\#eq:BulbWgtdEF)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( EF_{br,p} \) = Weighted emissions factor for pollutant *p* for fluorescent bulb breakage, *br*, in lbs./bulb   <br> \newline
+  \( EF_{b,p} \) = Emissions factor for bulb type b and pollutant p, in mg/bulb (see Table \@ref(tab:HgBulbEFs)) <br> \newline
+  \( FracTotB_{b} \) = Fraction of the number of bulb type *b* discarded and recycled <br> \newline
+</div>
+
+**Dental Amalgam**
+
+US EPA (1997) estimates that 2 percent of mercury used in dental offices is emitted to the air [[ref 35](#mercury-references)]. 
+
+Richardson et al. (2011) [[ref 35](#mercury-references)] estimate emissions from filled teeth of approximately 0.3 µg/day of mercury per filled tooth, or 2.4 × 10$^{-7}$ lbs. per year per filled tooth.
+
+**Thermostats/Thermometers**
+
+The 2002 EPA report estimates that there are 3 grams of mercury per thermostat [[ref 19](#mercury-references)]. Cain et al. (2007) [[ref 34](#mercury-references)] estimate that 1.5 percent of mercury in “control devices,” including thermostats, is emitted to the air before it is disposed of at a landfill or incinerator. Therefore, the amount of mercury emitted is 0.045 grams per thermostat, or 9.92× 10$^{-5}$ lbs. per thermostat [[ref 29](#mercury-references)].
+
+Leopold (2002) [[ref 19](#mercury-references)] estimates that 5 percent of thermometers are broken each year. EPA assumes that the remaining 95 percent of thermometers that are not broken are still in use and therefore do not contribute to emissions. Cain et al. (2007) [[ref 34](#mercury-references)] estimate that 10 percent of mercury from thermometers is emitted to the air before disposal in a landfill Therefore the emissions factor is estimated to be 10 lbs. of mercury emissions per ton of mercury in thermometers.
+
+**General Laboratory Activities**
+
+According to UNEP’s Chapter 3 E-Annex: Methodology for Estimating Mercury Emissions to Air and Results of the 2015 Global Emissions Inventory [[ref 37](#mercury-references)], an estimated 10 percent of mercury is emitted during breakage or use of products and 3 percent of mercury is emitted during waste recycling. Thus, the emissions factor is estimated to be 0.13 lb per lb of mercury used.
+
+### Controls 
+
+There are no controls assumed for these sources.
+
+### Emissions {#mercury_emissions}
+
+**Landfills (working face)**
+
+The total mercury emissions from landfills, in pounds, is estimated by multiplying the average tons of waste that each landfill receives per year by the average emissions factor. The emissions are reported at the county level for the county that the landfill is located in. 
+
+\begin{equation} 
+  E_{p,c} =  W_{c} \times EF_{p}  
+  (\#eq:LandfillsEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c} \) = Annual emissions of pollutant *p* in county *c*, in lbs. <br> \newline
+  \( W_{c} \) = Average tons of waste from all landfills in county *c* <br> \newline
+  \( EF_{p} \) = Emissions factor by pollutant, *p*, in pounds/ton <br> \newline
+</div>
+
+**Switches and Relays**
+
+The total county-level mercury emissions from switches and relays, in pounds, is estimated by multiplying the total switches unrecovered for each county by the emissions factor. 
+
+\begin{equation} 
+  E_{s,p,c} =  UnS_{c} \times EF_{s,p}  
+  (\#eq:SwitchesEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{s,p,c} \) = Annual emissions of pollutant *p* in county *c* from switches and relays, *s*, in lbs <br> \newline
+  \( UnS_{c} \) = Total switches unrecovered by county *c* <br> \newline
+  \( EF_{s,p} \) = Emissions factor for pollutant *p* for switches and relays, *s*, in lbs./switch <br> \newline
+</div>
+
+**Fluorescent Lamp Breakage/Recycling**
+
+The total county-level mercury emissions for fluorescent lamp breakage and recycling, in pounds, is estimated by multiplying the total fluorescent lamps broken or recycled for each county by the emissions factor.
+
+\begin{equation} 
+  E_{br,p,c} =  (DiscB_{c} \times 1,000\text { units}) \times EF_{br,p}  
+  (\#eq:FBulbBreakageEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{br,p,c} \) = Annual emissions of pollutant *p* from fluorescent bulb breakage, *br*, by county *c*, in lbs. <br> \newline
+  \( DiscB_{c} \) = Total number of bulbs discarded for county *c*, in million units <br> \newline
+  \( EF_{br,p} \) = Weighted emissions factor for pollutant *p* for fluorescent bulb breakage, *br*, in lbs./bulb <br> \newline
+</div>
+
+For fluorescent lamp recycling:
+
+\begin{equation} 
+  E_{r,p,c} =  (RecB_{c} \times 1,000\text { units}) \times EF_{r,p}  
+  (\#eq:FBulbRecycleEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{r,p,c} \) = Annual emissions of pollutant *p* from fluorescent lamp recycling, *r*, by county *c*, in lbs. <br> \newline
+  \( RecB_{c} \) = Total number of bulbs recycled for county *c*, in million bulbs <br> \newline
+  \( EF_{r,p} \) = Weighted emissions factor for pollutant *p* for fluorescent bulb recycling, *r*, in lbs./bulb <br> \newline
+</div>
+
+**Dental Amalgam**
+
+The total county-level mercury emissions for dental amalgam from fillings, in pounds, is estimated by multiplying the total number of fillings containing mercury for each county by the emissions factor.
+
+\begin{equation} 
+  E_{f,p,c} =  \sum\nolimits_{fg}HgF_{fg,c} \times EF_{f,p}
+  (\#eq:DAFillingEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{f,p,c} \) = Annual emissions of pollutant *p* from dental fillings, *f*, by county *c*, in lbs. <br> \newline
+  \( HgF_{fg,c} \) = Total fillings containing mercury in filling group *fg* in county *c* <br> \newline
+  \( EF_{f,p} \) = Emissions factor for pollutant *p* from dental fillings, *f*, in lbs./tooth filled <br> \newline
+</div>
+
+The total county-level mercury emissions for dental office preparation, in pounds, is estimated by multiplying the total pounds mercury from dental office preparations for each county by the emissions factor.
+
+\begin{equation} 
+  E_{o,p,c} = HgO_{c} \times EF_{o,p}
+  (\#eq:DADentalOfficPrepEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{o,p,c} \) = Annual emissions of pollutant *p* from dental office preparations, *o*, by county *c*, in lbs. <br> \newline
+  \( HgO_{c} \) = Total mercury from dental office preparations by county *c*, by pounds <br> \newline
+  \( EF_{o,p} \) = Emissions factor for pollutant *p* for dental office preparations, *o*, by lbs./lb. <br> \newline
+</div>
+
+The emissions from dental fillings and dental office preparations are summed to get the total mercury emissions from dental amalgam.
+
+\begin{equation} 
+  E_{da,p,c} =  E_{f,p,c} + E_{o,p,c}
+  (\#eq:DAEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{da,p,c} \) = Annual emissions of pollutant *p* from total dental amalgam, *da*, by county *c*, in lbs. <br> \newline
+  \( E_{f,p,c} \) = Annual emissions of pollutant *p* from dental fillings, *f*, by county *c*, in lbs. <br> \newline
+  \( E_{o,p,c} \) = Annual emissions of pollutant *p* from dental office preparations , *o*, by county *c*, in lbs. <br> \newline
+</div>
+
+**Thermostats/Thermometers**
+
+The total county-level mercury emissions for thermostats, in pounds, is estimated by multiplying the total number of thermostats disposed in each county by the emissions factor.
+
+\begin{equation} 
+  E_{ts,p,c} = DispTs_{c} \times EF_{ts,p}
+  (\#eq:ThermostatEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{ts,p,c} \) = Annual emissions of pollutant *p* for thermostats in county *c*, in lbs. <br> \newline
+  \( DispTs_{c} \) = Total thermostats disposed in county *c* <br> \newline
+  \( EF_{ts,p} \) = Emissions factor for pollutant *p* for thermostats, *ts*, in lbs./thermostat <br> \newline
+</div>
+
+The total county-level mercury emissions for thermometers, in pounds, is estimated by multiplying the total amount of mercury remaining in thermometers over their lifespan for each county by the emissions factor.
+
+\begin{equation} 
+  E_{t,p,c} = HgTm_{c} \times EF_{t,p}
+  (\#eq:ThermometerEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{t,p,c} \) = Annual emissions of pollutant *p* for thermometers in county *c*, in lbs. <br> \newline
+  \( HgTm_{c} \) = Amount of mercury remaining in thermometers over their lifespan in county *c*, in lbs. <br> \newline
+  \( EF_{t,p} \) = Emissions factor for pollutant *p* for thermometers, in lbs./ton <br> \newline
+</div>
+
+The emissions from thermostats and thermometers are summed to get the total mercury emissions.
+
+\begin{equation} 
+  E_{tt,p,c} =  E_{ts,p,c} + E_{t,p,c}
+  (\#eq:TotalThermEmis)
+\end{equation}
+ 
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{tt,p,c} \) = Annual emissions of pollutant *p* for thermostats and thermometers in county *c*, in lbs. <br> \newline
+  \( E_{ts,p,c} \) = Annual emissions of pollutant *p* for thermostats in county *c*, in lbs. <br> \newline
+  \( E_{t,p,c} \) = Annual emissions of pollutant *p* for thermometers in county *c*, in lbs. <br> \newline
+</div>
+
+### Example Calculations
+
+**Landfills (working face)**
+
+Table \@ref(tab:landfill-sample-calculations) lists sample calculations to determine the mercury emissions from a landfill. In this example the county only has one landfill, so equation 3 is only including this one value. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1,2,3,33),
+  Equation = c("$OP_{l} = 2017 - O_{l}$",
+               "$W_{l} = \\frac{WP_{l}}{OP_{l}}$",
+               "$W_{c} = \\sum\\nolimits_{c}W_{l}$",
+               "$E_{p,c} = W_{c} \\times EF_{p}$"),
+  Values = c("2017 - 1979",
+             "$\\frac{4845027\\text{ tons}}{38\\text{ years}}$",
+             "N/A; only one landfill in the county",
+             "$127501 \\text{ tons} \\times (3.63 \\times 10^{-6}) \\frac{\\text{lbs}}{\\text{ton}}$"),
+  Result = c("38 years that the landfill will be open",
+             "127,501 average tons of waste per year for the landfill",
+             "111,191 average tons of waste per year for the county",
+             "0.46 pounds of mercury for the county"))
+```
+
+```{r landfill-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample calculations for mercury emissions from landfills",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+
+**Switches and Relays**
+
+Table \@ref(tab:switchrelay-sample-calculations) lists sample calculations to estimate the mercury emissions from switches and relays. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(4,11,12,13,34),
+  Equation = c("$UnS_{s} = TotS_{s} - RecS_{s}$",
+               "$F_{s} = \\sum\\nolimits_{cs} F_{c}$",
+               "$FracF_{c} = \\frac{F_{c}}{F_{s}}$",
+               "$UnS_{c} = UnS_{s} \\times FracF_{c}$",
+               "$E_{s,p,c} = UnS_{c} \\times EF_{s,p}$"),
+  Values = c("$22,000\\,\\text{switches available} - 618\\,\\text{switches recovered}$",
+             "$\\sum\\,\\text{(All facilities in Connecticut)}$",
+             "$\\frac{18\\,\\text{facilities in the county}}{85\\,\\text{facilities in the state}}$",
+             "$21{,}382\\,\\text{unrecovered switches} \\times 0.2118\\,\\text{share of state facilities}$",
+             "$4{,}528\\,\\text{switches} \\times 0.00156\\,\\frac{\\text{lb}}{\\text{ton}}$"),
+  Result = c("21,382 unrecovered switches in the state",
+             "85 car recycling facilities in the state",
+             "0.2118 share of state car recycling facilities in the county",
+             "4,528 unrecovered switches in the county",
+             "7.06 pounds of mercury from switches and relays in the county"))
+```
+
+```{r switchrelay-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample calculations for mercury emissions from switches and relays",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"), font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+
+**Fluorescent Lamp Breakage/Recycling**
+
+Table \@ref(tab:fluorescent-sample-calculations) lists sample calculations to estimate the mercury emissions from fluorescent lamp breakage. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(5,6,7,14,15,16,30,30,30,31,31,31,32,35,36),
+  Equation = c(
+    "$TotB = \\sum\\nolimits_{b}{PB_{b}}$",
+    "$RecB = {TotB} \\times {RR}$",
+    "$DiscB = TotB - RecB$",
+    "$FracP_{c} = \\frac{P_{c}}{P_{US}}$",
+    "$DiscB_{c} = FracP_{c} \\times DiscB$",
+    "$RecB_{c} = FracP_{c} \\times RecB$",
+    "$EF_{b,p} = Hg_{b} \\times 0.10$",
+    "$EF_{b,p} = Hg_{b} \\times 0.10$",
+    "$EF_{b,p} = Hg_{b} \\times 0.10$",
+    "$FracTotB_{b} = \\frac{PB_{b}}{TotB}$",
+    "$FracTotB_{b} = \\frac{PB_{b}}{TotB}$",
+    "$FracTotB_{b} = \\frac{PB_{b}}{TotB}$",
+    "$(\\sum\\nolimits_{b}{EF_{br,p}} \\times {FracTotB_{b}}) \\times (2.2\\times10^{-6}\\frac{\\text{ lbs.}}{\\text{ mg}})$",
+    "$E_{br,p,c} = DiscB_{c} \\times EF_{br,p}$",
+    "$E_{r,p,c} = RecB_{c} \\times EF_{r,p}$"
+  ),
+  Values = c(
+    "$\\sum \\text{all bulbs recycled or discarded}$",
+    "$1485\\,\\text{million} \\times 23\\,\\text{percent recycling rate}$",
+    "$1485\\,\\text{million} - 341\\,\\text{million recycled bulbs}$",
+    "$\\frac{895,388\\,\\text{people in the county}}{38,857,0561\\,\\text{people in the US}}$",
+    "$0.00272 \\times 1,143\\,\\text{million bulbs}$",
+    "$0.00272 \\times 341\\,\\text{million bulbs}$",
+    "$\\text{CFL: } 2.63\\,\\text{mg Hg} \\times 10\\,\\text{percent}$",
+    "$\\text{Linear: } 10.2\\,\\text{mg Hg} \\times 10\\,\\text{percent}$",
+    "$\\text{HID: } 17\\,\\text{mg Hg} \\times 10\\,\\text{percent}$",
+    "$\\text{CFL: } \\frac{722\\,\\text{million CFL bulbs}}{1,485\\,\\text{million bulbs total}}$",
+    "$\\text{Linear: } \\frac{585\\,\\text{million Linear bulbs}}{1,485\\,\\text{million bulbs total}}$",
+    "$\\text{HID: } \\frac{180\\,\\text{million HID bulbs}}{1,485\\,\\text{million bulbs total}}$",
+    "$(0.1278 + 0.3998 + 0.2057\\,\\frac{\\text{mg}}{\\text{bulb}}) \\times \\left(2.2 \\times 10^{-6} \\frac{\\text{ lbs.}}{\\text{ mg}}\\right)$",
+    "$3,109,617\\,\\text{bulbs} \\times \\left(1.61 \\times 10^{-6} \\frac{\\text{ lbs. Hg}}{\\text{ bulb}}\\right)$",
+    "$928,846\\,\\text{bulbs} \\times \\left(1.94 \\times 10^{-9} \\frac{\\text{ lbs. Hg}}{\\text{ bulb}}\\right)$"
+  ),
+  Result = c(
+    "1,485 million bulbs discarded and recycled in the US",
+    "341 million bulbs recycled in the US",
+    "1,144 million bulbs discarded in the US",
+    "0.272 percent of total US population is in the county",
+    "3.109 million fluorescent bulbs discarded in the county",
+    "0.928 million fluorescent bulbs recycled in the county",
+    "0.263 mg Hg/CFL bulb",
+    "1.02 mg Hg/linear bulb",
+    "1.7 mg Hg/HID bulb",
+    "48.6 percent of total for CFL",
+    "39.2 percent of total for Linear",
+    "12.1 percent of total for HID",
+    "$1.61\\times 10^{-6}$ lbs. Hg/bulb weighted emissions factor for mercury for fluorescent lamp breakage",
+    "5.0 lbs. of mercury from fluorescent lamp breakage in the county",
+    "$1.8\\times 10^{-4}$ lbs. of mercury from fluorescent lamp recycling in the county"))
+```
+
+```{r fluorescent-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,
+    caption = "Sample calculations for mercury emissions from fluorescent lamp breakage",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("repeat_header"),
+      font_size = 10
+    ) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}"))
+```
+
+**Dental Amalgam**
+
+Table \@ref(tab:dental-sample-calculations) lists sample calculations to determine the mercury emissions from dental amalgam. The example will show the process for the 5-19 age group, with the total sum of emissions in the final step. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(17,18,19,19,19,20,21,22,23,37,38,39),
+  Equation = c(
+    "$FracP_{c} = \\frac{P_{c}}{P_{US}}$",
+    "$HgO_{c} = {FracP_{c}}\\times{HgDA}$",
+    "$FracP_{a} = \\frac{P_{a}}{P_{US}}$",
+    "$FracP_{a} = \\frac{P_{a}}{P_{US}}$",
+    "$FracP_{a} = \\frac{P_{a}}{P_{US}}$",
+    "$FracP_{fg}=\\sum\\nolimits_{a}{FracP_{a}}$",
+    "$P_{fg,c}={FracP_{fg}}\\times{P_{c}}$",
+    "$F_{fg,c}={P_{fg,c}}\\times{F_{fg}}$",
+    "$HgF_{fg,c}={F_{fg,c}}\\times{FracHgF_{fg}}$",
+    "$E_{f,p,c}=\\sum\\nolimits_{fg}{HgF_{fg,c}}\\times{EF_{f,p}}$",
+    "$E_{o,p,c}={HgO_{c}}\\times{EF_{o,p}}$",
+    "$E_{da,p,c}=E_{f,p,c}+E_{o,p,c}$"),
+  Values = c(
+    "$\\frac{895,388{\\text{ people in the county}}}{329,164,967{\\text{ people in the US}}}$",
+    "$0.272\\%\\times31,940{\\text{ lbs.}}$",
+    "$5{\\text{ to }}9:\\frac{20,304,238\\text{ people 5 to 9 age group}}{325,719,178\\text{ people in the US}}$",
+    "$10{\\text{ to }}14:\\frac{20,778,454\\text{ people 10 to 14 age group}}{325,719,178\\text{ people in the US}}$",
+    "$15{\\text{ to }}19:\\frac{21,131,660\\text{ people 15 to 19 age group}}{325,719,178\\text{ people in the US}}$",
+    "$\\sum{{6.23\\%}+{6.38\\%}+{6.49\\%}}$",
+    "${19.1006\\%}\\times{895,388{\\text{ people in Hartford County, CT}}}$",
+    "${171,025{\\text{ people}}}\\times{1.756{\\text{ fillings; 5 - 19 age group}}}$",
+    "${300,433{\\text{ fillings; 5 - 19 age group}}}\\times{31.6\\%}$",
+    "${94,936{\\text{ fillings}}}\\times\\left({2.4\\times10^{-7}\\frac{\\text{ lbs.}}{\\text{ tooth}}}\\right)$",
+    "$86.88{\\text{ lbs.}}\\times0.02\\frac{\\text{ lbs.}}{\\text{ lb.}}$",
+    "$0.722{\\text{ pounds}}+1.74{\\text{ pounds}}$"),
+  Result = c(
+    "0.272\\% of total US population is in the county",
+    "86.88 lbs. total mercury from dental office preparations in the county",
+    "6.23\\% of total US population for 5-9 age group",
+    "6.38\\% of total US population for 10-14 age group",
+    "6.49\\% of total US population for 15-19 age group",
+    "19.1006\\% of total US population for 5-19 age group",
+    "171,025 people in the 5-19 age group in the county",
+    "300,433 fillings in the 5-19 age group in the county",
+    "94,936 total fillings containing mercury in the 5-19 age group in the county",
+    "0.023 pounds of mercury emissions from fillings in the 5-19 age group (0.722 pounds of mercury in all age groups) in the county",
+    "1.74 pounds of mercury emissions from dental office preparations in the county",
+    "2.46 pounds of mercury from dental amalgam in the county"))
+```
+
+```{r dental-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample calculations for mercury emissions from dental amalgam",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("repeat_header"),
+      font_size = 10
+    ) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}"))
+```
+
+**Thermostats/Thermometers**
+
+Table \@ref(tab:thermo-sample-calculations) lists sample calculations to determine the mercury emissions from thermostats and thermometers. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county.
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(8,9,9,9,9,9,10,24,25,26,40,41,42),
+  Equation = c(
+    "$DispTs = RemTs \\times \\left(1-8\\%\\right)$",
+    "$HgTm_{n} = \\left(HgTm_{n-1}\\times{95\\%}\\right)+{HgTm_{1}}$",
+    "$HgTm_{n} = \\left(HgTm_{n-1}\\times{95\\%}\\right)+{HgTm_{1}}$",
+    "$HgTm_{n} = \\left(HgTm_{n-1}\\times{95\\%}\\right)+{HgTm_{1}}$",
+    "$HgTm_{n} = \\left(HgTm_{n-1}\\times{95\\%}\\right)+{HgTm_{1}}$",
+    "$HgTm_{n} = \\left(HgTm_{n-1}\\times{95\\%}\\right)+{HgTm_{1}}$",
+    "$HgTRl={\\left({HgTm_{5}}-{HgTRm}\\right)}\\times\\frac{1{\\text{ ton}}}{2,000{\\text{ lbs.}}}$",
+    "$FracP_{c}=\\frac{P_{c}}{P_{US}}$",
+    "$DispTs_{c}=FracP_{c}\\times{DispTs}$",
+    "$HgTm_{c}=FracP_{c}\\times{HgTmRl}$",
+    "$E_{ts,p,c}=DispTs_{c}\\times{EF_{ts,p}}$",
+    "$E_{t,p,c}=HgTm_{c}\\times{EF_{t,p}}$",
+    "$E_{tt,p,c}=E_{ts,p,c}+{E_{t,p,c}}$"),
+  Values = c(
+    "$2,500,000{\\text{ removed}}\\times 92\\%$",
+    "${\\text{y = 1: }}{1.546{\\text{ lbs.}}}\\times{95\\%}$",
+    "${\\text{y = 2: }}{\\left(518.7{\\text{ lbs.}}\\times{95\\%}\\right)}+{532{\\text{ lbs.}}}$",
+    "${\\text{y = 3: }}{\\left(1,024{\\text{ lbs.}}\\times{95\\%}\\right)}+{523{\\text{ lbs.}}}$",
+    "${\\text{y = 4: }}{\\left(1,496{\\text{ lbs.}}\\times{95\\%}\\right)}+{514{\\text{ lbs.}}}$",
+    "${\\text{y = 5: }}{\\left(1,935{\\text{ lbs.}}\\times{95\\%}\\right)}+{506{\\text{ lbs.}}}$",
+    "${2,345{\\text{ lbs.}}}-{350{\\text{ lbs.}}}\\times\\frac{1{\\text{ ton}}}{2,000{\\text{ lbs.}}}$",
+    "$\\frac{895,388{\\text{ people in the county}}}{38,857,0561{\\text{ people in the US}}}$",
+    "${0.272\\%}\\times{2,300,000{\\text{ thermostats}}}$",
+    "${0.272\\%}\\times{0.99{\\text{ tons}}}$",
+    "$6,256{\\text{ thermostats}}\\times\\left(9.92\\times10^{-5}\\frac{\\text{ lbs.}}{\\text{ thermostat}}\\right)$",
+    "$0.0027{\\text{ tons}}\\times10\\frac{\\text{ lbs.}}{\\text{ ton}}$",
+    "$0.62{\\text{ lbs.}}+0.027{\\text{ lbs.}}$"),
+  Result = c(
+    "2,300,000 thermostats disposed of in the United States",
+    "2,345 pounds of mercury available for release in thermometers",
+    "2,345 pounds of mercury available for release in thermometers",
+    "2,345 pounds of mercury available for release in thermometers",
+    "2,345 pounds of mercury available for release in thermometers",
+    "2,345 pounds of mercury available for release in thermometers",
+    "0.99 tons of total mercury in thermometers available for release",
+    "0.272\\% of total US population is in the county",
+    "6,256 thermostats disposed in the county",
+    "0.0027 tons of mercury from thermometers available for release in the county",
+    "0.62 pounds of mercury emissions from thermostats in the county",
+    "0.027 pounds of mercury emissions from thermometers in the county",
+    "0.647 pounds of mercury emissions from thermostats and thermometers in the county"))
+```
+
+```{r thermo-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df, booktabs = TRUE, longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample calculations for mercury emissions from thermostats and thermometers",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("repeat_header"),
+      font_size = 10
+    ) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}"))
+```
+
+### Improvements/Changes in the 2023 NEI
+
+Documentation for previous versions of the NEI have cited personal communications with USGS staff for estimates of the amount of mercury used in general laboratory activities. In discussions with Robert Virta of the USGS (2013), EPA learned that the USGS stopped conducting its survey of the end uses of mercury in the economy in 2002 [[ref 4](#mercury-references)]. However, the Interstate Mercury Education and Reduction Clearinghouse (IMERC) tracks the use of mercury-added chemical products that are sold as a consistent mixture of chemicals [[ref 5](#mercury-references)]. Since this trend indicates that the use of mercury-added chemical products has remained relatively consistent since 2002, the estimate of mercury emissions from general laboratory activities in the 2008 NEI is pulled forward through the 2020 NEI. Beginning with the 2023 NEI, EPA now uses the methodology described above to estimate emissions from general laboratory activities. 
+
+### Puerto Rico and U.S. Virgin Islands
+
+For landfills, Puerto Rico and the U.S. Virgin Islands use the same methodology as the rest of the U.S. However, for all other sources, because insufficient data exists to calculate emissions for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the US Virgin Islands. The total emissions in pounds for these two Florida counties are divided by their respective populations creating a pound per capita emission factor. For each Puerto Rico and US Virgin Island County, the pound per capita emission factor is multiplied by the county population (from the same year as the inventory’s activity data) which serves as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”.
+
+## References {#mercury-references}
+
+1.	Lindberg, S.E., G.R. Southworth, M.A. Bogle, T.J. Blasing, J. Owens, K. Roy, H. Zhang, T. Kuiken, J. Price, D. Reinhart, and H. Sfeir. 2005. [Airborne Emission of Mercury from Municipal Solid Waste. I: New Measurements from Six Operating Landfills in Florida](https://www.tandfonline.com/doi/abs/10.1080/10473289.2005.10464684). Journal of the Air and Waste Management Association, 55: 859-869.
+2.	Rathore, M., Singh, A., & Pant, V. A. 2012. [The Dental Amalgam Toxicity Fear: A Myth or Actuality](https://pmc.ncbi.nlm.nih.gov/articles/PMC3388771/). Toxicology International, 19(2), 81–88. 
+3.	Vandeven, J.A. and S.L. McGinnis. 2005. [An Assessment of Mercury in the Form of Amalgam in Dental Wastewater in the United States](https://www.semanticscholar.org/paper/An-Assessment-of-Mercury-in-the-Form-of-Amalgam-in-Vandeven-McGinnis/7e3af7771fd5e2e968caa0621f7ce1d260ec3c42). Water, Air, and Soil Pollution, 164:349-366.
+4.	Virta, R. 2013. US Geological Survey. Personal communication with David Cooley, Abt Associates, August 21, 2013.
+5.	IMERC, 2015. [IMERC Fact Sheet – Formulated Mercury-Added Products](https://www.newmoa.org/wp-content/uploads/2023/01/formulated_products_2018.pdf).
+6.	Thermostat Recycling Corporation. 2018. [About](https://thermostat-recycle.org/about/).
+7.	US EPA. 2016. [Phasing out of Mercury Thermometers Used in Industrial and Laboratory Settings](https://www.epa.gov/mercury/phasing-out-mercury-thermometers-used-industrial-and-laboratory-settings).
+8.	U.S. EPA. 2023. [Landfill Methane Outreach Program](https://www.epa.gov/lmop).
+9.	End of Life Vehicle Solutions Corporation. 2018a. [Collection Reporting](https://oldwww.usecology.com/ELVS-Mercury-Switch-Program/Reporting.aspx?AspxAutoDetectCookieSupport=1).
+10.	End of Life Vehicle Solution Solutions Corporation. 2018b. [Estimating Population of Mercury Convenience Light Switches](https://elvsolutions.org/?page_id=1298).
+11.	Freedonia Group, 2013. Industry Study 3054 Lamps.
+12.	Buildings.com, 2008. [Fluorescent Lamps 101](https://www.buildings.com/industry-news/article/10192793/fluorescent-lamps-101). 
+13.	Bulbs.com. Learning Center. [What Does Average Rated Life Mean?](https://www.bulbs.com/learning/arl.aspx)
+14.	Silveira, Geraldo TR, and Shoou-Yuh Chang, 2010. [Fluorescent lamp recycling initiatives in the United States and a recycling proposal based on extended producer responsibility and product stewardship concepts](https://journals.sagepub.com/doi/abs/10.1177/0734242X10383744). Waste Management & Research, 29(6):656-668. 
+15.	NEWMOA. 2015a. [IMERC Fact Sheet Mercury Use in Dental Amalgam](https://www.newmoa.org/wp-content/uploads/2023/01/dental_amalgam_2018.pdf). 
+16.	National Institute of Dental and Craniofacial Research. 2013. [Dental Caries (Tooth Decay)](https://www.nidcr.nih.gov/research/data-statistics/dental-caries).
+17.	American Dental Association (ADA). 1998. [Dental Amalgam: Update on Safety Concerns](https://jada.ada.org/article/S0002-8177(14)65611-7/abstract). Journal of the American Dental Association, 129:494:503.
+18.	Food and Drug Administration. 2017. [About Dental Amalgam Fillings](https://www.fda.gov/medical-devices/dental-amalgam-fillings/information-patients-about-dental-amalgam-fillings).
+19.	Leopold, B.R. 2002. [Use and Release of Mercury in the United States](https://cfpub.epa.gov/si/si_public_record_report.cfm?Lab=NRMRL&dirEntryId=88418). U.S. Environmental Protection Agency. Report EPA/600/R-02/104. 
+20.	Natural Resources Defense Council, Product Stewardship Institute, Clean Water Fund, and Mercury Policy Project. 2013. [Turning Up the Heat II: Exposing the continued failures of the manufacturers’ thermostat recycling program](https://www.nrcm.org/wp-content/uploads/2013/09/TurningUptheHeat2013.pdf).
+21.	NEWMOA. 2015b. [IMERC Fact Sheet Mercury Use in Measuring Devices](https://www.newmoa.org/wp-content/uploads/2023/01/measuring_devices_2018.pdf).
+22.	US EPA. 2023. [Inventory of Mercury Supply, Use and Trade in the United States: 2023 Report](https://www.epa.gov/system/files/documents/2023-12/2023-mercury-inventory-report_final.pdf). 
+23.	King, S. et al. May 2008. [Reducing Mercury in the Northeast United States](https://www-f.nescaum.org/documents/reducing-mercury-in-the-northeast-united-states/ne-mercury-progress-em-200805.pdf). EM Magazine. Air and Waste Management Association.
+24.	US Census Bureau, 2023. [County Business Patterns](https://www.census.gov/programs-surveys/cbp.html).
+25.	Babineau, I., Wu, C.Y., Jackson, A., Minnesota Pollution Control Agency. “Emission Factor Development for Mercury Emitted From Municipal Solid Waste during Processing and Handling.” In proceedings of the 109th Annual Meeting of the A&WMA, New Orleans, LA. June 2016.
+26.	US EPA. 2007. [Mercury Switches in Motor Vehicles; Significant New Use Rule](https://www.federalregister.gov/documents/2007/10/05/E7-19705/mercury-switches-in-motor-vehicles-significant-new-use-rule).  
+27.	Griffith, C., et al. 2001. [Toxics in Vehicles: Mercury. A Report by Ecology Center, Great Lakes United, and University of Tennessee Center for Clean Products and Clean Technologies](https://p2infohouse.org/ref/19/18304.pdf).
+28.	Goonan, T.G. 2006. [Mercury Flow Through the Mercury-Containing Lamp Sector of the Economy of the United States](https://pubs.usgs.gov/sir/2006/5264/sir20065264.pdf). US Geological Survey Scientific Investigations Report 2006-5264. 
+29.	Li, Y. and L. Jin. 2011. [Environmental Release of Mercury from Broken Compact Fluorescent Lamps](https://www.researchgate.net/publication/228503568_Environmental_Release_of_Mercury_from_Broken_Compact_Fluorescent_Lamps). Environmental Engineering Science, 28:687-691. 
+30.	Arendt, J. and J.F. Katers. 2013. [Compact fluorescent lighting in Wisconsin: elevated atmospheric emission and landfill deposition post-EISA implementation](https://www.researchgate.net/publication/236601998_Compact_fluorescent_lighting_in_Wisconsin_Elevated_atmospheric_emission_and_landfill_deposition_post-EISA_implementation). Waste Management and Research, 0:1-12.
+31.	Singhvi, R, A. Taneja, V. Kansal, C.J. Gasser, and D.J. Kalnicky. 2011. [Determination of Total Metallic Mercury in Compact Fluorescent Lamps (CFLs)](https://www.researchgate.net/publication/233238138_Determination_of_Total_Metallic_Mercury_in_Compact_Fluorescent_Lamps_CFLs). Environmental Forensics, 12:143-148. 
+32.	Aucott, M., M. McLinden, and M. Winka. 2004. [Release of Mercury from Broken Fluorescent Bulbs](https://dspace.njstatelib.org/items/a62682b7-2c7f-4b0f-b87d-df2d00c94b8f). New Jersey Department of Environmental Protection. Environmental Assessment and Risk Analysis Element, Research Project Summary.
+33.	National Electrical Manufacturers Association (NEMA). 2005. [Fluorescent and other Mercury-Containing Lamps and the Environment](https://www.nema.org/advocacy/environmental-stewardship).
+34.	Cain, A., S. Disch, C. Twaroski, J. Reindl, and C.R. Case. 2007. [Substance Flow Analysis of Mercury Intentionally Used in Products in the United States](https://onlinelibrary.wiley.com/doi/abs/10.1162/jiec.2007.1214). Journal of Industrial Ecology, 11: 61-75.
+35.	US EPA. 1997. [Mercury Study Report to Congress, Volume II: An Inventory of Anthropogenic Mercury Emissions in the United States](https://nepis.epa.gov/Exe/ZyNET.exe/2000EI7C.TXT?ZyActionD=ZyDocument&Client=EPA&Index=1995+Thru+1999&Docs=&Query=&Time=&EndTime=&SearchMethod=1&TocRestrict=n&Toc=&TocEntry=&QField=&QFieldYear=&QFieldMonth=&QFieldDay=&IntQFieldOp=0&ExtQFieldOp=0&XmlQuery=&File=D%3A%5Czyfiles%5CIndex%20Data%5C95thru99%5CTxt%5C00000009%5C2000EI7C.txt&User=ANONYMOUS&Password=anonymous&SortMethod=h%7C-&MaximumDocuments=1&FuzzyDegree=0&ImageQuality=r75g8/r75g8/x150y150g16/i425&Display=hpfr&DefSeekPage=x&SearchBack=ZyActionL&Back=ZyActionS&BackDesc=Results%20page&MaximumPages=1&ZyEntry=1&SeekPage=x&ZyPURL).
+36.	Richardson, G.M., R. Wilson, D. Allard, C. Purtill, S. Douma, and J. Graviere. 2011. [Mercury exposure and risks from dental amalgam in the US population, post-2000](https://www.researchgate.net/publication/51514541_Mercury_exposure_and_risks_from_dental_amalgam_in_the_US_population_post-2000). Science of the Total Environment, 409:4257-4268.
+37.	UNEP. 2019. [Chapter 3 E-Annex: Methodology for estimating mercury emissions to air and results of the 2015 global emissions inventory. Technical Background Report to the Global Mercury Assessment 2018](https://www.unep.org/globalmercurypartnership/resources/report/technical-background-report-global-mercury-assessment-2018), p. 3-31.

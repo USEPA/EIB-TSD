@@ -1,0 +1,317 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Solvents {#solvents-main}
+
+## Sector Descriptions and Overview 
+
+The solvent sector is a diverse collection of residential, commercial, institutional, and industrial sources of gas-phase organic emissions. Included in this sector are everyday items, such as cleaners, personal care products, adhesives, coatings, printing inks, and pesticides. These sources generate emissions through evaporative processes and include organics that fulfill product functions beyond acting as a traditional solvent (e.g., propellants, fragrances). As such, this sector is often described as the volatile chemical product (VCP) sector.
+
+Starting with the 2020 NEI, EPA has adopted emission factors generated using a new framework for most of this sector [[ref 1](#solvents-references)]. The table below notes all SCCs covered in this source category and the SCCs for which the EPA generates default emissions. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-32/solvents-sccs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r solvents-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Source Classification Codes used in the solvents sector.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down", "repeat_header"))
+```
+
+## EPA-developed estimates
+
+Solvent utilization emissions are largely based on estimates of national-level usage and allocated to the county-level using more geographically specific sources of data. Product usage of each SCC is preferentially estimated using economic statistics from the U.S. Census Bureau’s Annual Survey of Manufacturers, commodity prices from the U.S. Department of Transportation’s 2012 Commodity Flow Survey and the U.S. Census Bureau’s Paint and Allied Products Survey, and producer price indices. The producer price indices scale commodity prices (e.g., 2012) to target years (e.g., 2020) and are retrieved from the Federal Reserve Bank of St. Louis.  If any of the datasets are unavailable, default usage estimates will be derived using functional solvent usage statistics reported by The Freedonia Group [[ref 2](#solvents-references)] or sales quantities reported in a California Air Resources Board (CARB) California-specific survey [[ref 3](#solvents-references)]. The composition of products will be estimated by generating composites from CARB surveys [[refs 3-7](#solvents-references)]  and profiles reported in the U.S. EPA’s SPECIATE database [[ref 8](#solvents-references)]. Emissions are subsequently estimated using a framework that considers product composition, timescales of product usage, and timescales of evaporation for individual components [[ref 1](#solvents-references)].
+
+In the following sections, details are provided related to the collection of activity data, allocation of national-level emission estimates to the county-level, calculation of emission factors, calculation of emissions, state-specific variations in emission factors due to assumed nonpoint VOC controls and point source subtraction.
+
+### Activity and Allocation Data
+
+Activity data for solvent utilization is SCC-specific. For most SCCs, activity data is based on year-specific county-level population or employment data from the U.S. Census Bureau. Exceptions include county-level use estimates of active ingredients in agricultural pesticides from the United States Geological Survey [[ref 9](#solvents-references)] (2461850000) and vehicular lane miles traveled on paved roads from the Federal Highway Administration [[ref 10](#solvents-references)] and MOVES model (2401008000). All activity data reflects the most recently available dataset.
+
+The eleven SCCs allocated from the national-level to the county-level using population are listed in the table below.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-32/population-sccs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r population-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Source Categories That Use Population Activity Data.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down", "repeat_header"))
+```
+
+The SCCs allocated from the national-level to the county-level using employment statistics from the U.S. Census Bureau's County Business Patterns are all typically industrial in nature and listed in the table below.
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-32/employment-sccs.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r employment-sccs, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Source Categories That Use Employment Activity Data.',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down", "repeat_header"))
+```
+\* = Employment data is split evenly between Wood Furniture and Metal Furniture
+
+Emissions from agricultural pesticides (2461850000) are allocated from the national-level to the county-level using active ingredient application statistics from the United States Geological Survey. These statistics are reported at the county-level and the EPEST_HIGH_KG value in the associated dataset is utilized. The most recent dataset available is from 2017 and is used here. Due to data limitations, the USGS statistics do not contain active ingredient usage statistics for Alaska and Hawaii. For these jurisdictions, the mass of active ingredients applied in the conterminous United States was summed and divided by the total acres treated with pesticides, insecticide, and fungicide in the conterminous United States, as reported by the United States Department of Agriculture’s Census of Agriculture [[ref 11](#solvents-references)]. These usage factors (kg pesticide active ingredient usage per acre treated) were then applied to the Census of Agriculture’s reporting of total acres treated per-county in Alaska and Hawaii.
+
+Emissions from traffic markings (2401008000) are allocated using estimates of county-level paved vehicular miles traveled, which is consistent with the methods employed for asphalt paving.
+
+Due to confidential business information concerns, the U.S. Census Bureau often withholds data in the County Business Patterns dataset. This is the case if a particular county has 2 or fewer establishments under a given North American Industrial Classification Standard (NAICS) code. In prior years, the County Business Patterns data reported the counties where data was withheld, along with dataset ranges for the data withheld (e.g., 20-99 employees). A gap-filling procedure was implemented using state-level data, which did not feature withheld data, to estimate employment counts in all counties.
+
+Beginning in 2018, the Census Bureau stopped reporting dataset ranges for counties with withheld data. As such, the prior gap-filling methods required updating. For all post-2017 inventories, year-specific employment data from the County Business Patterns dataset is used to determine the total amount of withheld data in each state. The 2017 version of the County Business Patterns is then used to determine the counties for which withheld data exist and the data ranges for those counties, and it is to these counties that the difference between the state-level total employment and county-level total employment are allocated.
+
+### Emission Factors
+
+The framework [[ref 1](#solvents-references)] used to estimate emission factors from the nonpoint solvent sector considers the mass of chemical products used, the composition of these chemical products, the physiochemical properties of the chemical product constituents that govern volatilization, and the timescale available for these constituents to evaporate.
+
+This methodology resolves several issues in prior methods. First, prior methods did not account for fate-and-transport. Often, chemical products (e.g., personal care products) are quickly sequestered and thus unavailable for emission. Therefore, the speciation and magnitude of organics in emissions can differ from the speciation and magnitude of organics in the composition of products from which they volatilize. To consider fate-and-transport, the new methodology accounts for the evaporation timescale of the individual components within products and the use timescale available for evaporation (i.e., the elapsed time between application and any explicit removal process). Second, prior methods only quantified mass usage of chemicals that function as solvents. Sources in this sector include organics that evaporate and fulfill product functions beyond acting as a traditional solvent (e.g., isobutane as propellants, monoterpenes as fragrances). The new methodology attempts to quantify all organic mass that evaporates on relevant timescales. Third, prior methods assumed all mass usage and subsequent evaporation consisted of organics classified as regulatory VOCs. Evaporative organics from chemical products include many organics that are exempt compounds (e.g., acetone, siloxanes) and their proportions much be accounted for to accurately estimate regulatory VOC emissions.
+
+Sector-relevant usage estimates are based on national-level data, including data from the U.S. Census Bureau’s Annual Survey of Manufacturers, commodity prices from the U.S. Department of Transportation’s 2012 Commodity Flow Survey and the U.S. Census Bureau’s Paint and Allied Products Survey, and producer price indices from the Federal Reserve Bank of St. Louis. Derivation of product usage is as follows:
+
+\begin{equation} 
+  U = \frac{S \times 1000}{CP \times \frac{PPI_{ty}}{PPI_{base}} \times Pop}
+  (\#eq:product-usage)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( Usage \) = Annual usage in kg per person per year <br> \newline
+  \( S \) = Annual Survey of Manufacturers shipment value in $1000 per year <br> \newline
+  \( CP \) = Commodity Price from the U.S. Department of Transportation’s 2012 Commodity Flow Survey or the U.S. Census Bureau’s Paint and Allied Products Survey in $ per kg <br> \newline
+  \( PPI_{ty} \) = Producer Price Index from the Federal Reserve Bank of St. Louis for the appropriate NAICS code in the target year, i.e., current NEI, (unitless) <br> \newline
+  \( PPI_{base} \) = Producer Price Index from the Federal Reserve Bank of St. Louis for the appropriate NAICS code in the base year (unitless) <br> \newline
+  \( Pop \) = National-level population count from the U.S. Census Bureau <br> \newline
+</div>
+
+Due to data limitations, usage estimates for three SCCs follow different methods. Miscellaneous products (2460900000) and lighter fluid (2460030999) usage estimates are retrieved from sales quantities reported in a California-specific survey [[ref 3](#solvents-references)], and dry-cleaning (2420000000) usage estimates are retrieved from a report published by The Freedonia Group [[ref 2](#solvents-references)].
+
+To translate from usage to emissions, fate-and-transport is considered. Here, fate-and-transport is a function of the predicted evaporation timescale of each compound and the assigned use timescale of each product category. The evaporation timescale is the compound specific, characteristic timescale of emission from a surface layer and is calculated using previously published methods [[refs 12,13](#solvents-references)]. This timescale is defined as a relationship between the mass of a compound applied and the rate of its emission, which can be expressed by:
+
+\begin{equation} 
+  \text{Evaporation Timescale} [hr] = \frac{M_{applied}}{R_{emission}} = K_{OA} \times \frac{d}{v_{e}}
+  (\#eq:evap-timescale)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( K_{OA} \) = The octanol-air partitioning coefficient of the compound <br> \newline
+  \( d \) = The assumed depth of the applied product layer <br> \newline
+  \( v_{e} \) = The mass transfer coefficient of the compound from the surface layer into the bulk air, which is a function of aerodynamic and boundary layer resistances <br> \newline
+</div>
+
+A compound’s K~OA~ it is the ratio of an organic chemical’s concentration in octanol to the organic chemical’s concentration in air at equilibrium. It is often used to quantify the partitioning behavior of an organic compound between air and a matrix. As experimental values of KOA are sparse, modeled estimates from the QSAR model OPERA [[ref 14](#solvents-references)] are used and are retrieved from the U.S. EPA’s CompTox Chemistry Dashboard. In addition, each product category is assigned an indoor usage fraction (see Table below). This assignment enables the mass transfer coefficient to vary between indoor and outdoor conditions. Typically, the mass transfer coefficent indoors is smaller than the mass transfer coefficient outdoors due to more stagnant atmospheric conditions, and the newest version of the modeling framework reflects these dynamics. Indoor product usage utilizes a v~e~ of 5 m hr-1, and the remaining outdoor portion is assigned a v~e~ of 30 m/hr [[refs 12, 13](#solvents-references)]. Median values for d [0.1 mm] from Khare and Gentner (2018) [[ref 12](#solvents-references)] are applied for both indoors and outdoors. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-32/indoor-fraction.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r indoor-fraction, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Fraction of application assumed to occur indoors per SCC',
+) %>%
+kable_styling(position = "center", latex_options = c("repeat_header")) %>%
+  column_spec(1, width = "2cm") %>%
+  column_spec(2, width = "4cm") %>%
+  column_spec(3, width = "4cm")
+```
+\* = Emissions for Personal Care Products are calculated separately for short-use products and daily-use products. The final emission factor reflects a summation of both emission categories. Within the emissions modeling, a 1.00 indoor emission fraction is assumed for short-use products and a 0.50 indoor emission fraction is assumed for daily-use products
+
+
+Emissions are then determined by comparing the calculated evaporation timescale for each component with the assigned use timescale for the product category from which the component resides. The use timescale is the timescale available for a product category to evaporate and is based on the length of its direct use phase. If the use timescale for the product category is greater than the evaporation timescale of an organic ingredient, the compound is assumed to be emitted. Else, the compound is assumed to be retained in the product or other condensed phase and permanently sequestered. Overall, organic emissions (E) for the complete sector are calculated as a summation over all organic compounds, *i*, and product categories, *j*, as follows:
+
+\begin{equation}
+E =
+\begin{cases}
+  0, & \text{Use Timescale}_{j} < \text{Evap Timescale}_{i}\\[6pt]
+  \displaystyle \sum_{i,j} U_{j} \times f_{E_j} \times f_{S_{i,j}} \times \bigl(1 - f_{C_j}\bigr), & \text{Use Timescale}_{j} \geq \text{Evap Timescale}_{i}
+\end{cases}
+(\#eq:organic-emissions)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( U \) = Product usage <br> \newline
+  \( f_{E} \) = Evaporative organic fraction <br> \newline
+  \( f_{S} \) = Fraction of an organic compound in the evaporative organics portion of a product category <br> \newline
+  \( f_{C} \) = Fraction of emissions that feature post-use controls on a mass basis <br> \newline
+</div>
+
+### Controls
+
+There are two methods for controlling organic emissions from the nonpoint solvent utilization sector. The first method involves product reformulation, where existing VOC ingredients are substituted with exempt organic compounds (e.g., acetone) or the VOC mass content of products is lowered. Regulations are often set to limit the VOC content of chemical products, with California typically setting the most stringent limits in the country [[ref 15](#solvents-references)]. To reflect local regulations, starting with the 2017 NEI additional reductions were made to consumer solvent, architectural coating, and industrial maintenance coating SCCs for several states. The consumer solvent reductions were calculated using a phased approach developed in an Ozone Transport Commission (OTC) report where each marginal reduction reflect fractional changes to California Air Resource Board’s (ARB) VOC inventory for consumer products. As ARB’s most recent consumer and commercial product survey, which reports the VOC content and composition of products, is used in the underlying methodology, the fractional reductions to consumer products through product reformulation over time are implicitly captured. Therefore, it is assumed that these phased controls are represented, and further reductions are not necessary. However, application of emission factors whose derivation use the VOC content and composition of products from ARB’s most recent survey to all states would artificially reduce emissions where area source VOC rules relevant to the solvent sector have not been adopted.
+
+To account for emission variations for relevant consumer solvent SCCs, supplemental data from the OTC report are paired with information from ARB’s most recent survey to quantify the VOC content of products prior to rule adoption. These pre-rule VOC content values are then used to generate emission factor multipliers for relevant SCCs and have been applied to generate the relevant emission factors for this sector. For example, ARB’s most recent survey reports 10.14 tons per day of Brake Cleaner sales. The OTC documentation reports a 3.7 tons per day reduction in VOC emissions due to the adoption of a VOC limit of 10%, by weight. Therefore, the VOC limit prior to the rule adoption was 46.5%, by weight, which is derived using the following equation:
+
+\begin{equation} 
+  P_{VOC_r} = S \times (VOC_{wt-i} - VOC_{wt-f})
+  (\#eq:ef-scale)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( P_{VOC_r} \) = Daily VOC emission reduction for a given product <br> \newline
+  \( S \) = Daily sales of a given product <br> \newline
+  \( VOC_{wt-i} \) = Initial VOC weight percent <br> \newline
+  \( VOC_{wt-f} \) = Final VOC weight percent <br> \newline
+</div>
+
+Similar VOC content updates were applied to multipurpose solvents, paint thinners, disinfectants, floor polish, windshield washer fluids, construction adhesives, and all other products considered in the OTC documentation [[ref 15](#solvents-references)]. The updated VOC content values for all listed products were then applied to the derivation of the VOC content for all relevant product categories in the new emissions framework. Following this procedure, products are aggregated into relevant categories (e.g., household cleaners) and emission factor multipliers were generated (see table below).
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-32/post-use-control.xlsx")
+val <- df[[4]]
+num <- parse_number(val)
+df[[4]] <- ifelse(is.na(num),val,format(num, digits = 4, scientific = FALSE, trim = TRUE))
+df[is.na(df)] <- ""
+```
+
+```{r post-use-controls, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'Post-use control assumptions and emission factor inflation percentages'
+) %>%
+kable_styling(position = "center", latex_options = c("repeat_header")) %>%
+  column_spec(1, width = "2cm") %>%
+  column_spec(2, width = "3cm") %>%
+  column_spec(3, width = "3cm") %>%
+  column_spec(4, width = "3cm")
+```
+\* = Emissions for All Coating and Related Products are calculated separately for aerosol coatings and allied paint products (e.g., paint thinners, clean up solvents, multipurpose solvents, etc.). The final emission factor reflects a summation of both emission categories. Within the emissions modeling, a 0.33 post-use control factor is applied to allied paint products to reflect disposal of clean up solvents and paint thinners
+\** = Emissions for Lighter Fluid, Fire Starter, Other Fuels are assumed to feature 90% destruction via in-use combustion
+
+Uncontrolled emission factors for architectural coatings and industrial maintenance coatings are quantified using the prior ratio of controlled to uncontrolled emissions, which were based on estimates from the Eastern Regional Technical Advisory Committee. In the 2017 NEI, architectural and industrial maintenance coatings generated 2.03 lb/capita in states with applicable area source VOC rules and 2.72 lb/capita in states without rules. The resulting 1.340 scaling factor (2.72 / 2.03) is used to generate the uncontrolled emission factor shown above.
+
+The second pathway for controlling organic emissions from the solvent utilization sector involves post-use controls. These methods include add-on controls, manufacturing process modifications, and disposal techniques. A post-use control assumption is applied in the derivation of two SCCs: 2460500000 and 2460030999 (see table above). Since adoption of additional post-use control technologies vary widely in space and time, assigning blanket post-use controls beyond these two SCCs is not considered here. In lieu of these blanket assumptions, the Solvent Tool allows users to adjust emissions factors to account for controls, if needed.
+
+The states for which area source VOC rules and controlled emissions factors will be applied are shown below. 
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-32/states-with-controls.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r states-with-controls, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE, longtable = TRUE,
+  caption = 'States with area source VOC rules relevant to the solvent sector',
+) %>%
+kable_styling(position = "center", latex_options = c("repeat_header")) %>%
+  column_spec(1, width = "2cm") %>%
+  column_spec(2, width = "3cm") %>%
+  column_spec(3, width = "3cm")
+```
+
+### Emissions
+
+Total VOC emissions from solvent utilization are calculated by multiplying the activity data for the source category by the calculated emissions factor for that category.
+
+\begin{equation} 
+  E_{VOC_{c,s}} = A_{c,s} \times EF_{VOC,s}
+  (\#eq:emissions-calc)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{VOC_{c,s}} \) = Annual VOC emissions in county *c* for source category *s*, in tons per year <br> \newline
+  \( A_{c,s} \) = Activity data for county *c* associated with source category *s* <br> \newline
+  \( EF_{VOC,s} \) = Calculated VOC emissions factor for source category *s* <br> \newline
+</div>
+
+### Point Source Subtraction
+
+Since emissions from solvent utilization occur from both point and nonpoint SCCs, point source subtraction is required to ensure emissions from this sector are not double-counted. To accomplish this task, nonpoint SCCs must be mapped to corresponding point SCCs. This crosswalk (Solvents_Pt_nonPt_crosswalk.xlsx) can be found on the [2023 NEI Supplemental nonpoint data FTP site](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/).
+
+Point source subtraction for this sector should be completed at the county level using uncontrolled point source emissions. As such, assumptions related to the control efficiency of the point sources must be made. Often, the point source emission estimates submitted to the NEI feature 80-90% control efficiencies. *Uncontrolled* point source emission calculations will be calculated, as necessary, using the submitted point source emissions, engineering judgement, and an assumed control efficiency.
+
+The net calculation of nonpoint emissions following point source subtraction is as follows:
+
+\begin{equation} 
+  NP_{s,c} = TE_{s,c} - PS_{s,c}
+  (\#eq:point-source-subtraction)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( NP_{s,c} \) = Nonpoint source solvent emissions in county *c* for source category *s*, in tons per year <br> \newline
+  \( TE_{s,c} \) = Total solvent emissions in county *c* for source category *s*, in tons per year <br> \newline
+  \( PS_{s,c} \) = Point source solvent emissions in county *c* for source category *s*, in tons per year <br> \newline
+</div>
+
+If point source subtraction results in negative emissions, the Solvent Tool will zero out emissions for that source category in that county. HAP emissions are speciated from the estimated nonpoint source VOC emissions following point source subtraction.
+
+### Sample Calculations
+
+Sample calculations for VOC emissions from adhesives and sealants solvent utilization are included in the table below. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county. 
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c("5"),
+  Equation = c("$E_{scc,c} = EF_{scc} \\times A_{c}$"),
+  Values = c("$1.84 \\frac{lb}{capita} \\times 66,000 people$"),
+  Result = c("60.72 tons of VOC")
+)
+```
+
+```{r solvents-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample calculations for All Adhesives and Sealants",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result")
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 12) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{6cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{6cm}")
+)
+```
+
+### Improvements/Changes in the 2023 NEI
+
+No changes were made to the methodology for this category. Activity data was updated to reflect the most recent, best available data at the time of the NEI.
+
+### Puerto Rico and U.S. Virgin Islands
+
+For all SCCs that utilize population and employment statistics, emissions from Puerto Rico and the U.S. Virgin Islands are calculated using the same methodology described above. For agricultural pesticides and traffic markings, emissions are estimated using per-capita activity data from representative counties in Florida (Broward County and Monroe County for Puerto Rico and the U.S. Virgin Islands, respectively).
+
+## References {#solvents-references}
+
+1. Seltzer, K. M., Pennington, E., Rao, V., Murphy, B. N., Strum, M., Isaacs, K. K., and Pye, H. O. T.: Reactive organic carbon emissions from volatile chemical products, Atmos. Chem. Phys., 21, 5079–5100, https://doi.org/10.5194/acp-21-5079-2021, 2021. Note: emissions model is available and updated at https://github.com/USEPA/VCPy.
+2. The Freedonia Group: Solvents, Industry Study #3429, The Freedonia Group, Cleveland, OH, 2016. 
+3. California Air Resources Board (CARB): [Final 2015 Consumer & Commercial Product Survey Data Summaries](https://ww2.arb.ca.gov/our-work/programs/consumer-products-program/consumer-commercial-products-survey), 2019.
+4. California Air Resources Board (CARB): [2005 Architectural Coatings Survey – Final Report](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/CARB_Architectural_Coatings_final_2005_survey_rpt.pdf), 2007.
+5. California Air Resources Board (CARB): 2010 Aerosol Coatings Survey Results, 2012.
+6. California Air Resources Board (CARB): 2014 Architectural Coatings Survey - Draft Data Summary, 2014.
+7. California Air Resources Board (CARB): ORGPROF - Organic chemical profiles for source categories, 2018. https://ww2.arb.ca.gov/speciation-profiles-used-carb-modeling
+8. U.S. Environmental Protection Agency: Addendum, [SPECIATE Version 5.4](https://www.epa.gov/system/files/documents/2025-10/speciate_5p4addendum_1.pdf), Database Development Documentation, Research Triangle Park, NC, September 2025. 
+9.	Wieben, C.M., 2019, Estimated Annual Agricultural Pesticide Use for Counties of the Conterminous United States, 2013-17 (ver. 2.0, May 2020): U.S. Geological Survey data release, https://doi.org/10.5066/P9F2SRYH.
+10.	U.S. Department of Transportation, Federal Highway Administration, Office of Highway Policy Information; [Table HM-51 – Highway Statistics](https://www.fhwa.dot.gov/policyinformation/statistics/2018/hm51.cfm) 2018.
+11.	U.S. Department of Agriculture, [2012 Census of Agriculture, Volume 1– Part 51](https://www.nass.usda.gov/AgCensus/archive/files/2012-United-States-st99_1_051_052.pdf); AC-12-A-51.
+12.	Khare, P. and Gentner, D. R.: Considering the future of anthropogenic gas-phase organic compound emissions and the increasing influence of non-combustion sources on urban air quality, Atmos. Chem. Phys., 18, 5391–5413, https://doi.org/10.5194/acp-18-5391-2018, 2018.
+13.	Weschler, C. J. and Nazaroff, W. W.: Semivolatile organic compounds in indoor environments, Atmos. Environ., 42, 9018–9040, 2008. https://doi.org/10.1016/j.atmosenv.2008.09.052 
+14.	Mansouri, K., Grulke, C. M., Judson, R. S., and Williams, A. J.: OPERA models for predicting physicochemical properties and environmental fate endpoints, J. Cheminformatics, 10, 10, https://doi.org/10.1186/s13321-018-0263-1, 2018.
+15.	Ozone Transport Commission: [OTC Model Regulations for Nitrogen Oxides (NOx) and Photo-reactive Volatile Organic Compounds (VOCs), Technical Support Document](https://gaftp.epa.gov/air/nei/2023/doc/supporting_data/nonpoint/OTC_ModelRegs_NOX_VOCs_TSD_All_Final_10182016.pdf), Ozone Transport Commission, Boston, MA, 2016.

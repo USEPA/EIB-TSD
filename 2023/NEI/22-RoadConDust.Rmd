@@ -1,0 +1,261 @@
+```{r, include=FALSE}
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(glue)
+```
+
+# Dust: Road Construction {#RoadConDust}
+
+## Sector Descriptions and Overview 
+
+This section covers emissions associated with dust disturbed during road construction activities. The SCC for road construction dust is 2311030000.
+
+## EPA-developed estimates
+
+The calculations for estimating the emissions from road construction involve first estimating the acres disturbed from new road constructed in each county. The amount of state-level road construction spending by road type is available from the Federal Highway Administration (FHWA) and is converted to acreage disturbed using conversion factors from the Florida Department of Transportation (FLDOT). The state-level acreage disturbed by road type is summed together and distributed to the counties based on the proportion of building starts in each county. Emissions factors for PM10 and PM25 are calculated based on precipitation-evaporation values and dry silt content in each county. The total amount of acres disturbed is multiplied by these emissions factors to estimate emissions of PM from road construction.
+
+### Activity Data
+
+The activity data for this source category is the acreage disturbed from new road construction, which is estimated using data from FHWA’s Highway Statistics, State Highway Agency Capital Outlay, Table SF-12A [[ref 1](#roadcon-references)] and FLDOT’s Generic Cost per Mile Models [[ref 2](#roadcon-references)]. From the FHWA table, the following construction types are used: New Construction, Relocation, Added Capacity, Major Widening, and Minor Widening. Each of the following road types have spending broken out for each construction type:
+
+1.	Interstate, urban
+2.	Interstate, rural
+3.	Other arterial, urban
+4.	Other arterial, rural 
+5.	Collectors, urban
+6.	Collectors, rural
+
+Construction spending for each road type is summed across all construction types to determine the total annual highway spending for each road type. 
+
+\begin{equation} 
+  HS_{s,r} = \sum_{ct} S_{s,r}
+  (\#eq:roadcon-highwayspending)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( HS_{s,r} \) = Annual highway spending for road type *r* in state *s*, in dollars <br> \newline
+  \( ct \) = Construction type <br> \newline
+  \( S_{s,r} \) = Annual spending per construction type in state *s* for road type *r* <br> \newline
+</div>
+
+State expenditure data are converted to miles of new road and acres disturbed per mile of new road by applying conversions based on data obtained from FLDOT. The conversions are shown in Table \@ref(tab:roadcon-spending-per-mile), and the acres disturbed per mile conversions are calculated by multiplying the FLDOT’s total affected roadway width (including all lanes, shoulders, and areas affected beyond the road width) in feet by the number of feet in a mile and converting the resulting land area from ft2 to acres [[ref 2](#roadcon-references)]. Total affected roadway with is the sum of the numbers of lanes (assumed at 12 feet each), number of shoulders, and area affected beyond the road width (25 feet). There are 5,280 feet in a mile, and 43,560 ft2 in an acre.
+
+\begin{equation} 
+  RC_{m,s,r} = \frac{HS_{s,r}}{TDM}
+  (\#eq:roadcon-milesconstructed)
+\end{equation} 
+
+\begin{equation} 
+  RC_{a,s,r} = RC_{m,s,r} \times ADM
+  (\#eq:roadcon-acresdisturbed)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( RC_{m,s,r} \) = Miles of FHWA road type constructed in state *s* <br> \newline
+  \( RC_{a,s,r} \) = Acres of land disturbed for construction of FHWA road type *r* in state *s* <br> \newline
+  \( HS_{s,r} \) = Annual highway spending for road type *r* in state *s*, in dollars <br> \newline
+  \( TDM \) = Conversion of dollars spent to road miles constructed, in thousand dollars per mile <br> \newline
+  \( ADM \) = Conversion of road miles constructed to acres disturbe, in acres per mile <br> \newline
+</div>
+
+```{r, include=FALSE}
+df <- read_excel("./tables/Section-22/Road Construction Spending Per Mile.xlsx")
+df[is.na(df)] <- ""
+```
+
+```{r roadcon-spending-per-mile, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::kbl(
+  df, booktabs = TRUE,
+  caption = 'Spending per mile and acres disturbed per mile by highway type',
+) %>%
+kable_styling(full_width = FALSE, position = "center", latex_options = c("hold_position", "scale_down"))
+```
+
+The acres of land disturbed by road type can then be summed across all road types in a state to calculate the total state-level acreage disturbed due to new road construction. 
+
+\begin{equation} 
+  A_{s} = \sum_{r} RC_{a,s}
+  (\#eq:roadcon-total-acres-disturbed)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( A_{s} \) = Acres of land disturbed for all road construction in state *s* <br> \newline
+  \( RC_{a,s} \) = Acres of land disturbed for all road construction in state *s* <br> \newline
+</div>
+
+The process used to distribute the state-level amount of acreage disturbed to the counties is discussed in the next section.
+
+### Allocation Procedure
+
+Building permits data, used as a surrogate for road construction activity, from the U.S. Census Bureau are used to allocate the state-level acres disturbed by road construction to the county-level [[ref 3](#roadcon-references)]. Specifically, the ratio of the county-to state-level number of building starts is calculated and multiplied by the state-level acreage disturbed (from equation \@ref(eq:roadcon-total-acres-disturbed)) to estimate the county-level acreage disturbed by road construction. 
+
+\begin{equation} 
+  BFrac_{c} = \frac{Build_{c}}{Build_{s}}
+  (\#eq:roadcon-build-starts)
+\end{equation} 
+
+\begin{equation} 
+  A_{c} = A_{s} \times BFrac_{c}
+  (\#eq:roadcon-county-acres-disturbed)
+\end{equation} 
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( BFrac_{c} \) = The fraction of building starts in county *c* <br> \newline
+  \( Build_{c} \) = The number of building starts in county *c* <br> \newline
+  \( Build_{s} \) = The number of building starts in state *s* <br> \newline
+  \( A_{c} \) = Acres of land disturbed for road construction in county *c* <br> \newline
+  \( A_{s} \) = Acres of land disturbed for road construction in state *s* <br> \newline
+</div>
+
+### Emission Factors
+
+Due to regional variances in soil moisture and silt content, uncontrolled emissions factors for PM10 and PM25 are adjusted for each county. The initial uncontrolled PM10 emissions factor from construction of roads is 0.42 tons/acre-month [[ref 4](#roadcon-references)]. This emission factor represents the large amount of dirt moved during the construction of roadways, reflecting the high level of cut and fill activity that occurs at road construction sites. 
+
+To account for the soil moisture level, the uncontrolled PM10 emissions are weighted using the 30-year average precipitation-evaporation (PE) values from Thornthwaite’s PE Index. Average precipitation evaporation values for each state are estimated based on PE values for specific climatic divisions within a state [[ref 4](#roadcon-references)].  The average PE value for the test sites from which the PM10 emissions factor was developed is 24. Equation \@ref(eq:roadcon-uncontr-PM10-EF) adjusts the county-level uncontrolled emissions factor based on this PE value.
+
+To account for the silt content, the uncontrolled PM10 emissions are weighted using average silt content for each county. EPA uses the National Cooperative Soil Survey Microsoft Access Soil Characterization Database to develop county-level, average silt content values for surface soil [[ref 5](#roadcon-references)]. The U.S. Department of Agriculture and the National Cooperative Soil Survey define silt content of surface soil as the percentage of particles (mass basis) of diameter smaller than 50 micrometers (µm) found in the surface soil. Note that this definition is different than the U.S. Environmental Protection Agency’s definition that includes all particles (mass basis) of diameter smaller than 75 micrometers. This database contains the most commonly requested data from the National Cooperative Soil Survey Laboratories including data from the Kellogg Soil Survey Laboratory and cooperating universities. The average silt content for the test sites from which the PM10 emissions factor was developed is 9%. Equation \@ref(eq:roadcon-uncontr-PM10-EF) adjusts the county-level uncontrolled emissions factor based on this silt content value.
+
+\begin{equation}
+  UEF_{PM10,c} = EF_{PM10} \times \frac{24}{PE_{s}} \times \frac{s_{c}}{0.09}
+  (\#eq:roadcon-uncontr-PM10-EF)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(UEF_{PM10,c} \) = Uncontrolled PM10 emissions factor corrected for soil moisture and silt content in state *s* and county *c*, in tons/acre-month <br> \newline
+  \(EF_{PM10} \) = Initial PM10 emissions factor for road construction, 0.42 tons/acre-month <br> \newline
+  \(PE \) = precipitation-evaporation value for state *s* <br> \newline
+  \(s \) = Percent dry silt content for county *c* <br> \newline
+</div>
+
+Once PM10 adjustments have been made, uncontrolled PM2.5 emissions are set to 10 percent of PM10 [[ref 7](#roadcon-references)].
+
+\begin{equation}
+  UEF_{PM25,c} = UEF_{PM10,c} \times 0.1
+  (\#eq:roadcon-uncontr-PM25-EF)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(UEF_{PM25,c} \) = Uncontrolled PM2.5 emissions factor corrected for soil moisture and silt content in state *s* and county *c*, in tons/acre-month <br> \newline
+  \(UEF_{PM10,c} \) = Uncontrolled PM10 emissions factor corrected for soil moisture and silt content in state *s* and county *c*, in tons/acre-month <br> \newline
+</div>
+
+Primary PM emissions are equal to filterable emissions as there are no condensible emissions from dust from road construction.
+
+### Controls
+
+Dust emissions from road construction are generally controlled by watering the construction site. The Midwest Research Institute recommends using a control efficiency of 50% for PM10 and PM25 emissions from road construction [[ref 4](#roadcon-references)].
+
+\begin{equation}
+  EF_{p,c} = UEF_{p,c} \times 0.5
+  (\#eq:roadcon-contr-EF)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \(EF_{p,c} \) = Controlled emissions factor for pollutant *p* and county *c*, in tons/acre-month <br> \newline
+  \(UEF_{p,c} \) = Uncontrolled emissions factor for pollutant *p* and county *c*, in tons/acre-month <br> \newline
+</div>
+
+### Emissions
+
+The total annual PM emissions from road construction in each county are calculated by multiplying the acres disturbed by the emissions factors calculated in equation \@ref(eq:roadcon-contr-EF). The duration of construction activity for road construction is assumed to be 12 months.
+
+\begin{equation} 
+  E_{p,c} =  A_{c} \times EF_{p,c} \times M
+  (\#eq:roadcon-emissions)
+\end{equation}
+
+<div style="margin-left: 2em;">
+  Where: <br> \newline
+  \( E_{p,c} \) = Annual emissions of pollutant *p* in county *c*, in tons <br> \newline
+  \( A_{c} \) = Acres disturbed from road construction in county *c* <br> \newline
+  \(EF_{p,c} \) = Emissions factor for pollutant *p* and county *c*, in tons/acre <br> \newline 
+  \(M \) = Duration of construction activity, assumed to be 12 months <br> \newline 
+</div>
+
+
+### Sample Calculations
+
+Table \@ref(tab:roadcon-sample-calculations) shows sample calculations for PM25-PRI emissions from road construction from a single road type (urban interstate). The calculations would need to be repeated for the other road types to calculate the total road construction dust emissions. The values in these equations are demonstrating program logic and are not representative of any specific NEI year or county. 
+
+```{r, include=FALSE}
+df <- data.frame(
+  Eq = c(1:10),
+  Equation = c("$HS_{s,r} = \\sum_{ct} S_{s,r}$",
+               "$RC_{m,s,r} = \\frac{HS_{s,r}}{TDM}$",
+               "$RC_{a,s,r} = RC_{m,s,r} \\times ADM$",
+               "$A_{s} = \\sum_{r} RC_{a,s}$",
+               "$BFrac_{c} = \\frac{Build_{c}}{Build_{s}}$",
+               "$A_{c} = A_{s} \\times BFrac_{c}$",
+               "$UEF_{PM10,c} = EF_{PM10} \\times \\frac{24}{PE_{s}} \\times \\frac{s_{c}}{0.09}$",
+               "$UEF_{PM25,c} = UEF_{PM10,c} \\times 0.1$",
+               "$EF_{p,c} = UEF_{p,c} \\times 0.5$",
+               "$E_{p,c} =  A_{c} \\times EF_{p,c} \\times M$"),
+  Values = c("$1,000 \\text{ dollars} + 9,155,000 \\text{ dollars}$",
+             "$\\frac{9,156,000 \\text{ dollars}}{6,895,000 \\text{ dollars per mile}}$",
+             "$1.328 \\text{ miles} \\times 11.4 \\text{ acres per mile}$",
+             "$15.1 \\text{ acres} + 6.9 \\text{ acres} + 4.8 \\text{ acres}$",
+             "$\\frac{185 \\text{ building starts in county}}{952 \\text{building starts in state}}$",
+             "$26.78 \\text{ acres} \\times 0.194$",
+             "$0.42\\text{ tons per acre-month} \\times \\frac{24}{132} \\times \\frac{0.4145}{0.09}$",
+             "$0.10 \\times 0.3517 \\text{ tons per acre-month}$",
+             "$0.50 \\times 0.0352 \\text{ tons per acre-month}$",
+             "$5.2 \\text{ acres} \\times 0.0176 \\text{ tons per acre-month} \\times 12 \\text{ months}$"),  
+  Result = c("9,156,000 dollars spent on urban interstate construction",
+             "1.328 miles of urban interstate constructed",
+             "15.1 acres disturbed from urban interstate construction",
+             "26.78 acres disturbed from urban road construction (note: calculations for other road types not shown)",
+             "0.194 fraction of building starts",
+             "5.20 acres disturbed from urban road construction",
+             "0.3517 tons per acre-month uncontrolled PM10 emissions from road construction",
+             "0.0352 tons per acre-month PM25 emissions from road construction",
+             "0.0176 tons per care-month controlled PM25 emissions from new road construction",
+             "1.98 tons PM25 from urban road construction")
+)
+```
+
+```{r roadcon-sample-calculations, tidy=FALSE, echo=FALSE, booktabs = TRUE}
+kableExtra::landscape(
+  kableExtra::kbl(
+    df,booktabs = TRUE,longtable = TRUE,
+    escape = FALSE,  # allow LaTeX in cells
+    caption = "Sample Calculations",
+    col.names = c("Eq. \\#", "Equation", "Values", "Result"),
+  ) %>%
+    kableExtra::kable_styling(position = "center",
+      latex_options = c("repeat_header"),font_size = 10) %>%
+    kableExtra::column_spec(1, latex_column_spec = "p{2cm}") %>%
+    kableExtra::column_spec(2, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(3, latex_column_spec = "p{7cm}") %>%
+    kableExtra::column_spec(4, latex_column_spec = "p{5cm}")
+)
+```
+
+### Improvements/Changes in the 2023 NEI
+
+There have been no significant changes to this category.
+
+### Puerto Rico and U.S. Virgin Islands
+
+Since insufficient data exist to calculate emissions for the counties in Puerto Rico and the US Virgin Islands, emissions are based on two proxy counties in Florida: 12011, Broward County for Puerto Rico and 12087, Monroe County for the US Virgin Islands. The total emissions in tons for these two Florida counties are divided by their respective populations creating a tons per capita emissions factor. For each Puerto Rico and US Virgin Island County, the tons per capita emissions factor is multiplied by the county population (from the same year as the inventory’s activity data) which served as the activity data. In these cases, the throughput (activity data) unit and the emissions denominator unit are “EACH”. 
+
+## References {#roadcon-references}
+
+1.	Federal Highway Administration. [Table SF-12A, State Highway Agency Capital Outlay - 2023](https://www.fhwa.dot.gov/policyinformation/statistics/2023/sf12a.cfm).
+2.	Florida Department of Transportation. [Generic Cost per Mile Models](https://web.archive.org/web/20211221031511/https://www.fdot.gov/programmanagement/estimates/lre/costpermilemodels/cpmsummary.shtm).
+3.	U.S. Census Bureau. Annual Housing Units Authorized by Building Permits. [ASCII files by State, MSA, County or Place, co2023a](https://www2.census.gov/econ/bps/County/).
+4.	Midwest Research Institute. 1996. Improvement of Specific Emission Factors (BACM Project No. 1). Prepared for South Coast Air Quality Management District. 
+5.	U.S. Department of Agriculture, National Cooperative Soil Survey, [NCSS Microsoft Access Soil Characterization Database.](https://ncsslabdatamart.sc.egov.usda.gov/)
+6.	Midwest Research Institute. [Estimating Particulate Matter Emissions from Construction Operations, Final Report](https://nepis.epa.gov/Exe/ZyPDF.cgi/9100KK1W.PDF?Dockey=9100KK1W.PDF), Section 5.7.1. prepared for the Emission Factor and Inventory Group, Office of Air Quality Planning and Standards, U.S. Environmental Protection Agency. 
+ 
