@@ -549,7 +549,7 @@ Further controls on burning (i.e., burn bans in rural areas) are represented by 
   \( BE_{c} \) = Burn ban effectiveness in county *c*  <br> \newline
 </div>
 
-In this methodology, burn ban effectiveness is represented by a single value between 0 and 1 that is multiplied by the amount of land clearing debris burned in the rural areas of each county. In practice, the burn ban effectiveness is a function of both a rule’s penetration and effectiveness. Rule penetration refers to the extent to which a regulation covers emissions for a specified controlled area, and effectiveness concerns the ability of the regulatory program to achieve emissions reductions compared to full compliance. By default, the burn ban effectiveness for each county is 1 (i.e., the methodology assumes no burn bans in each county), although this may be updated by state, local, or tribal agencies.
+In this methodology, burn ban effectiveness is represented by a single value between 0 and 1 that is multiplied by the amount of land clearing debris burned in the rural areas of each county. In practice, the burn ban effectiveness is a function of both a rule’s penetration and effectiveness. Rule penetration refers to the extent to which a regulation covers emissions for a specified controlled area, and effectiveness concerns the ability of the regulatory program to achieve emissions reductions compared to full compliance. By default, the burn ban effectiveness for each county is 1 (i.e., the methodology assumes no burn bans in each county), although this may be updated by state, local, or Tribal agencies.
 
 ### Emissions
 

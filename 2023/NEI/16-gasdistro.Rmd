@@ -194,7 +194,7 @@ County-level gasoline consumption is estimated by summing onroad gasoline consum
   \( GC_{c,NR,m,f} \) = Nonroad gasoline consumption in county *c* for month *m* for fuel subtype *f*, in gallons <br> \newline
 </div>
 
-The county-level gasoline consumption is allocated to submerged, splash, and balanced filling technologies. Percentages of each filling technology are derived from the EIIP study [[ref 3](#gasdistro-references)]. State, local, and tribal (SLT) agencies may submit input templates to update theses default assumptions about the percentage of delivered fuel by filling technology. 
+The county-level gasoline consumption is allocated to submerged, splash, and balanced filling technologies. Percentages of each filling technology are derived from the EIIP study [[ref 3](#gasdistro-references)]. State, local, and Tribal (SLT) agencies may submit input templates to update theses default assumptions about the percentage of delivered fuel by filling technology. 
 
 \begin{equation} 
   GC_{c,ft,m,f} = GC_{c,m,f} \times Perc_{ft,c}  
