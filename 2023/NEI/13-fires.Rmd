@@ -634,7 +634,7 @@ explained in the new Structures and Motor Vehicle Fies section of the
 ### Pile burn methodology
 
 For the 2023 NEI, pile burn (PB) emissions were estimated using a
-combination of federal, state, local, and tribal activity data. This
+combination of federal, state, local, and Tribal activity data. This
 activity data was supplied in the form of daily estimates of area
 treated, pile volume, pile dimensions, or mass piled by location,
 varying by data source. As with the prescribed burn and wildfire S/L/T

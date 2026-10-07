@@ -15,7 +15,7 @@ This section includes an overview of all sources that are in the nonpoint data c
 
 ## Nonpoint source approaches 
 
-Nonpoint source data are provided by state, local, and tribal (S/L/T) agencies, and for certain sectors and/or pollutants, they are supplemented with data from the EPA. This section describes the various sources of data and the selection priority for each of the datasets to use for building the National Emissions Inventory (NEI) when multiple data sources are available for the same emissions source.
+Nonpoint source data are provided by state, local, and Tribal (S/L/T) agencies, and for certain sectors and/or pollutants, they are supplemented with data from the EPA. This section describes the various sources of data and the selection priority for each of the datasets to use for building the National Emissions Inventory (NEI) when multiple data sources are available for the same emissions source.
 
 ## Sources of data overview and selection hierarchies
 

@@ -358,9 +358,9 @@ kableExtra::kbl(df, longtable = TRUE, booktabs = TRUE,
   kableExtra::column_spec(7, latex_column_spec = "p{1.5cm}")
 ```
 
-## How well are tribal data and regions represented in the 2023 NEI?
+## How well are Tribal data and regions represented in the 2023 NEI?
 
-Two tribes submitted data to the EIS for 2023 as shown in Table \@ref(tab:participation). In this table, a “CAP, HAP” designation indicates that both criteria and hazardous air pollutants were submitted by the tribe. Facilities on tribal land were augmented using TRI, HAPs and PM in the same manner as facilities under the state and local jurisdictions, as explained in Section 3. Fourteen additional tribal agencies, shown in Table \@ref(tab:Tribal-Facilities), which did not submit any data, are represented in the point data category of the 2023 NEI due to the emissions added by the EPA. The emissions for these facilities are from the EPA gap fill datasets for airports, EGUs, landfills, and TRI data. Furthermore, many nonpoint datasets included in the NEI are presumed to include tribal activity. Most notably, the oil and gas nonpoint emissions have been confirmed to include activity on tribal lands because the underlying database contained data reported by tribes.
+Two Tribes submitted data to the EIS for 2023 as shown in Table \@ref(tab:participation). In this table, a “CAP, HAP” designation indicates that both criteria and hazardous air pollutants were submitted by the tribe. Facilities on Tribal land were augmented using TRI, HAPs and PM in the same manner as facilities under the state and local jurisdictions, as explained in Section 3. Fourteen additional Tribal agencies, shown in Table \@ref(tab:Tribal-Facilities), which did not submit any data, are represented in the point data category of the 2023 NEI due to the emissions added by the EPA. The emissions for these facilities are from the EPA gap fill datasets for airports, EGUs, landfills, and TRI data. Furthermore, many nonpoint datasets included in the NEI are presumed to include Tribal activity. Most notably, the oil and gas nonpoint emissions have been confirmed to include activity on Tribal lands because the underlying database contained data reported by Tribes.
 
 ```{r, include=FALSE}
 df <- read_excel("./tables/Section-2/participation.xlsx")
